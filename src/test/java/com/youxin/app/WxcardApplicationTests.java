@@ -1,3 +1,4 @@
+package com.youxin.app;
 //package com.youxin.wxcard;
 //
 //import org.junit.Test;
