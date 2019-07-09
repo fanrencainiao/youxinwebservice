@@ -1,0 +1,47 @@
+server:
+  port: 9898
+spring:
+  application:
+    name: youxinservice
+  mvc:
+    favicon:
+      enabled: false
+  thymeleaf:
+    prefix: classpath:/templates/
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:28018/admin
+      host: 127.0.0.1
+      username: 
+      password: 
+      database: youxinapp
+      port: 28018 
+      connectTimeout: 20000
+      socketTimeout: 20000
+      maxWaitTime: 2000
+      
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 
+    database: 0
+    timeout:
+      seconds: 10000
+    jedis:
+      pool:
+        max-active: 1024
+        max-wait:
+          seconds: 10000
+        max-idle: 200
+        min-idle: 1800000
+        
+        
+authorizationfilter:
+  requestUriList[0]: /user/register
+  requestUriList[1]: /user/login
+myTask:
+  apiKey: task0408 
+  #是否检验接口 0不检验，1检验
+  isAuth: 0 
+  #是否保存请求日志 0否，1是
+  isSaveRequestLogs: 0 
