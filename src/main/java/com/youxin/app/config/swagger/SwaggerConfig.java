@@ -1,4 +1,4 @@
-package com.youxin.app.config;
+package com.youxin.app.config.swagger;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

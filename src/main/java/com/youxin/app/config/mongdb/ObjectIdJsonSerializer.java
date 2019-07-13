@@ -1,4 +1,4 @@
-package com.youxin.app.config;
+package com.youxin.app.config.mongdb;
 
 import java.io.IOException;
 

@@ -6,7 +6,11 @@ import org.springframework.boot.web.server.WebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.stereotype.Component;
-
+/**
+ * 传入特殊字符json参数处理
+ * @author cf
+ *
+ */
 @Component
 public class PortalTomcatWebServerCustomizer implements
         WebServerFactoryCustomizer {

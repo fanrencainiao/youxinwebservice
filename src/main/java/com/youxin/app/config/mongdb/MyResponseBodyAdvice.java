@@ -1,3 +1,4 @@
+package com.youxin.app.config.mongdb;
 //package com.youxin.app.config;
 //
 //import org.bson.types.ObjectId;

@@ -6,8 +6,6 @@ spring:
   mvc:
     favicon:
       enabled: false
-#  thymeleaf:
-#    prefix: classpath:/templates/
   data:
     mongodb:
       uri: mongodb://127.0.0.1:28018/admin
