@@ -88,11 +88,18 @@ public class RedisUtil {
     public  String getKey(String key){
         jedis = getJedis();
         if (jedis!=null) {
-            return jedis.get(key);
+        	try {
+        		String res=jedis.get(key);
+        		return res;
+			} catch (Exception e) {
+				return null;
+			}
+            
         }else {
             return null;
         }
     }
+
     /**
      * 更新某个key并返回原来的值
      */

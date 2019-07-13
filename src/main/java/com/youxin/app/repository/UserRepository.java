@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-import com.youxin.app.entity.Test;
+import com.youxin.app.entity.User;
 
 
 @Repository
-public class TestRepository  extends BasicDAO<Test, ObjectId>{
+public class UserRepository  extends BasicDAO<User, ObjectId>{
 	
 	@Autowired
-	public TestRepository(@Qualifier("get") Datastore ds) {
+	public UserRepository(@Qualifier("get") Datastore ds) {
 		super(ds);
 	}
 	

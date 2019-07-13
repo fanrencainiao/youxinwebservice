@@ -14,7 +14,7 @@ public class ReqUtil {
 
 	private static final String name = "LOGIN_USER_ID";
 
-	public static void setLoginedUserId(int userId) {
+	public static void setLoginedUserId(String userId) {
 		RequestContextHolder.getRequestAttributes().setAttribute(name, userId, RequestAttributes.SCOPE_REQUEST);
 	}
 

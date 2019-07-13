@@ -16,6 +16,22 @@
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
+	
+	<repositories><!-- 代码库 -->
+   <repository>
+      <id>maven-ali</id>
+      <url>http://maven.aliyun.com/nexus/content/groups/public//</url>
+      <releases>
+         <enabled>true</enabled>
+      </releases>
+      <snapshots>
+         <enabled>true</enabled>
+         <updatePolicy>always</updatePolicy>
+         <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+   </repository>
+</repositories>
+
 
 	<dependencies>
 		<dependency>
@@ -60,11 +76,12 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 		</dependency>
+	
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>17.0</version>
-		</dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>25.1-jre</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -72,16 +89,28 @@
 			<version>1.2.37</version>
 		</dependency>
 		
-		<dependency>
+		<!-- <dependency>
 		<groupId>net.sf.json-lib</groupId>
 		<artifactId>json-lib</artifactId>
 		<version>2.4</version>
 		<classifier>jdk15</classifier>
-		</dependency>
+		</dependency> -->
 		
 		<dependency>
 		   <groupId>org.springframework.boot</groupId>
 		   <artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		
+		<!-- swagger2 -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 	</dependencies>
 

@@ -7,19 +7,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.youxin.app.controller.TestController;
 import com.youxin.app.entity.KSession;
 import com.youxin.app.entity.User;
 import com.youxin.app.utils.redis.RedisUtil;
 import com.youxin.app.yx.UUIDUtil;
-
+@Component
 public final class KSessionUtil {
-	private static Log log = LogFactory.getFactory().getInstance(KSessionUtil.class);
+	private static Log log = LogFactory.getLog(KSessionUtil.class);
+
+	private static RedisUtil redisUtil;
 
 	@Autowired
-	private static RedisUtil redisUtil;
+	public KSessionUtil(RedisUtil redisUtil) {
+		KSessionUtil.redisUtil = redisUtil;
+	}
 
 	/**
 	 * 根据用户Id获取access_token
@@ -127,7 +133,7 @@ public final class KSessionUtil {
 
 	}
 
-	public static String getAccess_token(long userId) {
+	public static String getAccess_token(String userId) {
 		String key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userId);
 		return redisUtil.getKey(key);
 	}
@@ -143,7 +149,7 @@ public final class KSessionUtil {
 	 * @param userId
 	 * @return
 	 */
-	public static User getUserByUserId(Integer userId) {
+	public static User getUserByUserId(String userId) {
 		String key = String.format(GET_USER_BY_USERID, userId);
 		String value = redisUtil.getKey(key);
 		User user = null;
@@ -158,7 +164,7 @@ public final class KSessionUtil {
 
 	}
 
-	public static void saveUserByUserId(Integer userId, User user) {
+	public static void saveUserByUserId(String userId, User user) {
 		String key = String.format(GET_USER_BY_USERID, userId);
 		redisUtil.saveTimeKey(key, user.toString(), KConstants.Expire.DAY1);
 

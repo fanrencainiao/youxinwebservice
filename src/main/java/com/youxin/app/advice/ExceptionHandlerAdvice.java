@@ -14,11 +14,12 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.utils.ResponseUtil;
+import com.youxin.app.utils.Result;
 
-import net.sf.json.JSONObject;
 
 
 @ControllerAdvice
@@ -30,13 +31,12 @@ public class ExceptionHandlerAdvice {
 			HttpServletResponse response, Exception e) throws Exception {
 		
 
-		int resultCode = 1020101;
-		String resultMsg = "接口内部异常";
-		String detailMsg = "";
+		int resultCode = 60001;
+		String resultMsg = "接口内部异常====>";
 		log.info(request.getRequestURI() + "错误：");
 		if (e instanceof MissingServletRequestParameterException
 				|| e instanceof BindException) {
-			resultCode = 1010101;
+			resultCode = 10001;
 			resultMsg = "请求参数验证失败，缺少必填参数或参数错误";
 		} else if (e instanceof ServiceException) {
 			ServiceException ex = ((ServiceException) e);
@@ -48,19 +48,21 @@ public class ExceptionHandlerAdvice {
 			resultCode=-1;
 		}else if(e instanceof EOFException){
 			log.info("====》 拦截    EOFException ");
-			detailMsg = e.getMessage();
+			resultMsg = resultMsg+e.getMessage();
 		}else {
 			e.printStackTrace();
-			detailMsg = e.getMessage();
+			resultMsg = resultMsg+e.getMessage();
 		}
 		log.info(resultMsg);
 
-		Map<String, Object> map = Maps.newHashMap();
-		map.put("resultCode", resultCode);
-		map.put("resultMsg", resultMsg);
-		map.put("detailMsg", detailMsg);
-
-		String text = JSONObject.fromObject(map).toString();
+//		Map<String, Object> map = Maps.newHashMap();
+//		map.put("resultCode", resultCode);
+//		map.put("resultMsg", resultMsg);
+//		map.put("detailMsg", detailMsg);	
+		Result map=new Result();
+		map.setCode(resultCode);
+		map.setMsg(resultMsg);
+		String text = JSONObject.toJSONString(map);
 
 		ResponseUtil.output(response, text);
 	}

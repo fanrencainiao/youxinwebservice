@@ -11,7 +11,7 @@
  
 <!--  <springProperty scope="context" name="logFilePath" source="D:/workspace-idea/gitlib/mytask/logfile"/>
     <springProperty scope="context" name="APPNAME" source="mytask"/> -->
-	<property name="APPNAME" value="wxcard"/>
+	<property name="APPNAME" value="youxinservice"/>
     <property name="APP_LOG_PATH" value="./logfile/youxin"/>
     
      <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -34,9 +34,23 @@
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
-        <file>${APP_LOG_PATH}/user/user_api.log</file>
+        <file>${APP_LOG_PATH}/api/base_api.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${APP_LOG_PATH}/user/user_api_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <fileNamePattern>${APP_LOG_PATH}/api/base_api_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>120MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    
+      <appender name="sdkfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <file>${APP_LOG_PATH}/sdk/sdk.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_PATH}/sdk/sdk_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>10</maxHistory>
             <totalSizeCap>120MB</totalSizeCap>
@@ -45,6 +59,10 @@
 
     <logger name="api.log" level="debug">
         <appender-ref ref="paifile"/>
+    </logger>
+    
+     <logger name="sdk" level="debug">
+        <appender-ref ref="sdkfile"/>
     </logger>
 
     <root level="info">

@@ -22,7 +22,8 @@ public enum ResultCode {
     USER_ACCOUNT_FORBIDDEN(20003, "账号已被禁用"),
     USER_NOT_EXIST(20004, "用户不存在"),
     USER_HAS_EXISTED(20005, "用户已存在"),
-
+    USER_ERR_TOKEN(20006, "没有请求令牌"),
+    USER_OUT_TOKEN(20007, "请求令牌过期"),
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
 
