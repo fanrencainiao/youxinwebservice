@@ -23,7 +23,7 @@ public class User {
 	
 	@Id
 	@ApiModelProperty(hidden=true)
-	private ObjectId id;
+	private Integer id;
 	/**
 	 * 用户帐号，最大长度32字符，必须保证一个APP内唯一
 	 */

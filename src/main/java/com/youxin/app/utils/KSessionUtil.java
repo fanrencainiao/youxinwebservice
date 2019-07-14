@@ -90,11 +90,11 @@ public final class KSessionUtil {
 	}
 
 	public static void removeToken(Object token) {
-		String userId = null;
+		Object userId = null;
 		if (!StringUtils.isBlank(token.toString())) {
 			String userIdKey = String.format(GET_USERID_BYTOKEN, token);
 			userId = redisUtil.getKey(userIdKey);
-			redisUtil.removeKey(userId);
+			redisUtil.removeKey(userId.toString());
 		}
 
 		// 根据userKey拿token
@@ -133,7 +133,7 @@ public final class KSessionUtil {
 
 	}
 
-	public static String getAccess_token(String userId) {
+	public static String getAccess_token(Object userId) {
 		String key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userId);
 		return redisUtil.getKey(key);
 	}
@@ -149,7 +149,7 @@ public final class KSessionUtil {
 	 * @param userId
 	 * @return
 	 */
-	public static User getUserByUserId(String userId) {
+	public static User getUserByUserId(Object userId) {
 		String key = String.format(GET_USER_BY_USERID, userId);
 		String value = redisUtil.getKey(key);
 		User user = null;
@@ -164,7 +164,7 @@ public final class KSessionUtil {
 
 	}
 
-	public static void saveUserByUserId(String userId, User user) {
+	public static void saveUserByUserId(Integer userId, User user) {
 		String key = String.format(GET_USER_BY_USERID, userId);
 		redisUtil.saveTimeKey(key, user.toString(), KConstants.Expire.DAY1);
 

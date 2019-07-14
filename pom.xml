@@ -131,7 +131,11 @@
 	                <compilerArguments>
 	                    <extdirs>${project.basedir}/src/lib</extdirs>
 	                </compilerArguments>
+	                
+	                  <!-- 如果没有该项配置，肯呢个devtools不会起作用，即应用不会restart -->
+                    <fork>true</fork>
 	            </configuration>
+
 	        </plugin>
 
 		</plugins>

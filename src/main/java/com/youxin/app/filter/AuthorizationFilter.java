@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import com.google.common.collect.Maps;
 import com.youxin.app.utils.AuthServiceUtils;
@@ -86,13 +88,11 @@ public class AuthorizationFilter implements Filter {
 		sb.append(request.getMethod()).append(" 请求：" + request.getRequestURI());
 
 		logger.info(sb.toString());
-		
-
 		// DEBUG**************************************************DEBUG
 		
 		// 如果访问的是控制台或资源目录
 		if (requestUri.startsWith("/console")||requestUri.startsWith("/v2") ||requestUri.startsWith("/swagger-resources")|| requestUri.startsWith("/toPage") || requestUri.endsWith(".js") || requestUri.endsWith(".html")
-				|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.startsWith("/test")) {
+				|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")|| requestUri.startsWith("/test")) {
 			Object obj = request.getSession().getAttribute(LoginSign.LOGIN_USER_KEY);
 			// 用户已登录或访问资源目录或访问登录页面
 			if (null == obj) {
@@ -114,20 +114,20 @@ public class AuthorizationFilter implements Filter {
 					int tipsKey = 20006;
 					renderByErrorKey(response, tipsKey, "不包含请求令牌");
 				} else {
-					String accid = getUserId(accessToken);
+					Integer userId = getUserId(accessToken);
 					// 请求令牌是否有效
-					if (null == accid) {
+					if (null == userId) {
 						logger.info("请求令牌无效或已过期...");
 						int tipsKey = 20007;
 						renderByErrorKey(response, tipsKey, "请求令牌无效或已过期...");
 					} else {
 
-						if (!AuthServiceUtils.authRequestApi(accid, time, accessToken, secret, requestUri)) {
+						if (!AuthServiceUtils.authRequestApi(userId, time, accessToken, secret, requestUri)) {
 							renderByError(response, "授权认证失败");
 							return;
 						}
 
-						ReqUtil.setLoginedUserId(accid);
+						ReqUtil.setLoginedUserId(String.valueOf(userId));
 						arg2.doFilter(arg0, arg1);
 						return;
 					}
@@ -149,16 +149,16 @@ public class AuthorizationFilter implements Filter {
 		return !requestUriMap.containsKey(requestUri.trim());
 	}
 
-	private String getUserId(String _AccessToken) {
-		String accid = null;
+	private Integer getUserId(String _AccessToken) {
+		Integer userId = null;
 
 		try {
-			accid = KSessionUtil.getUserIdBytoken(_AccessToken);
+			userId = Integer.valueOf(KSessionUtil.getUserIdBytoken(_AccessToken));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return accid;
+		return userId;
 	}
 
 	private static final String template = "{\"code\":%1$s,\"msg\":\"%2$s\"}";

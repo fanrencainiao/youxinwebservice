@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<link href="../static/common/layui/css/layui.css" rel="stylesheet" media="all">
+
+<body>
+	<div class="layui-row">
+		<div class="layui-col-md1">&nbsp;</div>
+		<input id="pageCount" type="" name="" style="display: none">
+		<div id="userVipConfigList" class="layui-col-md10">
+			 <div class="user_btn_div" style="margin-top: 2%"> 
+				<!-- <input type="text" name="" class="layui-input nickName" style="width: 15%;display: inline" placeholder="用户昵称">
+				<form class="layui-form" action="" style="float: left">
+					<div class="layui-form-item">
+						<select id="status" class="layui-select">
+							<option value="">请选择在线状态</option>
+							<option value="1">在线</option>
+							<option value="0">离线</option>
+						</select>
+					</div>
+				</form>
+ -->
+				<button class="layui-btn search_user_vip_config">搜索</button>
+				<button onclick="User.addUser()" class="layui-btn btn_addUser">新增用户</button>
+				
+			</div>
+
+			<div id=vip_config_table class="layui-card" style="margin-top: 1%">
+				<div class="layui-card-header"><p>用户列表</p></div>
+				<div class="layui-card-body">
+					<table id="vip_config_list" lay-filter="vip_config_list" style="table-layout:fixed;word-break:break-all;" >
+						
+					</table>
+				</div>
+			</div>
+
+			<!-- 多选操作 -->
+			<script type="text/html" id="toolbarConfigs">
+				<div class="layui-btn-container">
+					<button id="checkDeleteUsersId" class="layui-btn layui-btn-sm checkDeleteUsers" onclick="User.checkDeleteUsers()" lay-event="delete">多选删除</button>
+				</div>
+			</script>
+	
+			<!--操作-->
+			<script type="text/html" id="userVipConfigListBar">
+								
+				<a class="layui-btn layui-btn-danger layui-btn-xs delete" lay-event="delete">删除</a>
+							
+				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update">修改</a>
+				
+			</script>
+
+		</div>
+
+		<!-- 添加vip配置 -->
+		<div id="addVipConfig" class="layui-col-md10" style="display: none">
+			<div id="addVipConfigTitle" class="layui-card-header">新增vip配置</div>
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<td width="20%">vip配置参数</td>
+						<td>vip信息</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>vip级别</td>
+						<td><input id="configId" type="" name="" style="display: none" ><input id="vip" type="" name="" class="layui-input" ></td>
+					</tr>
+					<tr>
+						<td>金额</td>
+						<td><input id="money" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
+					</tr>
+					<tr>
+						<td>折前金额</td>
+						<td><input id="beMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额,需大于money"></td>
+					</tr>
+					<tr>
+						<td>ios金额</td>
+						<td><input id="iosMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
+					</tr>
+					<tr>
+						<td>ios折前金额</td>
+						<td><input id="iosBeMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额,需大于money"></td>
+					</tr>
+					<tr>
+						<td>一级提成金额</td>
+						<td><input id="firstMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
+					</tr>
+					<tr>
+						<td>二级提成金额</td>
+						<td><input id="secondMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
+					</tr>
+					<tr>
+						<td>好友限制</td>
+						<td><input id="limitNum" type="" name="" class="layui-input"></td>
+					</tr>
+					<tr>
+						<td>群成员限制</td>
+						<td><input id="limitgmNum" type="" name="" class="layui-input"></td>
+					</tr>
+					<tr>
+						<td>发朋友圈限制</td>
+						<td><input id="limitfNum" type="" name="" class="layui-input"></td>
+					</tr>
+					<tr>
+						<td>描述</td>
+						<td><textarea id="des"  name="" class="layui-textarea" placeholder="请输入内容"></textarea></td>
+					</tr>
+				
+					<tr>
+						<td>状态</td>
+						<td>
+							<form class="layui-form" action="" style="">
+								<div class="layui-form-item">
+									<select id="state" class="layui-select" style="width: 100%">
+										<option selected="selected" value="">请选择</option>
+										<option value="0">禁用</option>
+										<option value="1">启用</option>
+									</select>
+								</div>
+							</form>
+						</td>
+					</tr>
+				
+				</tbody>
+			</table>
+			
+			<div style="display: inline;">
+				<button onclick="User.commit_addUser()" class="layui-btn">提交</button>
+				<button onclick="User.button_back()" class="layui-btn layui-btn-primary layui-btn-sm" style="">&lt;&lt;返回</button>
+			</div>
+		</div>
+
+
+	</div>
+
+
+
+<!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
+
+<!-- 日期选择器 -->
+<script>
+	layui.use('laydate', function() {
+		var laydate = layui.laydate;
+        //日期时间选择器
+        laydate.render({
+            elem: '#configTime'
+            ,type: 'datetime'
+			,max: 0 //最大时间
+        });
+	})
+
+</script>
+
+</body>
+</html>

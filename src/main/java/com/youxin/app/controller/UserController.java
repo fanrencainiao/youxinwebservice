@@ -38,11 +38,11 @@ public class UserController extends AbstractController{
 	}
 	
 	@ApiOperation(value = "获取用户信息（优先从缓存获取）")
-	@ApiImplicitParams({ @ApiImplicitParam(name = "accid", value = "accid", required = true, paramType = "query") })
+	@ApiImplicitParams({ @ApiImplicitParam(name = "userId", value = "userId", required = true, paramType = "query") })
 	@GetMapping("get")
-	public Object get(@RequestParam String accid){
+	public Object get(@RequestParam Integer userId){
 		
-		User u=userService.getUser(accid);
+		User u=userService.getUser(userId);
 		return Result.success(u);
 	}
 	@ApiOperation(value = "登录）")

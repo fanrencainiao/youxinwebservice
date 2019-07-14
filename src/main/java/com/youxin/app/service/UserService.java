@@ -28,11 +28,10 @@ public interface UserService {
 	
 	/**
 	 * 获取用户信息
-	 * @param accid
-	 * @param toaccid
+	 * @param userId
 	 * @return
 	 */
-	User getUser(String accid);
+	User getUser(Integer userId);
 	
 	Map<String, Object> login(User bean);
 	

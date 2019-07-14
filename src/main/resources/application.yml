@@ -17,7 +17,7 @@ spring:
       connectTimeout: 20000
       socketTimeout: 20000
       maxWaitTime: 2000
-      
+
   redis:
     host: 127.0.0.1
     port: 6379
@@ -33,7 +33,7 @@ spring:
         max-idle: 200
         min-idle: 1800000
         
-        
+       
 authorizationfilter:
   requestUriList[0]: /user/register
   requestUriList[1]: /user/login

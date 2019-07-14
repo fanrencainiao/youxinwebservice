@@ -70,7 +70,7 @@ public class AuthServiceUtils {
 	 * @param secret
 	 * @return
 	 */
-	public static boolean authRequestApi(String userId,long time,String token,String secret,String url) {
+	public static boolean authRequestApi(Integer userId,long time,String token,String secret,String url) {
 		if(KConstants.filterSet.contains(url)) {
 			return true;
 		}
@@ -97,7 +97,7 @@ public class AuthServiceUtils {
 		
 	}
 	
-	public static String getRequestApiSecret(String userId,long time,String token) {
+	public static String getRequestApiSecret(Integer userId,long time,String token) {
 		
 		/**
 		 * 密钥 
