@@ -1,0 +1,42 @@
+{
+	"contentManagement": [
+		{
+			"title": "系统配置",
+			"icon": "&#xe716;",
+			"href": "",
+			"spread": false,
+			"systemConfig": true,
+			"children": [
+				{
+					"title": "服务器配置",
+					"icon": "&#xe857;",
+					"href": "/pages/console/system_config.html",
+					"spread": false
+				},
+				{
+					"title": "客户端配置",
+					"icon": "&#xe7ae;",
+					"href": "/pages/console/clientConfig.html",
+					"spread": false
+				},
+				{
+					"title":"集群配置",
+					"icon":"&#xe656;",
+					"href":"/pages/console/clusterConfig.html",
+					"spread":false
+				}
+			]
+			
+		},
+		{
+			"title": "用户管理",
+			"icon":"&#xe66f;",
+			"href": "/pages/console/userList.html",
+			"spread": false
+		}
+
+	]
+	
+}
+
+
