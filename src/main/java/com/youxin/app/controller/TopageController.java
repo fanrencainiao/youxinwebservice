@@ -18,8 +18,10 @@ public class TopageController {
 
 	@RequestMapping(value = "/toPage/{url}", method = RequestMethod.GET)
 	public String toPage(@PathVariable String url) {
-		if(StringUtil.isEmpty(url)) 
+		if(StringUtil.isEmpty(url)||url.contains("404")) 
 			url="404";
+		else
+			url="console/"+url;
 		return url;
 	}
 

@@ -37,8 +37,8 @@ spring:
 authorizationfilter:
   requestUriList[0]: /user/register
   requestUriList[1]: /user/login
-myTask:
-  apiKey: task0408 
+youxin:
+  apiKey: youxin 
   #是否检验接口 0不检验，1检验
   isAuth: 0 
   #是否保存请求日志 0否，1是
