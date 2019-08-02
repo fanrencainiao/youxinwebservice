@@ -56,7 +56,6 @@ public class UserController extends AbstractController{
 		user.setMobile(mobile);
 		user.setPassword(password);
 		user.setLoginType(loginType);
-		user.setRole(6);
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
 	}

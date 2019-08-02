@@ -77,14 +77,14 @@ layui.use(['bodyTab','form','element','layer','jquery'],function(){
                 Common.invoke({
                     path : '/console/updatePassword',
                     data : {
-                        "userId" : localStorage.getItem("account"),
+                        "userId" : localStorage.getItem("id"),
                         "password": $.md5(newPasswd)
                     },
                     successMsg : "修改密码成功",
                     errorMsg :  "修改密码失败，请稍后重试",
                     successCb : function(result) {
                         layui.layer.close(index); //关闭弹框
-                        location.replace("/pages/console/login.html");
+                        location.replace("login.html");
                     },
                     errorCb : function(result) {
 

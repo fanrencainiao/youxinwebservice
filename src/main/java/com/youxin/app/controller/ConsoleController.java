@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.User;
 import com.youxin.app.filter.LoginSign;
 import com.youxin.app.service.AdminConsoleService;
@@ -33,7 +34,11 @@ public class ConsoleController {
 		User login = consoleService.login(name, password);
 		if (login != null) {
 			request.getSession().setAttribute(LoginSign.LOGIN_USER_KEY, login);
-			return Result.success(login);
+			
+			String s=JSONObject.toJSONString(login);
+			JSONObject json=JSONObject.parseObject(s);
+			json.put("role", 6);
+			return Result.success(json);
 		}
 		return Result.failure(ResultCode.USER_LOGIN_ERROR);
 

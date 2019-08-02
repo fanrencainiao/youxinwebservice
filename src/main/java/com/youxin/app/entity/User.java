@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.NotSaved;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -91,7 +92,8 @@ public class User {
 	@ApiModelProperty(value="密码",required=true)
 	private String password;
 	@ApiModelProperty(value="角色",hidden=true)
-	private Integer role;//
+	@NotSaved
+	private List<Integer> role;//
 	@ApiModelProperty(value="创建时间",hidden=true)
 	private Long createTime;
 	@ApiModelProperty(value="更新时间",hidden=true)

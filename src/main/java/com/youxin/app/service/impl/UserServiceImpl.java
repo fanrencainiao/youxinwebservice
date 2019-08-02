@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> login(User bean) {
 		User user = null;
 		if (!StringUtil.isEmpty(bean.getAccid()))
-			user = repository.findOne("id", bean.getId());
+			user = repository.findOne("_id", bean.getId());
 		else {
 			user = repository.findOne("mobile", bean.getMobile());
 			

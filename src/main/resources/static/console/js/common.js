@@ -59,17 +59,17 @@ var Common = {
 			dataType : 'JSON',
 			success : function(result) {
 				layer.closeAll('loading');
-				if(1==result.resultCode){
+				if(1==result.code){
 					if(obj.successMsg!=false)
 						layer.msg(obj.successMsg,{icon: 1});
 					obj.successCb(result);//执行成功的回调函数					
-				}else if(-1==result.resultCode){
+				}else if(-1==result.code){
 					//缺少访问令牌
 					layer.msg("缺少访问令牌",{icon: 3});
 					window.location.href = "./console/login.html";
 				}else{
-					if(!Common.isNil(result.resultMsg))
-						layer.msg(result.resultMsg,{icon: 2,time: 2000});
+					if(!Common.isNil(result.msg))
+						layer.msg(result.msg,{icon: 2,time: 2000});
 					else
 						layer.msg(obj.errorMsg,{icon: 2,time: 2000});
 
@@ -80,8 +80,8 @@ var Common = {
 			},
 			error : function(result) {
 				layer.closeAll('loading');
-				if(!Common.isNil(result.resultMsg)){
-					layer.msg(result.resultMsg,{icon: 2});
+				if(!Common.isNil(result.msg)){
+					layer.msg(result.msg,{icon: 2});
 				}else{
 					layer.msg(obj.errorMsg,{icon: 2});
 				}
