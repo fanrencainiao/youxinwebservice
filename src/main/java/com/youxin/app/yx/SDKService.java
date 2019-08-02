@@ -512,14 +512,11 @@ public class SDKService {
 	private static JSONObject getJson(JSONObject json, String res) {
 		if (!StringUtil.isEmpty(res)) {
 			json = JSONObject.parseObject(res);
-			if (json.getIntValue("code") == 200) {
-					json = json.getJSONObject("info");
-			} else {
+			if (json.getIntValue("code") != 200) 
 				throw new ServiceException(0, json.getString("desc"));
-			}
-		} else {
+		} else 
 			throw new ServiceException(0, "sdk异常");
-		}
+		
 		return json;
 	}
 	public static void main(String[] args) {

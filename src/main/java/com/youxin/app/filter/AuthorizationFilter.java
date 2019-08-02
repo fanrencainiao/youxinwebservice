@@ -104,7 +104,6 @@ public class AuthorizationFilter implements Filter {
 			} else
 				response.sendRedirect("/templates/console/login.html");
 			
-				
 		} else {
 			if (requestUri.equals("/getImgCode")) {
 				arg2.doFilter(arg0, arg1);

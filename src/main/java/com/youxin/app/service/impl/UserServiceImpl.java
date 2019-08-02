@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
 		bean.setAccid(accid);
 		//sdk注册
 		JSONObject json= SDKService.createUser(bean);
-		User us=JSONObject.toJavaObject(json, User.class);
+		User us=JSONObject.toJavaObject(json.getJSONObject("info"), User.class);
 		//注册成功
 		bean.setToken(us.getToken());
 		if(StringUtil.isEmpty(bean.getToken())) {
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
 		// 先从 Redis 缓存中获取
 		User user = KSessionUtil.getUserByUserId(userId);
 		if (null == user) {
-			user = repository.findOne("id", userId);
+			user = repository.findOne("_id", userId);
 			if (null == user) {
 				System.out.println("id为" + userId + "的用户不存在");
 				return null;
@@ -112,7 +112,6 @@ public class UserServiceImpl implements UserService {
 			throw new ServiceException(20004, "帐号不存在, 请注册!");
 		}  else {
 			if(bean.getLoginType()==0) {
-			
 				// 账号密码登录
 				String password = bean.getPassword();
 				if (!password.equals(user.getPassword()))
