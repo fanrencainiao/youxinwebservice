@@ -14,12 +14,28 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.alibaba.fastjson.JSONObject;
-import com.youxin.app.entity.Friends;
-import com.youxin.app.entity.Msg;
-import com.youxin.app.entity.MsgFile;
 import com.youxin.app.entity.User;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.yx.request.Friends;
+import com.youxin.app.yx.request.Msg;
+import com.youxin.app.yx.request.MsgFile;
+import com.youxin.app.yx.request.MsgRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomAddRobotRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomCreateRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomGetRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomQueueDrop;
+import com.youxin.app.yx.request.chatroom.ChatroomQueueInit;
+import com.youxin.app.yx.request.chatroom.ChatroomQueueListRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomQueueOfferRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomQueuePollRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomRemoveRobotRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomRequestAddrRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomSendMsgRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomSetMemberRoleRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomTemporaryMuteRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomToggleCloseStatRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomUpdateRequest;
 
 public class SDKService {
 	protected static Log logger = LogFactory.getLog("sdk");
@@ -504,11 +520,10 @@ public class SDKService {
 
 	/**
 	 * 发送普通消息 给用户或者高级群发送普通消息，包括文本，图片，语音，视频和地理位置
-	 * 
-	 * @param msg
+	 *
 	 * @return {"code":200,"data":{"msgid":1200510468189,"timetag":1545635366312,//消息发送的时间戳"antispam":false}}
 	 */
-	public static JSONObject sendMsg(Msg msg) {
+	public static JSONObject sendMsg(MsgRequest msg) {
 		try {
 			JSONObject json = null;
 			String url = "https://api.netease.im/nimserver/msg/sendMsg.action";
@@ -801,8 +816,7 @@ public class SDKService {
 	}
 
 	/**
-	 * 发送广播消息 
-	 * 1、广播消息，可以对应用内的所有用户发送广播消息，广播消息目前暂不支持第三方推送（APNS、小米、华为等）；
+	 * 发送广播消息 1、广播消息，可以对应用内的所有用户发送广播消息，广播消息目前暂不支持第三方推送（APNS、小米、华为等）；
 	 * 2、广播消息支持离线存储，并可以自定义设置离线存储的有效期，最多保留最近100条离线广播消息；
 	 * 3、此接口受频率控制，一个应用一分钟最多调用10次，一天最多调用1000次，超过会返回416状态码； 4、该功能目前需申请开通，详情可咨询您的客户经理。
 	 * 
@@ -823,8 +837,8 @@ public class SDKService {
 			params.add(new BasicNameValuePair("body", body));
 			params.add(new BasicNameValuePair("from", from));
 			params.add(new BasicNameValuePair("isOffline", isOffline));
-			params.add(new BasicNameValuePair("ttl",ttl+""));
-			params.add(new BasicNameValuePair("targetOs",targetOs));
+			params.add(new BasicNameValuePair("ttl", ttl + ""));
+			params.add(new BasicNameValuePair("targetOs", targetOs));
 
 			// UTF-8编码,解决中文问题
 			HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
@@ -837,6 +851,242 @@ public class SDKService {
 			throw new ServiceException(0, "sdk编码异常");
 		} catch (IOException e) {
 			throw new ServiceException(0, "sdkio异常");
+		}
+	}
+
+	/**
+	 * 创建聊天室
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomCreate(ChatroomCreateRequest request) {
+
+		String url = "https://api.netease.im/nimserver/chatroom/create.action HTTP/1.1";
+
+		return postServer(request, url);
+	}
+
+	/**
+	 * 查询聊天室信息
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomGet(ChatroomGetRequest request) {
+
+		String url = "https://api.netease.im/nimserver/chatroom/get.action HTTP/1.1";
+
+		return postServer(request, url);
+	}
+
+	/**
+	 * 批量查询聊天室信息
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomGetBatch(ChatroomGetRequest request) {
+
+		String url = "https://api.netease.im/nimserver/chatroom/getBatch.action HTTP/1.1";
+
+		return postServer(request, url);
+	}
+
+	/**
+	 * 更新聊天室信息
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomUpdate(ChatroomUpdateRequest request) {
+
+		String url = "https://api.netease.im/nimserver/chatroom/update.action HTTP/1.1";
+
+		return postServer(request, url);
+	}
+
+	/**
+	 * 修改聊天室开/关闭状态
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomToggleCloseStat(ChatroomToggleCloseStatRequest request) {
+
+		String url = "https://api.netease.im/nimserver/chatroom/toggleCloseStat.action HTTP/1.1";
+
+		return postServer(request, url);
+	}
+
+	/**
+	 * 设置聊天室内用户角色
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomSetMemberRole(ChatroomSetMemberRoleRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/setMemberRole.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 请求聊天室地址 往聊天室内发消息
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomRequestAddr(ChatroomRequestAddrRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/requestAddr.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 发送聊天室消息
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomSendMsg(ChatroomSendMsgRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/sendMsg.action HTTP/1.1";
+		return postServer(request, url);
+
+	}
+
+	/**
+	 * 往聊天室内添加机器人
+	 * 
+	 * 往聊天室内添加机器人，机器人过期时间为24小时
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomAddRobot(ChatroomAddRobotRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/addRobot.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 从聊天室内删除机器人
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomRemoveRobot(ChatroomRemoveRobotRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/removeRobot.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 设置临时禁言状态
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomTemporaryMute(ChatroomTemporaryMuteRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/temporaryMute.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 往聊天室有序队列中新加或更新元素
+	 * 
+	 * @param request
+	 * @param transients 否
+	 *                   这个新元素的提交者operator的所有聊天室连接在从该聊天室掉线或者离开该聊天室的时候，提交的元素是否需要删除。true：需要删除；false：不需要删除。默认false。
+	 *                   当指定该参数为true时，若operator当前不在该聊天室内，则会返回403错误。
+	 * @return
+	 */
+	public static JSONObject chatroomQueueOffer(ChatroomQueueOfferRequest request, String transients) {
+		String url = "https://api.netease.im/nimserver/chatroom/queueOffer.action HTTP/1.1";
+		try {
+			JSONObject json = null;
+			List<NameValuePair> params = reflect(request);
+			params.add(new BasicNameValuePair("transient", transients));
+			// UTF-8编码,解决中文问题
+			HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
+
+			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
+			json = getJson(json, res);
+			logger.debug("getUinfos httpRes:" + res);
+			return json;
+		} catch (UnsupportedEncodingException e) {
+			throw new ServiceException(0, "sdk编码异常");
+		} catch (IOException e) {
+			throw new ServiceException(0, "sdkio异常");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw new ServiceException(0, e.getMessage());
+		}
+	}
+
+	/**
+	 * 从队列中取出元素
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueuePoll(ChatroomQueuePollRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queuePoll.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 排序列出队列中所有元素
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueueList(ChatroomQueueListRequest request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queueList.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 删除清理整个队列
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueueDrop(ChatroomQueueDrop request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queueDrop.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 初始化队列
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueueInit(ChatroomQueueInit request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queueInit.action HTTP/1.1";
+		return postServer(request, url);
+	}
+
+	
+	
+	
+	
+	
+	private static <T> JSONObject postServer(T request, String url) {
+		try {
+			JSONObject json = null;
+			List<NameValuePair> params = reflect(request);
+			// UTF-8编码,解决中文问题
+			HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
+
+			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
+			json = getJson(json, res);
+			logger.debug("getUinfos httpRes:" + res);
+			return json;
+		} catch (UnsupportedEncodingException e) {
+			throw new ServiceException(0, "sdk编码异常");
+		} catch (IOException e) {
+			throw new ServiceException(0, "sdkio异常");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			throw new ServiceException(0, e.getMessage());
 		}
 	}
 
@@ -858,12 +1108,6 @@ public class SDKService {
 		return json;
 	}
 
-	public static void main(String[] args) throws Exception {
-//		JSONObject json=new JSONObject();
-//		System.out.println(json.get("info"));
-		Msg e = new Msg();
-		reflect(e);
-	}
 
 	/**
 	 * 获取实体属性和属性值
@@ -888,4 +1132,10 @@ public class SDKService {
 		return params;
 	}
 
+	public static void main(String[] args) throws Exception {
+//		JSONObject json=new JSONObject();
+//		System.out.println(json.get("info"));
+		Msg e = new Msg();
+		reflect(e);
+	}
 }

@@ -1,4 +1,4 @@
-package com.youxin.app.entity;
+package com.youxin.app.yx.request;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
