@@ -24,6 +24,11 @@ import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomAddRobotRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomCreateRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomGetRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomMembersByPage;
+import com.youxin.app.yx.request.chatroom.ChatroomMuteRoom;
+import com.youxin.app.yx.request.chatroom.ChatroomQueryMembers;
+import com.youxin.app.yx.request.chatroom.ChatroomQueryUserRoomIds;
+import com.youxin.app.yx.request.chatroom.ChatroomQueueBatchUpdateElements;
 import com.youxin.app.yx.request.chatroom.ChatroomQueueDrop;
 import com.youxin.app.yx.request.chatroom.ChatroomQueueInit;
 import com.youxin.app.yx.request.chatroom.ChatroomQueueListRequest;
@@ -35,6 +40,8 @@ import com.youxin.app.yx.request.chatroom.ChatroomSendMsgRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomSetMemberRoleRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomTemporaryMuteRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomToggleCloseStatRequest;
+import com.youxin.app.yx.request.chatroom.ChatroomTopn;
+import com.youxin.app.yx.request.chatroom.ChatroomUpdateMyRoomRole;
 import com.youxin.app.yx.request.chatroom.ChatroomUpdateRequest;
 
 public class SDKService {
@@ -862,7 +869,7 @@ public class SDKService {
 	 */
 	public static JSONObject chatroomCreate(ChatroomCreateRequest request) {
 
-		String url = "https://api.netease.im/nimserver/chatroom/create.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/create.action";
 
 		return postServer(request, url);
 	}
@@ -875,7 +882,7 @@ public class SDKService {
 	 */
 	public static JSONObject chatroomGet(ChatroomGetRequest request) {
 
-		String url = "https://api.netease.im/nimserver/chatroom/get.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/get.action";
 
 		return postServer(request, url);
 	}
@@ -888,7 +895,7 @@ public class SDKService {
 	 */
 	public static JSONObject chatroomGetBatch(ChatroomGetRequest request) {
 
-		String url = "https://api.netease.im/nimserver/chatroom/getBatch.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/getBatch.action";
 
 		return postServer(request, url);
 	}
@@ -901,7 +908,7 @@ public class SDKService {
 	 */
 	public static JSONObject chatroomUpdate(ChatroomUpdateRequest request) {
 
-		String url = "https://api.netease.im/nimserver/chatroom/update.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/update.action";
 
 		return postServer(request, url);
 	}
@@ -914,7 +921,7 @@ public class SDKService {
 	 */
 	public static JSONObject chatroomToggleCloseStat(ChatroomToggleCloseStatRequest request) {
 
-		String url = "https://api.netease.im/nimserver/chatroom/toggleCloseStat.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/toggleCloseStat.action";
 
 		return postServer(request, url);
 	}
@@ -926,7 +933,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomSetMemberRole(ChatroomSetMemberRoleRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/setMemberRole.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/setMemberRole.action";
 		return postServer(request, url);
 	}
 
@@ -937,7 +944,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomRequestAddr(ChatroomRequestAddrRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/requestAddr.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/requestAddr.action";
 		return postServer(request, url);
 	}
 
@@ -948,7 +955,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomSendMsg(ChatroomSendMsgRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/sendMsg.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/sendMsg.action";
 		return postServer(request, url);
 
 	}
@@ -962,7 +969,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomAddRobot(ChatroomAddRobotRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/addRobot.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/addRobot.action";
 		return postServer(request, url);
 	}
 
@@ -973,7 +980,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomRemoveRobot(ChatroomRemoveRobotRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/removeRobot.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/removeRobot.action";
 		return postServer(request, url);
 	}
 
@@ -984,7 +991,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomTemporaryMute(ChatroomTemporaryMuteRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/temporaryMute.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/temporaryMute.action";
 		return postServer(request, url);
 	}
 
@@ -998,7 +1005,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomQueueOffer(ChatroomQueueOfferRequest request, String transients) {
-		String url = "https://api.netease.im/nimserver/chatroom/queueOffer.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/queueOffer.action";
 		try {
 			JSONObject json = null;
 			List<NameValuePair> params = reflect(request);
@@ -1027,7 +1034,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomQueuePoll(ChatroomQueuePollRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/queuePoll.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/queuePoll.action";
 		return postServer(request, url);
 	}
 
@@ -1038,7 +1045,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomQueueList(ChatroomQueueListRequest request) {
-		String url = "https://api.netease.im/nimserver/chatroom/queueList.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/queueList.action";
 		return postServer(request, url);
 	}
 
@@ -1049,7 +1056,7 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomQueueDrop(ChatroomQueueDrop request) {
-		String url = "https://api.netease.im/nimserver/chatroom/queueDrop.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/queueDrop.action";
 		return postServer(request, url);
 	}
 
@@ -1060,11 +1067,89 @@ public class SDKService {
 	 * @return
 	 */
 	public static JSONObject chatroomQueueInit(ChatroomQueueInit request) {
-		String url = "https://api.netease.im/nimserver/chatroom/queueInit.action HTTP/1.1";
+		String url = "https://api.netease.im/nimserver/chatroom/queueInit.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 将聊天室整体禁言
+	 *  设置聊天室整体禁言状态（仅创建者和管理员能发言）
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomMuteRoom(ChatroomMuteRoom request) {
+		String url = "https://api.netease.im/nimserver/chatroom/muteRoom.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 查询聊天室统计指标TopN
+	 *  1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 
+		2、当天的统计指标需要到第二天才能查询
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomTopn(ChatroomTopn request) {
+		String url = "https://api.netease.im/nimserver/chatroom/topn.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 分页获取成员列表
+	 *  1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 
+		2、当天的统计指标需要到第二天才能查询
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomMembersByPage(ChatroomMembersByPage request) {
+		String url = "https://api.netease.im/nimserver/chatroom/membersByPage.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 批量获取在线成员信息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueryMembers(ChatroomQueryMembers request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queryMembers.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 变更聊天室内的角色信息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomUpdateMyRoomRole(ChatroomUpdateMyRoomRole request) {
+		String url = "https://api.netease.im/nimserver/chatroom/updateMyRoomRole.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 批量更新聊天室队列元素
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueueBatchUpdateElements(ChatroomQueueBatchUpdateElements request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queueBatchUpdateElements.action";
 		return postServer(request, url);
 	}
 
-	
+	/**
+	 * 查询用户创建的开启状态聊天室列表
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject chatroomQueryUserRoomIds(ChatroomQueryUserRoomIds request) {
+		String url = "https://api.netease.im/nimserver/chatroom/queryUserRoomIds.action";
+		return postServer(request, url);
+	}
+
+
+	//====================================================================================================
+	//=======================================历史信息=====================================================
+	//====================================================================================================
 	
 	
 	
@@ -1107,6 +1192,7 @@ public class SDKService {
 
 		return json;
 	}
+	
 
 
 	/**
