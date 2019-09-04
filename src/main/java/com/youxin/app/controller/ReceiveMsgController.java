@@ -12,7 +12,7 @@ import com.youxin.app.utils.Result;
 @RequestMapping("/message/")
 public class ReceiveMsgController extends AbstractController{
 	
-	@PostMapping("callBack")
+	@PostMapping("receive")
 	public Object register(JSONObject obj){
 		System.out.println(obj); 
 		return Result.success();
