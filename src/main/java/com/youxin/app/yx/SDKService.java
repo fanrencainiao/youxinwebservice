@@ -43,6 +43,15 @@ import com.youxin.app.yx.request.chatroom.ChatroomToggleCloseStatRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomTopn;
 import com.youxin.app.yx.request.chatroom.ChatroomUpdateMyRoomRole;
 import com.youxin.app.yx.request.chatroom.ChatroomUpdateRequest;
+import com.youxin.app.yx.request.history.QueryBroadcastMsg;
+import com.youxin.app.yx.request.history.QueryBroadcastMsgById;
+import com.youxin.app.yx.request.history.QuerySessionMsg;
+import com.youxin.app.yx.request.history.QueryTeamMsg;
+import com.youxin.app.yx.request.history.QueryUserEvents;
+import com.youxin.app.yx.request.subscribe.SubscribeAdd;
+import com.youxin.app.yx.request.subscribe.SubscribeBatchdel;
+import com.youxin.app.yx.request.subscribe.SubscribeDelete;
+import com.youxin.app.yx.request.subscribe.SubscribeQuery;
 
 public class SDKService {
 	protected static Log logger = LogFactory.getLog("sdk");
@@ -1070,10 +1079,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/queueInit.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 将聊天室整体禁言
-	 *  设置聊天室整体禁言状态（仅创建者和管理员能发言）
+	 * 将聊天室整体禁言 设置聊天室整体禁言状态（仅创建者和管理员能发言）
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1081,11 +1090,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/muteRoom.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 查询聊天室统计指标TopN
-	 *  1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 
-		2、当天的统计指标需要到第二天才能查询
+	 * 查询聊天室统计指标TopN 1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 2、当天的统计指标需要到第二天才能查询
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1093,11 +1101,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/topn.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 分页获取成员列表
-	 *  1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 
-		2、当天的统计指标需要到第二天才能查询
+	 * 分页获取成员列表 1、根据时间戳，按指定周期列出聊天室相关指标的TopN列表 2、当天的统计指标需要到第二天才能查询
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1105,9 +1112,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/membersByPage.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 批量获取在线成员信息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1115,9 +1123,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/queryMembers.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 变更聊天室内的角色信息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1125,9 +1134,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/chatroom/updateMyRoomRole.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 批量更新聊天室队列元素
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1138,6 +1148,7 @@ public class SDKService {
 
 	/**
 	 * 查询用户创建的开启状态聊天室列表
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1146,14 +1157,120 @@ public class SDKService {
 		return postServer(request, url);
 	}
 
+	// ====================================================================================================
+	// =======================================历史信息=====================================================
+	// ====================================================================================================
+	/**
+	 * 单聊云端历史消息查询 查询存储在网易云通信服务器中的单人聊天历史消息，只能查询在保存时间范围内的消息
+	 * 
+	 * 跟据时间段查询点对点消息，每次最多返回100条； 不提供分页支持，第三方需要跟据时间段来查询。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject querySessionMsg(QuerySessionMsg request) {
+		String url = "https://api.netease.im/nimserver/history/querySessionMsg.action";
+		return postServer(request, url);
+	}
 
-	//====================================================================================================
-	//=======================================历史信息=====================================================
-	//====================================================================================================
+	/**
+	 * 群聊云端历史消息查询
+	 * 
+	 * 
+	 * 查询存储在网易云通信服务器中的群聊天历史消息，只能查询在保存时间范围内的消息
+	 * 
+	 * 跟据时间段查询群消息，每次最多返回100条； 不提供分页支持，第三方需要跟据时间段来查询。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject queryTeamMsg(QueryTeamMsg request) {
+		String url = "https://api.netease.im/nimserver/history/queryTeamMsg.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 用户登录登出事件记录查询
+	 * 
+	 * 
+	 * 接口描述 1.跟据时间段查询用户的登录登出记录，每次最多返回100条。 2.不提供分页支持，第三方需要跟据时间段来查询。
+	 * 3.此接口需要联系客户经理开通方能生效，生效后可以查询。不支持查询开通前的登录登出事件记录。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject queryUserEvents(QueryUserEvents request) {			
+		String url = "https://api.netease.im/nimserver/history/queryUserEvents.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 批量查询广播消息
+	 * @param request
+	 * @return
+	 */
+	
+	public static JSONObject queryBroadcastMsg(QueryBroadcastMsg request) {			
+		String url = "https://api.netease.im/nimserver/history/queryBroadcastMsg.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 查询单条广播消息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject queryBroadcastMsgById(QueryBroadcastMsgById request) {			
+		String url = "https://api.netease.im/nimserver/history/queryBroadcastMsgById.action";
+		return postServer(request, url);
+	}
+	// ====================================================================================================
+	// =======================================在线状态=====================================================
+	// ====================================================================================================
+	
+	/**
+	 * 订阅指定人员的在线状态事件，每个账号最大有效订阅账号不超过3000个
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject subscribeAdd(SubscribeAdd request) {			
+		String url = "https://api.netease.im/nimserver/event/subscribe/add.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 取消订阅指定人员的在线状态事件
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject subscribeDelete(SubscribeDelete request) {			
+		String url = "https://api.netease.im/nimserver/event/subscribe/delete.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 取消全部在线状态事件订阅
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject subscribeBatchdel(SubscribeBatchdel request) {			
+		String url = "https://api.netease.im/nimserver/event/subscribe/batchdel.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 查询在线状态事件订阅关系
+	 * 
+	 * 查询指定人员的有效在线状态事件订阅关系
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject subscribeQuery(SubscribeQuery request) {			
+		String url = "https://api.netease.im/nimserver/event/subscribe/query.action";
+		return postServer(request, url);
+	}
 	
 	
 	
-	
+
 	private static <T> JSONObject postServer(T request, String url) {
 		try {
 			JSONObject json = null;
@@ -1192,8 +1309,6 @@ public class SDKService {
 
 		return json;
 	}
-	
-
 
 	/**
 	 * 获取实体属性和属性值
