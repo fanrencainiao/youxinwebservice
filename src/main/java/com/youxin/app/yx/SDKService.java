@@ -52,6 +52,23 @@ import com.youxin.app.yx.request.subscribe.SubscribeAdd;
 import com.youxin.app.yx.request.subscribe.SubscribeBatchdel;
 import com.youxin.app.yx.request.subscribe.SubscribeDelete;
 import com.youxin.app.yx.request.subscribe.SubscribeQuery;
+import com.youxin.app.yx.request.team.Add;
+import com.youxin.app.yx.request.team.AddOrUpdateManager;
+import com.youxin.app.yx.request.team.ChangeOwner;
+import com.youxin.app.yx.request.team.Create;
+import com.youxin.app.yx.request.team.GetMarkReadInfo;
+import com.youxin.app.yx.request.team.JoinTeams;
+import com.youxin.app.yx.request.team.Kick;
+import com.youxin.app.yx.request.team.Leave;
+import com.youxin.app.yx.request.team.ListTeamMute;
+import com.youxin.app.yx.request.team.MuteTeam;
+import com.youxin.app.yx.request.team.MuteTlist;
+import com.youxin.app.yx.request.team.MuteTlistAll;
+import com.youxin.app.yx.request.team.Query;
+import com.youxin.app.yx.request.team.QueryDetail;
+import com.youxin.app.yx.request.team.Remove;
+import com.youxin.app.yx.request.team.Update;
+import com.youxin.app.yx.request.team.UpdateTeamNick;
 
 public class SDKService {
 	protected static Log logger = LogFactory.getLog("sdk");
@@ -1199,72 +1216,295 @@ public class SDKService {
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject queryUserEvents(QueryUserEvents request) {			
+	public static JSONObject queryUserEvents(QueryUserEvents request) {
 		String url = "https://api.netease.im/nimserver/history/queryUserEvents.action";
 		return postServer(request, url);
 	}
+
 	/**
 	 * 批量查询广播消息
+	 * 
 	 * @param request
 	 * @return
 	 */
-	
-	public static JSONObject queryBroadcastMsg(QueryBroadcastMsg request) {			
+
+	public static JSONObject queryBroadcastMsg(QueryBroadcastMsg request) {
 		String url = "https://api.netease.im/nimserver/history/queryBroadcastMsg.action";
 		return postServer(request, url);
 	}
+
 	/**
 	 * 查询单条广播消息
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject queryBroadcastMsgById(QueryBroadcastMsgById request) {			
+	public static JSONObject queryBroadcastMsgById(QueryBroadcastMsgById request) {
 		String url = "https://api.netease.im/nimserver/history/queryBroadcastMsgById.action";
 		return postServer(request, url);
 	}
 	// ====================================================================================================
 	// =======================================在线状态=====================================================
 	// ====================================================================================================
-	
+
 	/**
 	 * 订阅指定人员的在线状态事件，每个账号最大有效订阅账号不超过3000个
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject subscribeAdd(SubscribeAdd request) {			
+	public static JSONObject subscribeAdd(SubscribeAdd request) {
 		String url = "https://api.netease.im/nimserver/event/subscribe/add.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 取消订阅指定人员的在线状态事件
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject subscribeDelete(SubscribeDelete request) {			
+	public static JSONObject subscribeDelete(SubscribeDelete request) {
 		String url = "https://api.netease.im/nimserver/event/subscribe/delete.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 取消全部在线状态事件订阅
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject subscribeBatchdel(SubscribeBatchdel request) {			
+	public static JSONObject subscribeBatchdel(SubscribeBatchdel request) {
 		String url = "https://api.netease.im/nimserver/event/subscribe/batchdel.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 查询在线状态事件订阅关系
 	 * 
 	 * 查询指定人员的有效在线状态事件订阅关系
+	 * 
 	 * @param request
 	 * @return
 	 */
-	public static JSONObject subscribeQuery(SubscribeQuery request) {			
+	public static JSONObject subscribeQuery(SubscribeQuery request) {
 		String url = "https://api.netease.im/nimserver/event/subscribe/query.action";
+		return postServer(request, url);
+	}
+
+	// ==================================================================================
+	// =========================高级群组================================
+	// ==================================================================================
+	/**
+	 * 创建群
+	 * 
+	 * 创建高级群，以邀请的方式发送给用户；
+	 * 
+	 * custom 字段是给第三方的扩展字段，第三方可以基于此字段扩展高级群的功能，构建自己需要的群；
+	 * 建群成功会返回tid，需要保存，以便于加人与踢人等后续操作； 每个用户可创建的群数量有限制，限制值由 IM 套餐的群组配置决定，可登录管理后台查看。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamCreate(Create request) {
+		String url = "https://api.netease.im/nimserver/team/create.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 拉人入群
+	 * 
+	 * 
+	 * 1.可以批量邀请，邀请时需指定群主； 2.当群成员达到上限时，再邀请某人入群返回失败； 3.当群成员达到上限时，被邀请人“接受邀请"的操作也将返回失败。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamAdd(Add request) {
+		String url = "https://api.netease.im/nimserver/team/add.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 踢人出群
+	 * 
+	 * 高级群踢人出群，需要提供群主accid以及要踢除人的accid。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamKick(Kick request) {
+		String url = "https://api.netease.im/nimserver/team/kick.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 解散群 删除整个群，会解散该群，需要提供群主accid，谨慎操作！
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamRemove(Remove request) {
+		String url = "https://api.netease.im/nimserver/team/remove.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 编辑群资料
+	 * 
+	 * 高级群基本信息修改
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamUpdate(Update request) {
+		String url = "https://api.netease.im/nimserver/team/update.action";
+		return postServer(request, url);
+	}
+
+	/**
+	 * 群信息与成员列表查询
+	 * 
+	 * 
+	 * 高级群信息与成员列表查询，一次最多查询30个群相关的信息，跟据ope参数来控制是否带上群成员列表；
+	 * 查询群成员会稍微慢一些，所以如果不需要群成员列表可以只查群信息； 此接口受频率控制，某个应用一分钟最多查询30次，超过会返回416，并且被屏蔽一段时间；
+	 * 群成员的群列表信息中增加管理员成员admins的返回。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamQuery(Query request) {
+		String url = "https://api.netease.im/nimserver/team/query.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 获取群组详细信息
+	 * 
+	 * 查询指定群的详细信息（群信息+成员详细信息）
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamQueryDetail(QueryDetail request) {
+		String url = "https://api.netease.im/nimserver/team/queryDetail.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 获取群组已读消息的已读详情信息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamGetMarkReadInfo(GetMarkReadInfo request) {
+		String url = "https://api.netease.im/nimserver/team/getMarkReadInfo.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 获取群组已读消息的已读详情信息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamChangeOwner(ChangeOwner request) {
+		String url = "https://api.netease.im/nimserver/team/changeOwner.action";
+		return postServer(request, url);
+	}
+
+	
+	/**
+	 * 任命管理员
+	 * 提升普通成员为群管理员，可以批量，但是一次添加最多不超过10个人。
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamAddManager(AddOrUpdateManager request) {
+		String url = "https://api.netease.im/nimserver/team/addManager.action";
+		return postServer(request, url);
+	}
+	
+	
+	/**
+	 * 移除管理员
+	 * 解除管理员身份，可以批量，但是一次解除最多不超过10个人
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamRemoveManager(AddOrUpdateManager request) {
+		String url = "https://api.netease.im/nimserver/team/removeManager.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 获取某用户所加入的群信息
+	 * 获取某个用户所加入高级群的群信息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamJoinTeams(JoinTeams request) {
+		String url = "https://api.netease.im/nimserver/team/joinTeams.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 修改群昵称
+	 * 修改指定账号在群内的昵称
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamUpdateTeamNick(UpdateTeamNick request) {
+		String url = "https://api.netease.im/nimserver/team/updateTeamNick.action";
+		return postServer(request, url);
+	}
+	
+
+	/**
+	 * 修改消息提醒开关
+	 * 修改消息提醒开关
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamMuteTeam(MuteTeam request) {
+		String url = "https://api.netease.im/nimserver/team/muteTeam.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 禁言群成员
+	 * 高级群禁言群成员
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamMuteTlist(MuteTlist request) {
+		String url = "https://api.netease.im/nimserver/team/muteTlist.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 主动退群
+	 * 高级群主动退群
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamLeave(Leave request) {
+		String url = "https://api.netease.im/nimserver/team/leave.action";
+		return postServer(request, url);
+	}
+	/**
+	 * 将群组整体禁言
+	 * 禁言群组，普通成员不能发送消息，创建者和管理员可以发送消息
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamMuteTlistAll(MuteTlistAll request) {
+		String url = "https://api.netease.im/nimserver/team/muteTlistAll.action";
+		return postServer(request, url);
+	}
+	
+	/**
+	 * 获取群组禁言列表
+	 * @param request
+	 * @return
+	 */
+	public static JSONObject teamListTeamMute(ListTeamMute request) {
+		String url = "https://api.netease.im/nimserver/team/listTeamMute.action";
 		return postServer(request, url);
 	}
 	
