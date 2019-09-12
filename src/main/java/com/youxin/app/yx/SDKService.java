@@ -1543,9 +1543,9 @@ public class SDKService {
 		if (!StringUtil.isEmpty(res)) {
 			json = JSONObject.parseObject(res);
 			if (json.getIntValue("code") != 200)
-				throw new ServiceException(0, json.getString("desc"));
+				throw new ServiceException(-1, json.getString("desc"));
 		} else
-			throw new ServiceException(0, "sdk异常");
+			throw new ServiceException(-1, "sdk异常");
 
 		return json;
 	}
