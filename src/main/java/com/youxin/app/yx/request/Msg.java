@@ -1,20 +1,12 @@
 package com.youxin.app.yx.request;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Indexed;
 
 import lombok.Data;
 
 @Data
-@Entity(value = "msg", noClassnameStored = true)
 public class Msg {
 
-	@Id
-	private ObjectId id;
 	
-	@Indexed(unique=true)
 	private String msgid;
 	
 	/**

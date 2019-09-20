@@ -14,13 +14,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.alibaba.fastjson.JSONObject;
-import com.youxin.app.entity.User;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.yx.request.Friends;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
+import com.youxin.app.yx.request.User.User;
 import com.youxin.app.yx.request.chatroom.ChatroomAddRobotRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomCreateRequest;
 import com.youxin.app.yx.request.chatroom.ChatroomGetRequest;
@@ -263,7 +263,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -298,7 +298,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -327,7 +327,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -356,7 +356,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -390,7 +390,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -424,7 +424,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -455,7 +455,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -484,7 +484,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -516,7 +516,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -542,7 +542,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -566,7 +566,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -611,7 +611,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -651,7 +651,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -692,7 +692,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -726,7 +726,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -760,7 +760,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -801,7 +801,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -839,7 +839,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -878,7 +878,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -1041,7 +1041,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");
@@ -1520,7 +1520,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			logger.debug("getUinfos httpRes:" + res);
+			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
 			throw new ServiceException(0, "sdk编码异常");

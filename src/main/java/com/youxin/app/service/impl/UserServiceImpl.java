@@ -55,8 +55,10 @@ public class UserServiceImpl implements UserService {
 	public synchronized Map<String, Object> addUser(User bean) {
 		String accid=Md5Util.md5Hex(bean.getId()+"");
 		bean.setAccid(accid);
+		com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
 		//sdk注册
-		JSONObject json= SDKService.createUser(bean);
+		BeanUtils.copyProperties(bean, u);
+		JSONObject json= SDKService.createUser(u);
 		User us=JSONObject.toJavaObject(json.getJSONObject("info"), User.class);
 		//注册成功
 		bean.setToken(us.getToken());

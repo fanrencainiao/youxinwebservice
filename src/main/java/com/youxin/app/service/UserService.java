@@ -36,4 +36,6 @@ public interface UserService {
 	Map<String, Object> login(User bean);
 	
 	long mobileCount(String mobile);
+	
+	
 }

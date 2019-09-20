@@ -1,15 +1,8 @@
-package com.youxin.app.entity;
+package com.youxin.app.yx.request.User;
 
 
-import java.util.List;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.annotations.NotSaved;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 /**
@@ -17,19 +10,15 @@ import lombok.Data;
  * @author cf
  *
  */
-@Entity(value = "user", noClassnameStored = true)
 @Data
-@ApiModel(value="用户")
 public class User {
 	
-	@Id
 	@ApiModelProperty(hidden=true)
 	private Integer id;
 	/**
 	 * 用户帐号，最大长度32字符，必须保证一个APP内唯一
 	 */
-	@Indexed(unique=true)
-	@ApiModelProperty(hidden=true)
+
 	private String accid;
 	/**
 	 * 用户昵称，最大长度64字符，可设置为空字符串
@@ -37,22 +26,22 @@ public class User {
 	@ApiModelProperty(value="用户昵称，最大长度64字符，可设置为空字符串",required=true)
 	private String name;
 	/**
-	 * json属性，第三方可选填，最大长度1024字符
-	 */
-	private String props;
-	/**
 	 * 用户头像，最大长度1024字节，可设置为空字符串
 	 */
 	@ApiModelProperty(value="用户头像，最大长度1024字节，可设置为空字符串")
 	private String icon;
+	@ApiModelProperty(value="json属性，第三方可选填，最大长度1024字符")
+	private String props;
 	/**
 	 *  	网易云通信ID可以指定登录token值，
 	 *  	最大长度128字符，并更新，如果未指定，
 	 *  	会自动生成token，并在创建成功后返回
 	 */
-	@ApiModelProperty(hidden=true)
-	@Indexed(unique=true)
+	@ApiModelProperty(value="会自动生成token，并在创建成功后返回")
 	private String token;
+	
+	
+
 	/**
 	 * 用户签名，最大长度256字符，可设置为空字符串
 	 */
@@ -83,57 +72,15 @@ public class User {
 	 */
 	@ApiModelProperty(value="用户名片扩展字段，最大长度1024字符，用户可自行扩展，建议封装成JSON字符串，也可以设置为空字符串")
 	private String ex;
-	
-	//============================================================================================
-	//==============================扩展字段=============================================
-	//============================================================================================
-	@ApiModelProperty(value="登录类型 0：账号密码登录，1：短信验证码登录，2.友信号密码登录",required=true)
-	private int loginType;// 登录类型 0：账号密码登录，1：短信验证码登录，2.友信号密码登录
-	@ApiModelProperty(value="密码",required=true)
-	private String password;
-	@ApiModelProperty(value="角色",hidden=true)
-	@NotSaved
-	private List<Integer> role;//
 	@ApiModelProperty(value="创建时间",hidden=true)
 	private Long createTime;
 	@ApiModelProperty(value="更新时间",hidden=true)
 	private Long updateTime;
-	
-	
-	/**
-	 * 用户设置
-	 */
-	@ApiModelProperty(value="用户设置")
-	private UserSettings settings;
-	
-	@Data
-	public static class UserSettings {
-		/**
-		 * 是否全局禁言(文字)：
-		 * true：全局禁言，false:取消全局禁言
-		 */
-		private Integer tmute;
-		
-		/**
-		 * 是否全局禁言(音频)：
-		 * true：全局禁言，false:取消全局禁言
-		 */
-		private Integer vmute;
-		/**
-		 * 被静音的帐号列表
-		 */
-		private List<String> mutelist;
-		
-		/**
-		 * 加黑的帐号列表
-		 */
-		private List<String> blacklist;
-		
-	
-		
-	}
+
+
 	
 	
 	
 
 }
+

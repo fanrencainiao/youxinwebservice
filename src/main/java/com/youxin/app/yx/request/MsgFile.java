@@ -1,18 +1,12 @@
 package com.youxin.app.yx.request;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-
 
 import lombok.Data;
 
 @Data
-@Entity(value = "msgfile", noClassnameStored = true)
 public class MsgFile {
 
-	@Id
-	private ObjectId id;
+
 	/**
 	 * 字符流base64串(Base64.encode(bytes)) ，最大15M的字符流
 	 * 最大15M的字符流

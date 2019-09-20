@@ -28,25 +28,25 @@ public class MainTest {
     private static String SECRET = "d53d9d0cd80b";  //AppSecret
 
     public static final void main(String[] args) throws IOException {
-    	String accid=StringUtil.randomUUID();
-    	User u=new User();
-    	u.setAccid(accid);
-    	u.setName(accid);
-    	u.setGender(1);
-    	
-        JSONObject res = SDKService.createUser(u);
+//    	String accid=StringUtil.randomUUID();
+//    	User u=new User();
+//    	u.setAccid(accid);
+//    	u.setName(accid);
+//    	u.setGender(1);
 //    	
-//    	JSONArray accids=new JSONArray();
-//    	accids.add("04343009cac34bd1b47faa722a3dd71f");
-//    	String res = getUinfos(accids.toString());
-    	
-    	//accid没有区分大小写
-//        String res = updateUinfo("HelloWorld","cfs","13628271337");
-        User us=JSONObject.toJavaObject(res, User.class);
-        u.setName("sds");
-        BeanUtils.copyProperties(us, u,"name");
-        System.out.println(us.toString());
-        System.out.println(u.toString());
+//        JSONObject res = SDKService.createUser(u);
+////    	
+////    	JSONArray accids=new JSONArray();
+////    	accids.add("04343009cac34bd1b47faa722a3dd71f");
+////    	String res = getUinfos(accids.toString());
+//    	
+//    	//accid没有区分大小写
+////        String res = updateUinfo("HelloWorld","cfs","13628271337");
+//        User us=JSONObject.toJavaObject(res, User.class);
+//        u.setName("sds");
+//        BeanUtils.copyProperties(us, u,"name");
+//        System.out.println(us.toString());
+//        System.out.println(u.toString());
         //TODO: 对结果的业务处理，如解析返回结果，并保存成功注册的用户
     }
     /**

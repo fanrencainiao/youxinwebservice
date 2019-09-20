@@ -2,11 +2,20 @@ package com.youxin.app.utils;
 
 import java.io.Serializable;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+@ApiModel(value="response返回对象")
 public class Result implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@ApiModelProperty(value = "code")
     private Integer code;
-
+	@ApiModelProperty(value = "说明")
     private String msg;
-
+	@ApiModelProperty(value = "数据")
     private Object data;
 
     public Result() {}

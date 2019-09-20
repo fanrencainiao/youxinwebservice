@@ -8,16 +8,21 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.youxin.app.utils.Result;
+
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.ResponseMessageBuilder;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.Contact;
 import springfox.documentation.service.Parameter;
+import springfox.documentation.service.ResponseMessage;
 import springfox.documentation.service.SecurityReference;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
@@ -38,9 +43,16 @@ public class SwaggerConfig {
 //        List<Parameter> pars = new ArrayList<>();
 //        tokenPar.name("access_token").description("令牌").modelRef(new ModelRef("string")).parameterType("header").required(false).build();
 //        pars.add(tokenPar.build());
+//    	 List<ResponseMessage> responseMessageList = new ArrayList<>();
+//    	    responseMessageList.add(new ResponseMessageBuilder().code(404).message("找不到资源").responseModel(new ModelRef("Result")).build());
+//    	    responseMessageList.add(new ResponseMessageBuilder().code(409).message("业务逻辑异常").responseModel(new ModelRef("Result")).build());
+//    	    responseMessageList.add(new ResponseMessageBuilder().code(422).message("参数校验异常").responseModel(new ModelRef("Result")).build());
+//    	    responseMessageList.add(new ResponseMessageBuilder().code(500).message("服务器内部错误").responseModel(new ModelRef("Result")).build());
+//    	    responseMessageList.add(new ResponseMessageBuilder().code(503).message("Hystrix异常").responseModel(new ModelRef("Result")).build());
 
     	
         return new Docket(DocumentationType.SWAGGER_2)
+        		
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.youxin.app.controller"))
@@ -88,7 +100,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("友信api")
                 .description("友信相关接口文档")
-                .contact(new Contact("youxin", "", ""))
+                .contact(new Contact("youxin", "www.youxinapp.cn", ""))
                 .version("2.0")
                 .build();
     }
