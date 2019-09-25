@@ -22,6 +22,7 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
+import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 
 import io.swagger.annotations.Api;
@@ -39,6 +40,10 @@ public class UserController extends AbstractController{
 	private UserService userService;
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	private SMSServiceImpl sendSms;
+	
+	
 	@ApiOperation(value = "注册")
 	@PostMapping("register")
 	public Object register(@RequestBody @Valid User user){
@@ -56,15 +61,17 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "登录")
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
-	,@ApiImplicitParam(name = "password", value = "密码", required = false, paramType = "query"),
-	@ApiImplicitParam(name = "loginType", value = "登录类型(0：账号密码登录)", required = true, paramType = "query"),
+	,@ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
+	@ApiImplicitParam(name = "loginType", value = "登录类型(0：账号密码登录，1：短信验证登录)", paramType = "query"),
+	@ApiImplicitParam(name = "smsCode", value = "短信验证码", paramType = "query"),
 	})
 	@PostMapping("login")
-	public Object login(@RequestParam String mobile,@RequestParam String password,@RequestParam int loginType){
+	public Object login(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String password,@RequestParam(defaultValue="") String smsCode,@RequestParam(defaultValue="-1") int loginType){
 		User user=new User();
 		user.setMobile(mobile);
 		user.setPassword(password);
 		user.setLoginType(loginType);
+		user.setSmsCode(smsCode);
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
 	}
@@ -171,6 +178,16 @@ public class UserController extends AbstractController{
 		
 		return Result.error();
 	}
+	
+	@ApiOperation(value = "发送短信")
+	@PostMapping("sendSms")
+	public Object sendSms(@RequestParam String telephone,@RequestParam String areaCode,@RequestParam String language,@RequestParam String code){
+
+		String codes=sendSms.sendSmsToInternational(telephone, areaCode,language,code);
+		
+		return Result.success(codes);
+	}
+	
 	
 	
 	

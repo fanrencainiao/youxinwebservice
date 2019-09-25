@@ -15,6 +15,7 @@ public enum ResultCode {
     PARAM_NOT_COMPLETE(10004, "参数缺失"),
     PASS_NOT_EQUAL1(10005,"兩次密碼不一致"),
     PASS_NOT_EQUAL2(10006,"新舊密碼不一致"),
+    PARAM_IMG_ERROR(10007, "图形验证码错误"),
 
     /* 用户错误：20001-29999*/
     USER_NOT_LOGGED_IN(20001, "用户未登录"),

@@ -23,6 +23,7 @@ spring:
     port: 6379
     password: 
     database: 0
+    isCluster: false
     timeout:
       seconds: 10000
     jedis:
@@ -37,9 +38,20 @@ spring:
 authorizationfilter:
   requestUriList[0]: /user/register
   requestUriList[1]: /user/login
+  requestUriList[2]: /other/randcode/sendSms
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
   isAuth: 0 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
+## 阿里云短信服务
+smsconfig:
+  product: Dysmsapi
+  domain: dysmsapi.aliyuncs.com
+  accesskeyid: LTAIPf3JXTTdhbVU
+  accesskeysecret: acMpNNTELzuMKgJisolq9DztjTLmFE
+  signname: 友信IM
+  chinase-templetecode: SMS_164220086
+  ## 图形验证码是否启用0不启用 1起用
+  isstart: 0

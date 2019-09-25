@@ -86,6 +86,15 @@ public class Result implements Serializable{
         result.setResultCode(resultCode);
         return result;
     }
+    public static Result failure(int code,String msg,Object data) {
+        Result result = new Result();
+        result.setCode(code);
+        result.setMsg(msg);
+        if(data!=null) {
+        	result.setData(data);
+        }
+        return result;
+    }
 
     public static Result failure(ResultCode resultCode, Object data) {
         Result result = new Result();

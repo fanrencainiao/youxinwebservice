@@ -22,6 +22,7 @@ import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 
 
@@ -35,6 +36,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	@Qualifier("get")
 	private Datastore dfds;
+	
+	@Autowired
+	private SMSServiceImpl smsServer;
 	
 	@Override
 	public Map<String, Object> register(User bean) {
@@ -120,10 +124,10 @@ public class UserServiceImpl implements UserService {
 					throw new ServiceException(20002, "帐号或密码错误");
 			} else if (1 == bean.getLoginType()) {
 				// 短信验证码登录
-//				if (null == example.getVerificationCode())
-//					throw new ServiceException("短信验证码不能为空!");
-//				if (!SKBeanUtils.getSMSService().isAvailable(user.getTelephone(), example.getVerificationCode()))
-//					throw new ServiceException("短信验证码不正确!");
+				if (null == bean.getSmsCode())
+					throw new ServiceException("短信验证码不能为空!");
+				if (!smsServer.isAvailable("86"+user.getMobile(), bean.getSmsCode()))
+					throw new ServiceException("短信验证码不正确!");
 			}else {
 				throw new ServiceException(20002, "登录方式错误");
 			}

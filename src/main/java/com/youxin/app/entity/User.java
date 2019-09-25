@@ -98,6 +98,9 @@ public class User {
 	private Long createTime;
 	@ApiModelProperty(value="更新时间",hidden=true)
 	private Long updateTime;
+	@ApiModelProperty(value="短信验证码",hidden=true)
+	@NotSaved
+	private String smsCode;
 	
 	
 	/**
