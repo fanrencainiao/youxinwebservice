@@ -179,16 +179,7 @@ public class UserController extends AbstractController{
 		return Result.error();
 	}
 	
-	@ApiOperation(value = "发送短信")
-	@PostMapping("sendSms")
-	public Object sendSms(@RequestParam String telephone,@RequestParam String areaCode,@RequestParam String language,@RequestParam String code){
 
-		String codes=sendSms.sendSmsToInternational(telephone, areaCode,language,code);
-		
-		return Result.success(codes);
-	}
-	
-	
 	
 	
 	
