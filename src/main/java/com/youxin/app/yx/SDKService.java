@@ -284,7 +284,7 @@ public class SDKService {
 			JSONObject json = null;
 			String url = "https://api.netease.im/nimserver/user/updateUinfo.action";
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("accids", user.getAccid()));
+			params.add(new BasicNameValuePair("accid", user.getAccid()));
 			params.add(new BasicNameValuePair("name", user.getName()));
 			params.add(new BasicNameValuePair("icon", user.getIcon()));
 			params.add(new BasicNameValuePair("sign", user.getSign()));

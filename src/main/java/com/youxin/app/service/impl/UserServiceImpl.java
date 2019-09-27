@@ -68,7 +68,15 @@ public class UserServiceImpl implements UserService {
 		com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
 		//sdk注册
 		BeanUtils.copyProperties(bean, u);
+		//扩展字段封装
+		JSONObject exs=new JSONObject();
+		exs.put("password", bean.getPassword());
+		exs.put("role", bean.getRole());
+		exs.put("createTime", bean.getCreateTime());
+		exs.put("updateTime", bean.getUpdateTime());
+		u.setEx(exs.toString());
 		JSONObject json= SDKService.createUser(u);
+		
 		User us=JSONObject.toJavaObject(json.getJSONObject("info"), User.class);
 		//注册成功
 		bean.setToken(us.getToken());

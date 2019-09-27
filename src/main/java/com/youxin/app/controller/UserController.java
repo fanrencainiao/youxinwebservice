@@ -90,10 +90,21 @@ public class UserController extends AbstractController{
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
 			u.setPassword(newPassword);
 			repository.save(u);
+			updatePwdTosdk(u);
 		}else {
 			return Result.failure(ResultCode.USER_LOGIN_ERROR);
 		}
 		return Result.success(u);
+	}
+
+	private void updatePwdTosdk(User u) {
+		if(StringUtils.isNotBlank(u.getEx())) {
+			JSONObject exs = JSONObject.parseObject(u.getEx());
+			exs.put("password", u.getPassword());
+		}
+		com.youxin.app.yx.request.User.User uq=new com.youxin.app.yx.request.User.User();
+		BeanUtils.copyProperties(u, uq);
+		SDKService.updateUinfo(uq);
 	}
 	@ApiOperation(value = "修改密码_短信")
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
@@ -111,6 +122,7 @@ public class UserController extends AbstractController{
 				throw new ServiceException("短信验证码不正确!");
 			u.setPassword(newPassword);
 			repository.save(u);
+			updatePwdTosdk(u);
 		}else {
 			return Result.failure(ResultCode.USER_NOT_EXIST);
 		}
