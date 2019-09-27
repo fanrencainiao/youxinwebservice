@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.mongodb.DBCollection;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
+import com.youxin.app.ex.ServiceException;
 import com.youxin.app.service.UserService;
+import com.youxin.app.yx.SDKService;
 
 
 
@@ -99,9 +102,11 @@ public class InitializationData  implements CommandLineRunner {
 				User user = new User();
 				user.setId(1000);
 				user.setName("1000");
-				user.setMobile("861000");
+				user.setMobile("1000");
 				user.setPassword(DigestUtils.md5Hex("1000"));
 				user.setCreateTime(DateUtil.currentTimeSeconds());
+				user=createAccid(user,"1000");
+				
 				dfds.save(user);
 //				KXMPPServiceImpl.getInstance().registerAndXmppVersion(user.getUserId() + "", user.getPassword());
 			} catch (Exception e) {
@@ -118,6 +123,7 @@ public class InitializationData  implements CommandLineRunner {
 				u.setName("10000");
 				u.setPassword(DigestUtils.md5Hex("10000"));
 				u.setCreateTime(DateUtil.currentTimeSeconds());
+				u=createAccid(u,"10000");
 				dfds.save(u);
 //				KXMPPServiceImpl.getInstance().registerSystemNo("10000", DigestUtils.md5Hex("10000"));
 			} catch (Exception e) {
@@ -132,11 +138,12 @@ public class InitializationData  implements CommandLineRunner {
 			// 初始化1100号 作为金钱相关通知系统号码
 			try {
 				User u=new User();
-				u.setMobile("861100");
+				u.setMobile("1100");
 				u.setId(1100);
 				u.setName("1100");
 				u.setPassword(DigestUtils.md5Hex("1100"));
 				u.setCreateTime(DateUtil.currentTimeSeconds());
+				u=createAccid(u,"1100");
 				dfds.save(u);
 //				KXMPPServiceImpl.getInstance().registerSystemNo("1100", DigestUtils.md5Hex("1100"));
 			} catch (Exception e) {
@@ -146,6 +153,23 @@ public class InitializationData  implements CommandLineRunner {
 		}
 		
 		
+	}
+
+
+	private User createAccid(User user, String userId) {
+		String accid=Md5Util.md5Hex(userId);
+		user.setAccid(accid);
+		com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
+		//sdk注册
+		BeanUtils.copyProperties(user, u);
+		JSONObject json= SDKService.createUser(u);
+		User us=JSONObject.toJavaObject(json.getJSONObject("info"), User.class);
+		//注册成功
+		user.setToken(us.getToken());
+		if(StringUtil.isEmpty(user.getToken())) {
+			System.out.println("token缺失，注册失败");
+		}
+		return user;
 	}
 	
 	

@@ -50,7 +50,7 @@ public class OtherServerController {
 		
 		if(1 == isRegister){
 			if (us.mobileCount(telephone)>=1){
-				Result.failure(ResultCode.USER_HAS_EXISTED);
+				return Result.failure(ResultCode.USER_HAS_EXISTED);
 			}
 		}
 		

@@ -39,12 +39,16 @@ authorizationfilter:
   requestUriList[0]: /user/register
   requestUriList[1]: /user/login
   requestUriList[2]: /other/randcode/sendSms
+  requestUriList[3]: /user/updatePwdForSms
+
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
   isAuth: 0 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
+  #redis地址
+  redisAddr: redis://127.0.0.1:6379
 ## 阿里云短信服务
 smsconfig:
   product: Dysmsapi

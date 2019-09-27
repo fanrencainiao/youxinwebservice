@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.User;
+import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.KSessionUtil;
@@ -90,7 +91,28 @@ public class UserController extends AbstractController{
 			u.setPassword(newPassword);
 			repository.save(u);
 		}else {
-			Result.failure(ResultCode.USER_LOGIN_ERROR);
+			return Result.failure(ResultCode.USER_LOGIN_ERROR);
+		}
+		return Result.success(u);
+	}
+	@ApiOperation(value = "修改密码_短信")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
+	,@ApiImplicitParam(name = "smsCode", value = "短信验证码", required = true, paramType = "query"),
+	@ApiImplicitParam(name = "newPassword", value = "新密码", required = true, paramType = "query"),
+	})
+	@PostMapping("updatePwdForSms")
+	public Object updatePwdForSms(@RequestParam String mobile,@RequestParam String smsCode,@RequestParam String newPassword){
+		
+		Query<User> q = repository.createQuery();
+		q.field("mobile").equal(mobile);
+		User u = repository.findOne(q);
+		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
+			if (!sendSms.isAvailable("86"+mobile, smsCode))
+				throw new ServiceException("短信验证码不正确!");
+			u.setPassword(newPassword);
+			repository.save(u);
+		}else {
+			return Result.failure(ResultCode.USER_NOT_EXIST);
 		}
 		return Result.success(u);
 	}
@@ -178,6 +200,25 @@ public class UserController extends AbstractController{
 		
 		return Result.error();
 	}
+	
+	@ApiOperation(value = "搜索用户",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号",  paramType = "query")
+	})
+	@GetMapping("searchUser")
+	public Object searchUser(@RequestParam(defaultValue="") String mobile
+			){
+		Query<User> q=repository.createQuery();
+		
+		if(StringUtils.isNotBlank(mobile)) {
+			q.field("mobile").equal(mobile);
+		}
+		User u = repository.findOne(q);	
+		if(u!=null)
+			u.setPassword("");
+		return Result.success(u);
+	}
+	
+	
 	
 
 	

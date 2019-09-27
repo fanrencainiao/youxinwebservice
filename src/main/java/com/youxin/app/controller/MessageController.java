@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/msg/")
 public class MessageController {
 	
-	@ApiOperation(value = "发送普通消息 给用户或者高级群发送普通消息，包括文本，图片，语音，视频和地理位置",response=Result.class)
+	@ApiOperation(value="发送普通消息",notes = "发送普通消息 给用户或者高级群发送普通消息，包括文本，图片，语音，视频和地理位置",response=Result.class)
 	@PostMapping("sendMsg")
 	public Object sendMsg(@RequestBody @Valid MsgRequest msg){
 		JSONObject json = SDKService.sendMsg(msg);
@@ -36,7 +36,7 @@ public class MessageController {
 		}
 		return Result.error();
 	}
-	@ApiOperation(value = "批量发送点对点普通消息 1.给用户发送点对点普通消息，包括文本，图片，语音，视频，地理位置和自定义消息。\n 2.最大限500人，只能针对个人,如果批量提供的帐号中有未注册的帐号，会提示并返回给用户。\n 3.此接口受频率控制，一个应用一分钟最多调用120次，超过会返回416状态码，并且被屏蔽一段时间； 具体消息参考下面描述。",response=Result.class)
+	@ApiOperation(value ="批量发送点对点普通消息",notes = "批量发送点对点普通消息 1.给用户发送点对点普通消息，包括文本，图片，语音，视频，地理位置和自定义消息。\n 2.最大限500人，只能针对个人,如果批量提供的帐号中有未注册的帐号，会提示并返回给用户。\n 3.此接口受频率控制，一个应用一分钟最多调用120次，超过会返回416状态码，并且被屏蔽一段时间； 具体消息参考下面描述。",response=Result.class)
 	@PostMapping("sendBatchMsg")
 	public Object sendBatchMsg(@RequestBody @Valid Msg msg){
 		JSONObject json = SDKService.sendBatchMsg(msg);
@@ -46,7 +46,7 @@ public class MessageController {
 		return Result.error();
 	}
 	
-	@ApiOperation(value = "发送自定义系统通知 1.自定义系统通知区别于普通消息，方便开发者进行业务逻辑的通知； \n 2.目前支持两种类型：点对点类型和群类型（仅限高级群），根据msgType有所区别。 \n应用场景：如某个用户给另一个用户发送好友请求信息等，具体attach为请求消息体，第三方可以自行扩展，建议是json格式",response=Result.class)
+	@ApiOperation(value ="发送自定义系统通知",notes = "发送自定义系统通知 1.自定义系统通知区别于普通消息，方便开发者进行业务逻辑的通知； \n 2.目前支持两种类型：点对点类型和群类型（仅限高级群），根据msgType有所区别。 \n应用场景：如某个用户给另一个用户发送好友请求信息等，具体attach为请求消息体，第三方可以自行扩展，建议是json格式",response=Result.class)
 	@PostMapping("sendAttachMsg")
 	public Object sendAttachMsg(@RequestBody @Valid Msg msg){
 		JSONObject json = SDKService.sendAttachMsg(msg);
@@ -56,7 +56,7 @@ public class MessageController {
 		return Result.error();
 	}
 	
-	@ApiOperation(value = "批量发送点对点自定义系统通知 1.系统通知区别于普通消息，应用接收到直接交给上层处理，客户端可不做展示； 2.目前支持类型：点对点类型； 3.最大限500人，只能针对个人,如果批量提供的帐号中有未注册的帐号，会提示并返回给用户； 4.此接口受频率控制，一个应用一分钟最多调用120次，超过会返回416状态码，并且被屏蔽一段时间； 应用场景：如某个用户给另一个用户发送好友请求信息等，具体attach为请求消息体，第三方可以自行扩展，建议是json格式",response=Result.class)
+	@ApiOperation(value ="批量发送点对点自定义系统通知",notes = "批量发送点对点自定义系统通知 1.系统通知区别于普通消息，应用接收到直接交给上层处理，客户端可不做展示； 2.目前支持类型：点对点类型； 3.最大限500人，只能针对个人,如果批量提供的帐号中有未注册的帐号，会提示并返回给用户； 4.此接口受频率控制，一个应用一分钟最多调用120次，超过会返回416状态码，并且被屏蔽一段时间； 应用场景：如某个用户给另一个用户发送好友请求信息等，具体attach为请求消息体，第三方可以自行扩展，建议是json格式",response=Result.class)
 	@PostMapping("sendBatchAttachMsg")
 	public Object sendBatchAttachMsg(@RequestBody @Valid Msg msg){
 		JSONObject json = SDKService.sendBatchAttachMsg(msg);
@@ -74,7 +74,7 @@ public class MessageController {
 		}
 		return Result.error();
 	}
-	@ApiOperation(value = "字上传NOS文件清理任务，按时间范围和文件类下、场景清理符合条件的文件 每天提交的任务数量有限制，请合理规划。",response=Result.class)
+	@ApiOperation(value ="字上传NOS文件清理任务",notes = "字上传NOS文件清理任务，按时间范围和文件类下、场景清理符合条件的文件 每天提交的任务数量有限制，请合理规划。",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "startTime", value = "被清理文件的开始时间，必须小于endTime且大于0，endTime和startTime不能之间不能超过7天", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "endTime", value = "被清理文件的结束时间", required = true, paramType = "query"),
 	@ApiImplicitParam(name = "contentType", value = "被清理的文件类型，文件类型包含contentType则被清理 如原始文件类型为\"image/png\"，contentType参数为\"image\",则满足被清理条件", paramType = "query"),

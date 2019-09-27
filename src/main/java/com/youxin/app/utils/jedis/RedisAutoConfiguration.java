@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisAutoConfiguration {
 
-
-	    private String address="redis://127.0.0.1:6378";
+		@Value("${youxin.redisAddr}")
+	    private String address;
 
 	    @Value("${spring.redis.port}")
 	    private int port;

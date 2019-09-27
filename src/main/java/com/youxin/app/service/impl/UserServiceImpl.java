@@ -24,6 +24,7 @@ import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.Friends;
 
 
 
@@ -45,6 +46,11 @@ public class UserServiceImpl implements UserService {
 		if(StringUtil.isEmpty(bean.getMobile())) {
 			throw new ServiceException(0, "手机号必填");
 		}
+		if(StringUtil.isEmpty(bean.getSmsCode())) {
+			throw new ServiceException(0, "短信验证码必填");
+		}
+		if (!smsServer.isAvailable("86"+bean.getMobile(), bean.getSmsCode()))
+			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = this.mobileCount(bean.getMobile());
 		if(mobileCount>=1) {
 			throw new ServiceException(0, "手机号已被注册");
@@ -71,6 +77,14 @@ public class UserServiceImpl implements UserService {
 		}
 		//保存本地数据库
 		repository.save(bean);
+		//加系统客服好友
+		Friends friends=new Friends();
+		friends.setAccid(accid);
+		friends.setFaccid(Md5Util.md5Hex("10000"));
+		friends.setType(1);
+		friends.setMsg("加客服好友");
+		SDKService.friendAdd(friends);
+		
 		//缓存用户token
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(bean.getId(), bean.getId(), null);
 		data.put("id", bean.getId());
@@ -197,5 +211,14 @@ public class UserServiceImpl implements UserService {
 			Integer id = new Integer(dbobj.get("_id").toString());
 			return id;
 		}
+//		public static void main(String[] args) {
+//		//加系统客服好友
+//		Friends friends=new Friends();
+//		friends.setAccid("2dd0c6c424d1afbf925b8be4fbe85981");
+//		friends.setFaccid("1f62ff7760da2b49ee1468b19e90d80f");
+//		friends.setType(1);
+//		friends.setMsg("加客服好友");
+//		SDKService.friendAdd(friends);
+//	}
 
 }
