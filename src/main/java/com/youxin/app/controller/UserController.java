@@ -166,13 +166,14 @@ public class UserController extends AbstractController{
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
 			JSONObject json = SDKService.updateUinfo(user);
 			if(json.getIntValue("code")==200) {
-				BeanUtils.copyProperties(user, u,"id");
+				BeanUtils.copyProperties(user, u,"id","mobile");
 				//更新本地数据库
 				repository.save(u);
 				//更新redis
 				KSessionUtil.saveUserByUserId(u.getId(), u);
-				Result.success();
-			}
+				return Result.success();
+			}else
+				return Result.errorMsg(json.toJSONString());
 		}
 		return Result.error();
 	}
@@ -230,11 +231,7 @@ public class UserController extends AbstractController{
 		return Result.success(u);
 	}
 	
-	
-	
 
-	
-	
 	
 
 }

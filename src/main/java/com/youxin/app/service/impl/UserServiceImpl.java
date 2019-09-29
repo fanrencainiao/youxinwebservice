@@ -1,8 +1,11 @@
 package com.youxin.app.service.impl;
 
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -157,7 +160,7 @@ public class UserServiceImpl implements UserService {
 		}
 		KSessionUtil.saveUserByUserId(user.getId(), user);
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
-		Object token = data.get("access_token");
+//		Object token = data.get("access_token");
 		data.put("id", user.getId());
 		data.put("accid", user.getAccid());
 		data.put("name", user.getName());
@@ -219,14 +222,56 @@ public class UserServiceImpl implements UserService {
 			Integer id = new Integer(dbobj.get("_id").toString());
 			return id;
 		}
-//		public static void main(String[] args) {
-//		//加系统客服好友
+		public static void main(String[] args) {
+		//加系统客服好友
 //		Friends friends=new Friends();
 //		friends.setAccid("2dd0c6c424d1afbf925b8be4fbe85981");
 //		friends.setFaccid("1f62ff7760da2b49ee1468b19e90d80f");
 //		friends.setType(1);
 //		friends.setMsg("加客服好友");
 //		SDKService.friendAdd(friends);
-//	}
+			
+//		System.out.println(SDKService.getUinfos("['2dd0c6c424d1afbf925b8be4fbe85981']"));
+	}
+
+		@Override
+		public String getUserName(Integer userId) {
+			return this.getUser(userId).getName();
+		}
+		
+		// 用户充值 type 1 充值 2 消费
+		public synchronized Double rechargeUserMoeny(Integer userId, Double money, int type) {
+			try {
+				
+				Query<User> q = repository.createQuery();
+				q.field("_id").equal(userId);
+				UpdateOperations<User> ops = repository.createUpdateOperations();
+				User user = getUser(userId);
+				if (null == user)
+					return 0.0;
+				DecimalFormat df=new DecimalFormat("#.00");
+				money=Double.valueOf(df.format(money));
+				
+				if (KConstants.MOENY_ADD == type) {
+					ops.inc("balance", money);
+					ops.inc("totalRecharge", money);
+					user.setBalance(Double.valueOf(df.format(user.getBalance() + money)));
+				} else {
+					if(this.getUser(userId).getBalance()<money){
+						//余额不足
+						return 0.0;
+					}
+					ops.inc("balance", -money);
+					ops.inc("totalConsume", money);
+					user.setBalance(Double.valueOf(df.format(user.getBalance() - money)));
+				}
+				repository.update(q, ops);
+				KSessionUtil.saveUserByUserId(userId, user);
+				return q.get().getBalance();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return 0.0;
+			}
+		}
 
 }

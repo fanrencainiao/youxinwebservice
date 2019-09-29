@@ -33,9 +33,20 @@ public interface UserService {
 	 */
 	User getUser(Integer userId);
 	
-	Map<String, Object> login(User bean);
+	/**
+	 * 获取用户昵称
+	 * @param userId
+	 * @return
+	 */
+	String getUserName(Integer userId);
 	
+	Map<String, Object> login(User bean);
+	/**
+	 * 手机注册数量
+	 * @param mobile
+	 * @return
+	 */
 	long mobileCount(String mobile);
 	
-	
+	public Double rechargeUserMoeny(Integer userId, Double money, int type);
 }

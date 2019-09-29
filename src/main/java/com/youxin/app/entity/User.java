@@ -101,6 +101,12 @@ public class User {
 	@ApiModelProperty(value="短信验证码")
 	@NotSaved
 	private String smsCode;
+	@ApiModelProperty(value="用户总余额")
+	private Double balance = 0.0; // 用户余额
+	@ApiModelProperty(value="充值总金额")
+	private Double totalRecharge = 0.0;// 充值总金额
+	@ApiModelProperty(value="消费总金额")
+	private Double totalConsume = 0.0;// 消费总金额
 	
 	
 	/**

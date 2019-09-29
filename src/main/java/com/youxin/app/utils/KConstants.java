@@ -53,7 +53,12 @@ public class KConstants {
 		static final int HOUR12 = 43200;
 		static final int HOUR=3600;
 	}
-	
+	//订单状态
+	public interface OrderStatus {
+		public static final int CREATE = 0;// 创建
+		public static final int END = 1;// 成功
+		public static final int DELETE = -1;// 删除
+	}
 	// 消费类型 
 	public interface ConsumeType {
 		public static final int USER_RECHARGE = 1;// 用户充值
@@ -69,6 +74,9 @@ public class KConstants {
 		public static final int RECEIVE_PAYMENTCODE = 11;// 付款码收款
 		public static final int SEND_QRCODE = 12;// 二维码收款 付款方
 		public static final int RECEIVE_QRCODE = 13;// 二维码收款 收款方
+		public static final int VIP_RECHARGE = 14;// VIP充值
+		public static final int VIP_COMMISSION = 15;// 推广用户VIP充值提成
+		public static final int SYSTEM_REDUCE = 16;// 后台扣除（目前用于异常账号）
 	}
 	
 	
