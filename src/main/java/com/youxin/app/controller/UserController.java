@@ -56,8 +56,15 @@ public class UserController extends AbstractController{
 	@ApiImplicitParams({ @ApiImplicitParam(name = "userId", value = "userId", required = true, paramType = "query") })
 	@GetMapping("get")
 	public Object get(@RequestParam Integer userId){
-		
 		User u=userService.getUser(userId);
+		return Result.success(u);
+	}
+	@ApiOperation(value = "获取用户信息根据accid")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "toAccid", value = "toAccid", required = true, paramType = "query") })
+	@GetMapping("getByAccid")
+	public Object getByAccid(@RequestParam String toAccid){
+		
+		User u=userService.getUser(toAccid,toAccid);
 		return Result.success(u);
 	}
 	@ApiOperation(value = "登录")
@@ -170,6 +177,7 @@ public class UserController extends AbstractController{
 				//更新本地数据库
 				repository.save(u);
 				//更新redis
+				u.setPassword("");
 				KSessionUtil.saveUserByUserId(u.getId(), u);
 				return Result.success();
 			}else

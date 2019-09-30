@@ -13,13 +13,14 @@ import org.springframework.web.context.request.RequestContextListener;
 
 import com.youxin.app.filter.AuthorizationFilterProperties;
 import com.youxin.app.utils.applicationBean.SmsConfig;
+import com.youxin.app.utils.applicationBean.WxConfig;
 
 
 
 @SpringBootApplication
 @EntityScan("com.youxin.app.entity")
 @ComponentScan(basePackages ="com.youxin.app")
-@EnableConfigurationProperties(value = { AuthorizationFilterProperties.class, SmsConfig.class })
+@EnableConfigurationProperties(value = { AuthorizationFilterProperties.class, SmsConfig.class})
 @ServletComponentScan
 public class YouxinApplication {
 

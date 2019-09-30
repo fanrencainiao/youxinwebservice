@@ -166,6 +166,7 @@ public final class KSessionUtil {
 
 	public static void saveUserByUserId(Integer userId, User user) {
 		String key = String.format(GET_USER_BY_USERID, userId);
+		user.setPassword("");
 		redisUtil.saveTimeKey(key, user.toString(), KConstants.Expire.DAY1);
 
 	}
