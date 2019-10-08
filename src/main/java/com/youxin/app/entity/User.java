@@ -108,6 +108,8 @@ public class User {
 	@ApiModelProperty(value="消费总金额")
 	private Double totalConsume = 0.0;// 消费总金额
 	
+	@ApiModelProperty(value="支付宝买家id")
+	private String aliUserId;
 	
 	/**
 	 * 用户设置

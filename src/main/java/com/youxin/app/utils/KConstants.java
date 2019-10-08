@@ -167,7 +167,15 @@ public class KConstants {
 		static final int SdkLoginNotExist = 1040306;
 		
 	}
-	
+
+		//支付方式
+		public interface PayType {
+			public static final int ALIPAY = 1;// 支付宝支付
+			public static final int WXPAY = 2;// 微信支付
+			public static final int BALANCEAY = 3;// 余额支付
+			public static final int SYSTEMPAY = 4;// 系统支付
+			public static final int IOSINBUY = 5;// ios内购
+		}
 	
 	public interface ResultMsgs {
 		

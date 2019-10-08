@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 
 
+
 /**
  * 各种 加密 权限验证的类
  * @author lidaye
@@ -260,5 +261,61 @@ public class AuthServiceUtils {
 		return key;
 	}
 	
+	public static boolean authUser(String userId,String token,long time,String secret) {
+		if(!authRequestTime(time)) {
+			return false;
+		}
+		if(StringUtil.isEmpty(secret)) {
+			return false;
+		}
+			
+		String secretKey=getUserSecret(userId, token,  time);
+		
+		if(!secretKey.equals(secret)) {
+			return false;
+		}else {
+			return true;
+		}
+		
+	}
 
+	public static String getUserSecret(String userId,String token,long time) {
+		
+		/**
+		 * 密钥 
+			md5( md5(apikey+time) +userid+token) 
+		 */
+		
+		/**
+		 * apikey+time
+		 */
+		String apiKey_time=new StringBuffer()
+				.append(getApiKey())
+				.append(time).toString();
+		
+		/**
+		 * userid+token
+		 */
+		String userid_token=new StringBuffer()
+				.append(userId)
+				.append(token).toString();
+//		/**
+//		 * payPassword
+//		 */
+//		String md5payPassword=payPassword;
+		/**
+		 * md5(apikey+time)
+		 */
+		String md5ApiKey_time=Md5Util.md5Hex(apiKey_time);
+		
+		/**
+		 *  md5(apikey+time) +userid+token+payPassword
+		 */
+		String key =new StringBuffer()
+					.append(md5ApiKey_time)
+					.append(userid_token).toString();
+		
+		return Md5Util.md5Hex(key);
+		
+	}
 }
