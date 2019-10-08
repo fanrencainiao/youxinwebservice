@@ -1,5 +1,6 @@
 package com.youxin.app.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -140,9 +141,16 @@ public class UserController extends AbstractController{
 	public Object refreshToken(@RequestParam(required=true) String accid){
 		JSONObject refreshToken = SDKService.refreshToken(accid);
 		if(refreshToken.getIntValue("code")==200) {
-			Result.success(refreshToken.getJSONObject("info"));
+			User u = repository.findOne("accid", accid);
+			u.setToken(refreshToken.getJSONObject("info").getString("token"));
+			//更新本地数据库
+			repository.save(u);
+			//更新redis
+			u.setPassword("");
+			KSessionUtil.saveUserByUserId(u.getId(), u);
+			return Result.success(refreshToken.getJSONObject("info"));
 		}
-		return Result.error();
+		return Result.errorMsg(refreshToken.toJSONString());
 	}
 	
 	@ApiOperation(value = "封禁用户")
@@ -150,7 +158,7 @@ public class UserController extends AbstractController{
 	public Object blockUser(@RequestParam(required=true) String accid,@RequestParam() String needkick){
 		JSONObject refreshToken = SDKService.block(accid, needkick);
 		if(refreshToken.getIntValue("code")==200) {
-			Result.success();
+			return Result.success();
 		}
 		return Result.error();
 	}
@@ -159,9 +167,9 @@ public class UserController extends AbstractController{
 	public Object unblockUser(@RequestParam(required=true) String accid){
 		JSONObject refreshToken = SDKService.unblock(accid);
 		if(refreshToken.getIntValue("code")==200) {
-			Result.success();
+			return Result.success();
 		}
-		return Result.error();
+		return Result.errorMsg(refreshToken.toJSONString());
 	}
 	@ApiOperation(value = "更新用户基本信息")
 	@PostMapping("updateUinfo")
@@ -173,7 +181,7 @@ public class UserController extends AbstractController{
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
 			JSONObject json = SDKService.updateUinfo(user);
 			if(json.getIntValue("code")==200) {
-				BeanUtils.copyProperties(user, u,"id","mobile");
+				BeanUtils.copyProperties(user, u,"id","mobile","token");
 				//更新本地数据库
 				repository.save(u);
 				//更新redis
@@ -201,10 +209,10 @@ public class UserController extends AbstractController{
 //				repository.save(u);
 //				//更新redis
 //				KSessionUtil.saveUserByUserId(u.getId(), u);
-				Result.success();
+				return Result.success();
 			}
 		
-		return Result.error();
+		return Result.errorMsg(json.toJSONString());
 	}
 	
 	@ApiOperation(value = "查看用户的黑名单和静音列表")
@@ -216,10 +224,10 @@ public class UserController extends AbstractController{
 				JSONObject jsonr=new JSONObject();
 				jsonr.put("mutelist", json.get("mutelist"));
 				jsonr.put("blacklist", json.get("blacklist"));
-				Result.success(jsonr);
+				return Result.success(jsonr);
 			}
 		
-		return Result.error();
+		return Result.errorMsg(json.toJSONString());
 	}
 	
 	@ApiOperation(value = "搜索用户",response=Result.class)
@@ -230,16 +238,11 @@ public class UserController extends AbstractController{
 			){
 		Query<User> q=repository.createQuery();
 		
-		if(StringUtils.isNotBlank(mobile)) {
-			q.field("mobile").equal(mobile);
-		}
-		User u = repository.findOne(q);	
-		if(u!=null)
-			u.setPassword("");
+		q.field("mobile").equal(mobile);
+		List<User> u = q.asList();
 		return Result.success(u);
 	}
 	
-
 	
 
 }

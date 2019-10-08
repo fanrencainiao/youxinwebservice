@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-//@Component
-//@ConfigurationProperties(prefix = "aliPayConfig")
+@Component
+@ConfigurationProperties(prefix = "alipayconfig")
 public class AliPayConfig {
 	// 支付宝认证应用Id
 	private String appid;

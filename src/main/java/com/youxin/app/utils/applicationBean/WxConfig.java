@@ -8,8 +8,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-//@Component
-//@ConfigurationProperties(prefix = "wxConfig")
+@Component
+@ConfigurationProperties(prefix = "wxconfig")
 public class WxConfig {
 	// 微信认证的自己应用ID
 	private String appid;
@@ -27,8 +27,8 @@ public class WxConfig {
 	private String callBackUrl;
 	// 证书文件 名称
 	private String pkPath;
-	// 小程序appid
-	private String xcxappid;
-	// 小程序secret
-	private String xcxsecret;
+//	// 小程序appid
+//	private String xcxappid;
+//	// 小程序secret
+//	private String xcxsecret;
 }

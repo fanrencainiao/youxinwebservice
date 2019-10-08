@@ -100,7 +100,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("友信api")
                 .description("友信相关接口文档")
-                .contact(new Contact("youxin", "www.youxinapp.cn", ""))
+                .contact(new Contact("youxin", "http://www.youxinapp.cn", ""))
                 .version("2.0")
                 .build();
     }
