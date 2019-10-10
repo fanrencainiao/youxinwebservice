@@ -54,11 +54,11 @@ public final class KSessionUtil {
 			int expire = KConstants.Expire.DAY7 * 5;
 			String atKey = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userKey);
 			if (StringUtils.isBlank(accessToken))
-				accessToken = redisUtil.getKey(atKey);
-			if (StringUtils.isBlank(accessToken))
+//				accessToken = redisUtil.getKey(atKey);
+//			if (StringUtils.isBlank(accessToken))
 				accessToken = UUIDUtil.getUUID();
+			removeAccessToken(userKey);
 			redisUtil.saveTimeKey(atKey, accessToken, expire);
-
 			String userIdKey = String.format(GET_USERID_BYTOKEN, accessToken);
 			redisUtil.saveTimeKey(userIdKey, String.valueOf(userId), expire);
 

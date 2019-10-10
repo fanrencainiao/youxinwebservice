@@ -38,11 +38,17 @@ public class SwaggerConfig {
 
     @Bean
     public Docket createRestApi() {
-    	  //添加head参数配置start
-//        ParameterBuilder tokenPar = new ParameterBuilder();
-//        List<Parameter> pars = new ArrayList<>();
-//        tokenPar.name("access_token").description("令牌").modelRef(new ModelRef("string")).parameterType("header").required(false).build();
-//        pars.add(tokenPar.build());
+//    	  添加head参数配置start
+        ParameterBuilder tokenPar = new ParameterBuilder();
+        tokenPar.name("time").description("时间").modelRef(new ModelRef("Long")).parameterType("query").required(false).build();
+        ParameterBuilder tokenPar1 = new ParameterBuilder();
+        tokenPar1.name("secret").description("密钥").modelRef(new ModelRef("String")).parameterType("query").required(false).build();
+        
+        List<Parameter> pars = new ArrayList<>();
+        pars.add(tokenPar.build());
+        pars.add(tokenPar1.build());
+    	
+    	
 //    	 List<ResponseMessage> responseMessageList = new ArrayList<>();
 //    	    responseMessageList.add(new ResponseMessageBuilder().code(404).message("找不到资源").responseModel(new ModelRef("Result")).build());
 //    	    responseMessageList.add(new ResponseMessageBuilder().code(409).message("业务逻辑异常").responseModel(new ModelRef("Result")).build());
@@ -63,7 +69,7 @@ public class SwaggerConfig {
                 .build()
                 .securitySchemes(securitySchemes())
                 .securityContexts(securityContexts())
-//                .globalOperationParameters(pars)
+                .globalOperationParameters(pars)
                 ;//注意这里;
     }
     

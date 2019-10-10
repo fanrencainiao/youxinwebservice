@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 
 
+
 /**
  * 各种 加密 权限验证的类
  * @author lidaye
@@ -13,10 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class AuthServiceUtils {
 	
-	@Value("youxin.apiKey")
+	@Value("sysinfo.apiKey")
 	private static String apiKey;
 	
-	@Value("youxin.isAuth")
+	@Value("sysinfo.isAuth")
 	private static int isAuth;
 	
 	/**
@@ -290,7 +291,7 @@ public class AuthServiceUtils {
 		 * apikey+time
 		 */
 		String apiKey_time=new StringBuffer()
-				.append(getApiKey())
+				.append(apiKey)
 				.append(time).toString();
 		
 		/**
@@ -318,4 +319,129 @@ public class AuthServiceUtils {
 		return Md5Util.md5Hex(key);
 		
 	}
+	
+	/**
+	 * 二维码收款加密(md5(md5(apiKey+time+money+payPassword)+userId+token))
+	 * @param userId
+	 * @param token
+	 * @param money
+	 * @param time
+	 * @param payPassword
+	 * @param secret
+	 * @return
+	 */
+	public static boolean authQRCodeReceipt(String userId,String token,String money,long time,String payPassword,String secret){
+		if(StringUtil.isEmpty(userId)){
+			return false;
+		}
+		if(StringUtil.isEmpty(token)){
+			return false;
+		}
+		if(StringUtil.isEmpty(money)){
+			return false;
+		}
+		if(!authRequestTime(time)){
+			return false;
+		}
+		if(StringUtil.isEmpty(payPassword)){
+			return false;
+		}
+		String secretKey = getQRCodeReceiptSecret(userId,token,money,time,payPassword);
+		if(secretKey.equals(secret)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public static String getQRCodeReceiptSecret(String userId,String token,String money,long time,String payPassword){
+		 // 二维码收款加密 secret = md5(md5(apiKey+time+money+payPassword)+userId+token)
+		
+		/**
+		 * md5(apiKey+time+money+payPassword)
+		 */
+		String apiKey_time_money_payPassword=new StringBuffer()
+				.append(apiKey)
+				.append(time)
+				.append(money)
+				.append(payPassword).toString();
+		
+		String md5Apikey_time_money_payPassword=Md5Util.md5Hex(apiKey_time_money_payPassword);
+		
+		/**
+		 * userId_token
+		 */
+		String userId_token=new StringBuffer()
+				.append(userId)
+				.append(token).toString();
+		
+		String secret=new StringBuffer()
+				.append(md5Apikey_time_money_payPassword)
+				.append(userId_token).toString();
+		
+		String key=Md5Util.md5Hex(secret);
+		return key;
+	}
+
+	/**
+	 * 校验付款码付款接口加密(md5(md5(apikey+time+money+paymentCode)+userId+token))
+	 * 
+	 * @param paymentCode
+	 * @param userId
+	 * @param money
+	 * @param token
+	 * @param time
+	 * @param secret
+	 * @return
+	 */
+		public static boolean authPaymentCode(String paymentCode,String userId,String money,String token,long time,String secret){
+			if(StringUtil.isEmpty(paymentCode)){
+				return false;
+			}
+			if(StringUtil.isEmpty(userId)){
+				return false;
+			}
+			if(StringUtil.isEmpty(money)){
+				return false;
+			}
+			if(StringUtil.isEmpty(token)){
+				return false;
+			}
+			String secretKey = getPaymentCodeSecret(paymentCode,userId,money,token,time);
+			if(secretKey.equals(secret)){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		
+		public static String getPaymentCodeSecret(String paymentCode,String userId,String money,String token,long time){
+			
+			 // 付款码付款加密 secret = md5(md5(apiKey+time+money+paymentCode)+userId+token)
+			 
+			
+			/**
+			 * md5(apikey+time+money+paymentCode)
+			 */
+			String Apikey_time_money_paymentCode=new StringBuffer()
+					.append(apiKey)
+					.append(time)
+					.append(money)
+					.append(paymentCode).toString();
+			
+			String md5Apikey_time_money_paymentCode=Md5Util.md5Hex(Apikey_time_money_paymentCode);
+			/**
+			 * userId+token
+			 */
+			String userId_token=new StringBuffer()
+					.append(userId)
+					.append(token).toString();
+			
+			String secret=new StringBuffer()
+					.append(md5Apikey_time_money_paymentCode)
+					.append(userId_token).toString();
+			
+			String key=Md5Util.md5Hex(secret);
+			return key;
+		}
 }

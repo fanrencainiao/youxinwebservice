@@ -1,8 +1,11 @@
 package com.youxin.app.service;
 
+import java.util.List;
 import java.util.Map;
 
+import com.mongodb.DBObject;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserVo;
 
 
 public interface UserService {
@@ -49,4 +52,17 @@ public interface UserService {
 	long mobileCount(String mobile);
 	
 	public Double rechargeUserMoeny(Integer userId, Double money, int type);
+	
+	/**
+	 * 查询指定字段的
+	 * @param example
+	 * @return
+	 */
+	List<DBObject> queryUser(UserVo example);
+	/**
+	 * 通过id直接从数据库获取用户信息
+	 * @param userId
+	 * @return
+	 */
+	User getUserFromDB(Integer userId);
 }

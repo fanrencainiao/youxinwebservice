@@ -1,7 +1,9 @@
 package com.youxin.app.service.impl;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
@@ -12,11 +14,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.internal.operation.WriteConcernHelper;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
@@ -28,6 +33,7 @@ import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -115,6 +121,7 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 		user.setPassword("");
+		user.setPayPassword("");
 		return user;
 	}
 
@@ -128,6 +135,7 @@ public class UserServiceImpl implements UserService {
 				return null;
 			}
 			user.setPassword("");
+			user.setPayPassword("");
 			KSessionUtil.saveUserByUserId(userId, user);
 		}
 
@@ -163,6 +171,7 @@ public class UserServiceImpl implements UserService {
 
 		}
 		user.setPassword("");
+		user.setPayPassword("");
 		KSessionUtil.saveUserByUserId(user.getId(), user);
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
 //		Object token = data.get("access_token");
@@ -277,6 +286,57 @@ public class UserServiceImpl implements UserService {
 			e.printStackTrace();
 			return 0.0;
 		}
+	}
+	
+	
+	@Override
+	public List<DBObject> queryUser(UserVo example) {
+		List<DBObject> list = Lists.newArrayList();
+		// Query<User> query = mongoDs.find(getEntityClass());
+		// Query<User> query =mongoDs.createQuery(getEntityClass());
+		// query.filter("_id<", param.getUserId());
+		DBObject ref = new BasicDBObject();
+		if (null != example.getId())
+			ref.put("_id", new BasicDBObject("$lt", example.getId()));
+		if (!StringUtil.isEmpty(example.getName()))
+			ref.put("name", Pattern.compile(example.getName()));
+		if (example.getGender()>0)
+			ref.put("sex", example.getGender());
+		ref.put("mobile", example.getMobile());
+//		if (null != example.getStartTime())
+//			ref.put("birthday", new BasicDBObject("$gte", example.getStartTime()));
+//		if (null != example.getEndTime())
+//			ref.put("birthday", new BasicDBObject("$lte", example.getEndTime()));
+		DBObject fields = new BasicDBObject();
+		fields.put("password", 0);
+		fields.put("token", 0);
+		fields.put("loginType", 0);
+		fields.put("balance", 0);
+		fields.put("totalRecharge", 0);
+		fields.put("totalConsume", 0);
+		DBCursor cursor = dfds.getDB().getCollection("user").find(ref, fields)
+				.sort(new BasicDBObject("_id", -1)).limit(10);
+		while (cursor.hasNext()) {
+			DBObject obj = cursor.next();
+			obj.put("userId", obj.get("_id"));
+			obj.removeField("_id");
+
+			list.add(obj);
+		}
+
+		return list;
+	}
+
+	@Override
+	public User getUserFromDB(Integer userId) {
+			User user = repository.findOne("_id", userId);
+			if (null == user) {
+				System.out.println("id为" + userId + "的用户不存在");
+				return null;
+			} else
+				KSessionUtil.saveUserByUserId(userId, user);
+
+			return user;
 	}
 
 }

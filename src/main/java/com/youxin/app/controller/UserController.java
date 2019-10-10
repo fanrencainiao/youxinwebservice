@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,11 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.DBObject;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.KSessionUtil;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.sms.SMSServiceImpl;
@@ -53,14 +57,14 @@ public class UserController extends AbstractController{
 		return Result.success(data);
 	}
 	
-	@ApiOperation(value = "获取用户信息（优先从缓存获取）")
+	@ApiOperation(value = "获取用户信息（优先从缓存获取）",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "userId", value = "userId", required = true, paramType = "query") })
 	@GetMapping("get")
 	public Object get(@RequestParam Integer userId){
 		User u=userService.getUser(userId);
 		return Result.success(u);
 	}
-	@ApiOperation(value = "获取用户信息根据accid")
+	@ApiOperation(value = "获取用户信息根据accid",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "toAccid", value = "toAccid", required = true, paramType = "query") })
 	@GetMapping("getByAccid")
 	public Object getByAccid(@RequestParam String toAccid){
@@ -68,7 +72,7 @@ public class UserController extends AbstractController{
 		User u=userService.getUser(toAccid,toAccid);
 		return Result.success(u);
 	}
-	@ApiOperation(value = "登录")
+	@ApiOperation(value = "登录",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
 	@ApiImplicitParam(name = "loginType", value = "登录类型(0：账号密码登录，1：短信验证登录)", paramType = "query"),
@@ -84,19 +88,42 @@ public class UserController extends AbstractController{
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
 	}
-	@ApiOperation(value = "修改密码")
-	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
-	,@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "query"),
+	@ApiOperation(value = "退出登录",response=Result.class)
+	@DeleteMapping("logout")
+	public Object logout(){
+		Integer userId = ReqUtil.getUserId();
+		// 维护redis中的数据
+		KSessionUtil.removeAccessToken(userId);
+		KSessionUtil.deleteUserByUserId(userId);
+		return Result.success();
+	}
+	@ApiOperation(value = "修改密码",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query"),
+	@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "query"),
 	@ApiImplicitParam(name = "newPassword", value = "新密码", required = true, paramType = "query"),
+	@ApiImplicitParam(name = "type", value = "密码类型(1登录密码，2支付密码)", required = true, paramType = "query"),
 	})
 	@PostMapping("updatePwd")
-	public Object updatePwd(@RequestParam String mobile,@RequestParam String password,@RequestParam String newPassword){
-		
+	public Object updatePwd(@RequestParam int type,@RequestParam String mobile,@RequestParam String password,@RequestParam String newPassword){
+	
 		Query<User> q = repository.createQuery();
-		q.field("mobile").equal(mobile).field("password").equal(password);
+		
+		q.field("mobile").equal(mobile);
+		if(type==1) 
+			q.field("password").equal(password);
+		else if(type==2)
+			q.field("payPassword").equal(password);
+		else
+			return Result.error("修改失败，密码类型错误");
+			
 		User u = repository.findOne(q);
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
-			u.setPassword(newPassword);
+			if(type==1) 
+				u.setPassword(newPassword);
+			else
+				u.setPayPassword(newPassword);
+			
+			
 			repository.save(u);
 			updatePwdTosdk(u);
 		}else {
@@ -109,18 +136,20 @@ public class UserController extends AbstractController{
 		if(StringUtils.isNotBlank(u.getEx())) {
 			JSONObject exs = JSONObject.parseObject(u.getEx());
 			exs.put("password", u.getPassword());
+			exs.put("payPassword", u.getPayPassword());
 		}
 		com.youxin.app.yx.request.User.User uq=new com.youxin.app.yx.request.User.User();
 		BeanUtils.copyProperties(u, uq);
 		SDKService.updateUinfo(uq);
 	}
-	@ApiOperation(value = "修改密码_短信")
+	@ApiOperation(value = "修改密码_短信",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "smsCode", value = "短信验证码", required = true, paramType = "query"),
 	@ApiImplicitParam(name = "newPassword", value = "新密码", required = true, paramType = "query"),
+	@ApiImplicitParam(name = "type", value = "密码类型(1登录密码，2支付密码)", required = true, paramType = "query"),
 	})
 	@PostMapping("updatePwdForSms")
-	public Object updatePwdForSms(@RequestParam String mobile,@RequestParam String smsCode,@RequestParam String newPassword){
+	public Object updatePwdForSms(@RequestParam int type,@RequestParam String mobile,@RequestParam String smsCode,@RequestParam String newPassword){
 		
 		Query<User> q = repository.createQuery();
 		q.field("mobile").equal(mobile);
@@ -128,7 +157,12 @@ public class UserController extends AbstractController{
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
 			if (!sendSms.isAvailable("86"+mobile, smsCode))
 				throw new ServiceException("短信验证码不正确!");
-			u.setPassword(newPassword);
+			if(type==1) 
+				u.setPassword(newPassword);
+			else if(type==2)
+				u.setPayPassword(newPassword);
+			else
+				return Result.error("修改失败，密码类型错误");
 			repository.save(u);
 			updatePwdTosdk(u);
 		}else {
@@ -136,7 +170,7 @@ public class UserController extends AbstractController{
 		}
 		return Result.success(u);
 	}
-	@ApiOperation(value = "刷新token(云信指定token)")
+	@ApiOperation(value = "刷新token(云信指定token)",response=Result.class)
 	@PostMapping("refreshToken")
 	public Object refreshToken(@RequestParam(required=true) String accid){
 		JSONObject refreshToken = SDKService.refreshToken(accid);
@@ -153,7 +187,7 @@ public class UserController extends AbstractController{
 		return Result.errorMsg(refreshToken.toJSONString());
 	}
 	
-	@ApiOperation(value = "封禁用户")
+	@ApiOperation(value = "封禁用户",response=Result.class)
 	@PostMapping("blockUser")
 	public Object blockUser(@RequestParam(required=true) String accid,@RequestParam() String needkick){
 		JSONObject refreshToken = SDKService.block(accid, needkick);
@@ -162,7 +196,7 @@ public class UserController extends AbstractController{
 		}
 		return Result.error();
 	}
-	@ApiOperation(value = "解禁用户")
+	@ApiOperation(value = "解禁用户",response=Result.class)
 	@PostMapping("unblockUser")
 	public Object unblockUser(@RequestParam(required=true) String accid){
 		JSONObject refreshToken = SDKService.unblock(accid);
@@ -171,7 +205,7 @@ public class UserController extends AbstractController{
 		}
 		return Result.errorMsg(refreshToken.toJSONString());
 	}
-	@ApiOperation(value = "更新用户基本信息")
+	@ApiOperation(value = "更新用户基本信息",response=Result.class)
 	@PostMapping("updateUinfo")
 	public Object updateUinfo(@RequestBody(required=true) com.youxin.app.yx.request.User.User user){
 		if(StringUtils.isBlank(user.getAccid())) {
@@ -193,7 +227,7 @@ public class UserController extends AbstractController{
 		}
 		return Result.error();
 	}
-	@ApiOperation(value = "设置黑名单/静音 拉黑/取消拉黑；设置静音/取消静音")
+	@ApiOperation(value = "设置黑名单/静音 拉黑/取消拉黑；设置静音/取消静音",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "accid", value = "用户帐号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "targetAcc", value = "被加黑或加静音的帐号", required = true, paramType = "query"),
 	@ApiImplicitParam(name = "relationType", value = "本次操作的关系类型,1:黑名单操作，2:静音列表操作", required = true, paramType = "query"),
@@ -215,7 +249,7 @@ public class UserController extends AbstractController{
 		return Result.errorMsg(json.toJSONString());
 	}
 	
-	@ApiOperation(value = "查看用户的黑名单和静音列表")
+	@ApiOperation(value = "查看用户的黑名单和静音列表",response=Result.class)
 	@PostMapping("listBlackAndMuteList")
 	public Object listBlackAndMuteList(@RequestParam String accid){
 
@@ -234,12 +268,10 @@ public class UserController extends AbstractController{
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号",  paramType = "query")
 	})
 	@GetMapping("searchUser")
-	public Object searchUser(@RequestParam(defaultValue="") String mobile
-			){
-		Query<User> q=repository.createQuery();
-		
-		q.field("mobile").equal(mobile);
-		List<User> u = q.asList();
+	public Object searchUser(@RequestParam(defaultValue="") String mobile){
+		UserVo vo=new UserVo();
+		vo.setMobile(mobile);
+		List<DBObject> u = userService.queryUser(vo);
 		return Result.success(u);
 	}
 	

@@ -8,7 +8,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cn.xyz.commons.utils.StringUtil;
+import com.youxin.app.utils.StringUtil;
+
 
 /**
  * 创建时间：2016年11月2日 下午7:12:44

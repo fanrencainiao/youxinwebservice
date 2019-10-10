@@ -78,5 +78,10 @@ alipayconfig:
   call-back-url: http://youxinapp.cn/alipay/callBack
   appCode: 9508b34b3f0249e7b483ed12013a0fe5
   
+#系统配置信息
+sysinfo:
+  api-key: youxin
+  is-auth: 1
+  
   
   

@@ -67,6 +67,12 @@ public class Result implements Serializable{
         result.setResultCode(ResultCode.ERROR);
         return result;
     }
+    public static Result error(String msg) {
+        Result result = new Result();
+        result.setCode(-1);
+        result.setMsg(msg);
+        return result;
+    }
     public static Result errorMsg(String msg) {
         Result result = new Result();
         result.setCode(-1);

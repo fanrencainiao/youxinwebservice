@@ -1,7 +1,6 @@
 package com.youxin.app.controller;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,19 +12,13 @@ import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
-import com.alipay.api.request.AlipayFundTransOrderQueryRequest;
-import com.alipay.api.request.AlipayFundTransToaccountTransferRequest;
-import com.alipay.api.response.AlipayFundTransOrderQueryResponse;
-import com.alipay.api.response.AlipayFundTransToaccountTransferResponse;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.User;
 import com.youxin.app.repository.ConsumeRecordRepository;
-import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.BeanUtils;
@@ -47,8 +40,6 @@ public class AlipayController extends AbstractController{
 	private ConsumeRecordManagerImpl cr;
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private UserRepository repository;
 	@Autowired
 	@Qualifier("get")
 	private Datastore dfds;
