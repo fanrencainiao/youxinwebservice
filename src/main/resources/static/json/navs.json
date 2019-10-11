@@ -31,7 +31,7 @@
 		{
 			"title": "用户管理",
 			"icon":"&#xe66f;",
-			"href": "/pages/console/userList.html",
+			"href": "/templates/console/userList.html",
 			"spread": false
 		}
 

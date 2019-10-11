@@ -1,0 +1,4 @@
+$(function() {
+	updateHomeCount();
+	UI.index();
+});

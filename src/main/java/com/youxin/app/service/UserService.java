@@ -22,6 +22,13 @@ public interface UserService {
 	 */
 	Map<String, Object> addUser(User bean);
 	/**
+	 * 根据指定字段修改用户信息
+	 * @param bean
+	 * @return
+	 */
+	void updateUser(User bean);
+	
+	/**
 	 * 获取用户信息
 	 * @param accid
 	 * @param toaccid
@@ -51,7 +58,7 @@ public interface UserService {
 	 */
 	long mobileCount(String mobile);
 	
-	public Double rechargeUserMoeny(Integer userId, Double money, int type);
+	Double rechargeUserMoeny(Integer userId, Double money, int type);
 	
 	/**
 	 * 查询指定字段的

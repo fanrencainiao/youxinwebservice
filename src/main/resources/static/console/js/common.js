@@ -20,7 +20,7 @@ function request(url){
 	console.log("userId:"+localStorage.getItem("userId"));
 	console.log("apiKey:"+localStorage.getItem("apiKey"));*/
 	/*console.log(localStorage.getItem("access_Token"));*/
-	var obj=localStorage.getItem("apiKey")+time+localStorage.getItem("userId")+localStorage.getItem("access_Token");
+	var obj=apiKey+time+localStorage.getItem("id")+localStorage.getItem("access_Token")+"";
 	url=url+"?secret="+$.md5(obj)+"&time="+time;
 	return url;
 }

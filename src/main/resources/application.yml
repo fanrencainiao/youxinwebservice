@@ -77,11 +77,7 @@ alipayconfig:
   alipay-public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuEunTudnoTDAC0FA+vWBFdv6+EX1pMIuyBr+jFuuErptJMBfj5reyUcVAYfAcMQ2fkIFs5G7mfmxxRiC3VD4FfZLfeaD84tdMr+KUbf7ocqrA3Xrvw/+vHsNhWSU2/p8mq7ur3uj8nY74R7eOrkMDKX2UqY+J3mAgEAhvbSlsica81cKksqeOQHycfw6qLZJjW/geXqOdsVKdkuIVK76bjmLalf9L+7CqG0NBytuxhldb9ELH7/nngez3ituCfe56NC4phWNBcDVeSYZBVEZgPIJx9AvjVAVhHSGMS9zmith3EiIJD/GddCg/TTWc4KiqEGCqVRY3YYpA33P9igzzQIDAQAB
   call-back-url: http://youxinapp.cn/alipay/callBack
   appCode: 9508b34b3f0249e7b483ed12013a0fe5
-  
-#系统配置信息
-sysinfo:
-  api-key: youxin
-  is-auth: 1
+
   
   
   

@@ -10,10 +10,10 @@
 	<div class="layui-row">
 		<div class="layui-col-md1">&nbsp;</div>
 		<input id="pageCount" type="" name="" style="display: none">
-		<div id="userVipConfigList" class="layui-col-md10">
-			 <div class="user_btn_div" style="margin-top: 2%"> 
-				<!-- <input type="text" name="" class="layui-input nickName" style="width: 15%;display: inline" placeholder="用户昵称">
-				<form class="layui-form" action="" style="float: left">
+		<div id="baseList" class="layui-col-md10">
+			 <div class="search_div" style="margin-top: 2%"> 
+				<input type="text" name="" class="layui-input nickName" style="width: 15%;display: inline" placeholder="用户昵称">
+		<!-- 		<form class="layui-form" action="" style="float: left">
 					<div class="layui-form-item">
 						<select id="status" class="layui-select">
 							<option value="">请选择在线状态</option>
@@ -21,17 +21,17 @@
 							<option value="0">离线</option>
 						</select>
 					</div>
-				</form>
- -->
-				<button class="layui-btn search_user_vip_config">搜索</button>
-				<button onclick="User.addUser()" class="layui-btn btn_addUser">新增用户</button>
+				</form> -->
+
+				<button class="layui-btn search_base">搜索</button>
+				<button onclick="Base.add()" class="layui-btn btn_add">新增用户</button>
 				
 			</div>
 
-			<div id=vip_config_table class="layui-card" style="margin-top: 1%">
+			<div id="base_table" class="layui-card" style="margin-top: 1%">
 				<div class="layui-card-header"><p>用户列表</p></div>
 				<div class="layui-card-body">
-					<table id="vip_config_list" lay-filter="vip_config_list" style="table-layout:fixed;word-break:break-all;" >
+					<table id="body_list" lay-filter="body_list" style="table-layout:fixed;word-break:break-all;" >
 						
 					</table>
 				</div>
@@ -40,14 +40,19 @@
 			<!-- 多选操作 -->
 			<script type="text/html" id="toolbarConfigs">
 				<div class="layui-btn-container">
-					<button id="checkDeleteUsersId" class="layui-btn layui-btn-sm checkDeleteUsers" onclick="User.checkDeleteUsers()" lay-event="delete">多选删除</button>
+					<button id="checkDeleteIds" class="layui-btn layui-btn-sm checkDeletes" onclick="Base.checkDeletes()" lay-event="delete">多选删除</button>
 				</div>
 			</script>
 	
 			<!--操作-->
-			<script type="text/html" id="userVipConfigListBar">
+			<script type="text/html" id="baseListBar">
 								
-				<a class="layui-btn layui-btn-danger layui-btn-xs delete" lay-event="delete">删除</a>
+				
+			{{#  if(d.disableUser == 1){ }}
+				<a class="layui-btn layui-btn-disabled layui-btn-xs undelete" lay-event="undelete">解禁</a>
+			{{#  }else{  }}
+				<a class="layui-btn layui-btn-danger layui-btn-xs delete" lay-event="delete">禁用</a>
+			{{#  } }}
 							
 				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update">修改</a>
 				
@@ -55,9 +60,9 @@
 
 		</div>
 
-		<!-- 添加vip配置 -->
-		<div id="addVipConfig" class="layui-col-md10" style="display: none">
-			<div id="addVipConfigTitle" class="layui-card-header">新增vip配置</div>
+		<!-- 添加 -->
+		<div id="addConfig" class="layui-col-md10" style="display: none">
+			<div id="addConfigTitle" class="layui-card-header">新增</div>
 			<table class="layui-table">
 				<thead>
 					<tr>
@@ -130,15 +135,23 @@
 			</table>
 			
 			<div style="display: inline;">
-				<button onclick="User.commit_addUser()" class="layui-btn">提交</button>
-				<button onclick="User.button_back()" class="layui-btn layui-btn-primary layui-btn-sm" style="">&lt;&lt;返回</button>
+				<button onclick="Base.commit_add()" class="layui-btn">提交</button>
+				<button onclick="Base.button_back()" class="layui-btn layui-btn-primary layui-btn-sm" style="">&lt;&lt;返回</button>
 			</div>
 		</div>
 
 
 	</div>
 
-
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/core.js"></script>
+<script type="text/javascript" src="/static/console/js/tripledes.js"></script>
+<script type="text/javascript" src="/static/console/js/userList.js"></script>
 
 <!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
 

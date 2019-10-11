@@ -14,10 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class AuthServiceUtils {
 	
-	@Value("sysinfo.apiKey")
+	@Value("youxin.apiKey")
 	private static String apiKey;
 	
-	@Value("sysinfo.isAuth")
+	@Value("youxin.isAuth")
 	private static int isAuth;
 	
 	/**

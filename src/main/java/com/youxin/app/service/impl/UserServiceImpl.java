@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -37,6 +39,7 @@ import com.youxin.app.yx.request.Friends;
 
 @Service
 public class UserServiceImpl implements UserService {
+	protected Log log=LogFactory.getLog(this.getClass());
 	@Autowired
 	private UserRepository repository;
 
@@ -337,6 +340,19 @@ public class UserServiceImpl implements UserService {
 				KSessionUtil.saveUserByUserId(userId, user);
 
 			return user;
+	}
+
+	@Override
+	public void updateUser(User bean) {
+		if(bean==null || bean.getId()==null ||bean.getId()<1000)
+			log.debug("信息同步更新失败");
+		Query<User> q = repository.createQuery();
+		q.field("_id").equal(bean.getId());
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		if(bean.getDisableUser()==0 || bean.getDisableUser()==1) {
+			ops.set("disableUser", bean.getDisableUser());
+		}
+		repository.update(q, ops);
 	}
 
 }

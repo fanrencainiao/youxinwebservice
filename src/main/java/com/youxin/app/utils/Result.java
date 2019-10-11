@@ -1,6 +1,8 @@
 package com.youxin.app.utils;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -60,6 +62,16 @@ public class Result implements Serializable{
         Result result = new Result();
         result.setResultCode(ResultCode.SUCCESS);
         result.setData(data);
+        return result;
+    }
+    public static Map<String, Object> success(PageResult data) {
+    	Map<String, Object> result = new HashMap<>();
+    	result.put("resultCode", 1);
+    	result.put("resultMsg", 1);
+    	result.put("data", data.getData());
+    	result.put("count", data.getCount());
+    	result.put("total", data.getTotal());
+    	result.put("currentTime", DateUtil.currentTimeMilliSeconds());
         return result;
     }
     public static Result error() {
