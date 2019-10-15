@@ -44,7 +44,7 @@ authorizationfilter:
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
-  isAuth: 0 
+  isAuth: 1 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
   #redis地址

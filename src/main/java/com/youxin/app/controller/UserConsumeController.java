@@ -55,7 +55,7 @@ public class UserConsumeController extends AbstractController {
 			@ApiImplicitParam(name = "payType", value = "充值类型（1支付宝，2微信）", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "price", value = "充值金额", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "time", value = "充值时间", required = true, paramType = "query"),
-			@ApiImplicitParam(name = "secret", value = "安全加密", required = true, paramType = "query") })
+			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
 	@PostMapping(value = "/recharge")
 	public Object getSign(@RequestParam int payType, @RequestParam String price,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {

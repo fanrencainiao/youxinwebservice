@@ -81,8 +81,16 @@ public class Result implements Serializable{
     }
     public static Result error(String msg) {
         Result result = new Result();
-        result.setCode(-1);
-        result.setMsg(msg);
+        result.setCode(0);
+        if(!StringUtil.isEmpty(msg)) {
+        	result.setMsg(msg);
+        }
+        return result;
+    }
+    public static Result error(String msg,Object data) {
+        Result result = new Result();
+        result=error(msg);
+        result.setData(data);
         return result;
     }
     public static Result errorMsg(String msg) {

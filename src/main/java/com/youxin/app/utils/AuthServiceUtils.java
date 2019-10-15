@@ -2,7 +2,11 @@ package com.youxin.app.utils;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Configuration;
 
 
 
@@ -12,14 +16,17 @@ import org.springframework.beans.factory.annotation.Value;
  * @author lidaye
  *
  */
-public class AuthServiceUtils {
+@Configuration
+public class AuthServiceUtils implements ApplicationContextAware{
 	
-	@Value("youxin.apiKey")
-	private static String apiKey;
+	@Value("${youxin.apiKey}")
+	private  String apiKeys;
 	
-	@Value("youxin.isAuth")
+	@Value("${youxin.isAuth}")
+	private  int isAuths;
+	
 	private static int isAuth;
-	
+	private static String apiKey;
 	/**
 	 * 检验接口请求时间
 	 * @param time
@@ -443,5 +450,12 @@ public class AuthServiceUtils {
 			
 			String key=Md5Util.md5Hex(secret);
 			return key;
+		}
+
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			apiKey=apiKeys;
+			isAuth=isAuths;
 		}
 }
