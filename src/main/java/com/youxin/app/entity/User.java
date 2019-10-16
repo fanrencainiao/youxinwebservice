@@ -9,8 +9,12 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.NotSaved;
 
+import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.exam.UserExample;
+import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
+import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.StringUtil;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -115,9 +119,30 @@ public class User {
 
 	@ApiModelProperty(value = "支付宝买家id")
 	private String aliUserId;
-	
+
+	@ApiModelProperty(value = "友讯号")
+	@Indexed(unique = true)
+	private String account;
+
 	@ApiModelProperty(value = "禁用用户（1禁用 0解禁）")
-	private int disableUser;
+	private int disableUser = 0;
+
+	public String setExs() {
+		JSONObject exs = new JSONObject();
+		if (!StringUtil.isEmpty(this.password))
+			exs.put("password", this.password);
+		if (!StringUtil.isEmpty(this.account))
+			exs.put("account", this.account);
+		if (!StringUtil.isEmpty(this.payPassword))
+			exs.put("payPassword", this.payPassword);
+		if (!CollectionUtil.isEmpty(this.role))
+			exs.put("role", this.role);
+		exs.put("disableUser", this.disableUser);
+		exs.put("createTime", this.createTime);
+		exs.put("updateTime", this.updateTime);
+		this.ex = exs.toJSONString();
+		return ex;
+	}
 
 	/**
 	 * 用户设置
@@ -134,7 +159,17 @@ public class User {
 	@Data
 	public static class UserSettings {
 		@ApiModelProperty(value = "可根据手机号搜索（0否 1是）")
-		private int searchByMobile;
+		private int searchByMobile=1;
+		@ApiModelProperty(value = "允许添加方式（0所有方式，1手机号，2友讯号，3二维码）")
+		private int addType=0;
+		@ApiModelProperty(value = "加好友是否需要验证（0不需要，1需要）")
+		private int isInvide=1;
+		@ApiModelProperty(value = "消息加密传输（0不需要，1需要）")
+		private int isCodeMsg=0;
+		@ApiModelProperty(value = "是否震动（0不需要，1需要）")
+		private int isActive=0;
+		@ApiModelProperty(value = "是否向我推荐通讯录好友（0不需要，1需要）")
+		private int pushLocalFriends=1;
 	}
 
 	@Data

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.web.multipart.MultipartFile;
 
+
 public final class StringUtil {
 
 	public static String trim(String s) {
@@ -56,6 +57,21 @@ public final class StringUtil {
 		return "" + (new Random().nextInt(899999) + 100000);
 	}
 
+	public static String randomAccount(String accountTitle) {
+		//用字符数组的方式随机
+		String randomAccount = "";
+		String model = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		char[] m = model.toCharArray();
+		
+		for (int j=0;j<6 ;j++ )
+		{
+			char ch = m[(int)(Math.random()*52)];
+			randomAccount = randomAccount + ch;
+		}
+		if(isEmpty(accountTitle)) 
+			return randomAccount;
+		return accountTitle + randomAccount;
+	}
 	public static String randomPassword() {
 		return randomString(6);
 	}

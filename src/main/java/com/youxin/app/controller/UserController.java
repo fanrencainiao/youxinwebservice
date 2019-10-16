@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
@@ -28,6 +30,7 @@ import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
+import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 
@@ -265,14 +268,33 @@ public class UserController extends AbstractController{
 	}
 	
 	@ApiOperation(value = "搜索用户",response=Result.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号",  paramType = "query")
+	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号",  paramType = "query"),
+	@ApiImplicitParam(name = "account", value = "友讯号",  paramType = "query")
 	})
 	@GetMapping("searchUser")
-	public Object searchUser(@RequestParam(defaultValue="") String mobile){
+	public Object searchUser(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String account){
 		UserVo vo=new UserVo();
-		vo.setMobile(mobile);
+		if (!StringUtil.isEmpty(mobile))
+			vo.setMobile(mobile);
+		if (!StringUtil.isEmpty(account))
+			vo.setAccount(account);
 		List<DBObject> u = userService.queryUser(vo);
 		return Result.success(u);
+	}
+	
+	@ApiOperation(value = "修改友讯号",response=Result.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "account", value = "友讯号",  paramType = "query")
+	})
+	@PostMapping("updateAccount")
+	public Object updateAccount(@RequestParam(defaultValue="") String account){
+		return Result.success(userService.updateAccount(account));
+	}
+	
+	@ApiOperation(value = "修改用户隐私设置",response=Result.class)
+	@PostMapping("updateSettings")
+	public Object updateSettings(@RequestBody UserSettings settings){
+		userService.updateSettings(settings);
+		return Result.success();
 	}
 	
 	

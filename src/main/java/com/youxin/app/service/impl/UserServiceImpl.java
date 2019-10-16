@@ -8,11 +8,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
@@ -23,6 +26,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.internal.operation.WriteConcernHelper;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
@@ -30,6 +34,7 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
@@ -50,6 +55,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private SMSServiceImpl smsServer;
 
+	@Value("${youxin.accountTitle}")
+	private String accountTitle;
 	@Override
 	public Map<String, Object> register(User bean) {
 		if (StringUtil.isEmpty(bean.getMobile())) {
@@ -64,9 +71,11 @@ public class UserServiceImpl implements UserService {
 		if (mobileCount >= 1) {
 			throw new ServiceException(0, "手机号已被注册");
 		}
-
+		//创建主键
 		Integer userId = createUserId();
 		bean.setId(userId);
+		//设置初始有讯号
+		bean.setAccount(StringUtil.randomAccount(accountTitle) + userId);
 		Map<String, Object> map = addUser(bean);
 		return map;
 	}
@@ -78,12 +87,7 @@ public class UserServiceImpl implements UserService {
 		// sdk注册
 		BeanUtils.copyProperties(bean, u);
 		// 扩展字段封装
-		JSONObject exs = new JSONObject();
-		exs.put("password", bean.getPassword());
-		exs.put("role", bean.getRole());
-		exs.put("createTime", bean.getCreateTime());
-		exs.put("updateTime", bean.getUpdateTime());
-		u.setEx(exs.toString());
+		u.setEx(bean.setExs());
 		JSONObject json = SDKService.createUser(u);
 
 		User us = JSONObject.toJavaObject(json.getJSONObject("info"), User.class);
@@ -106,6 +110,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(bean.getId(), bean.getId(), null);
 		data.put("id", bean.getId());
 		data.put("accid", bean.getAccid());
+		data.put("account", bean.getAccount());
 		data.put("name", bean.getName());
 		data.put("birth", bean.getBirth());
 		data.put("icon", bean.getIcon());
@@ -123,6 +128,7 @@ public class UserServiceImpl implements UserService {
 			System.out.println("accid为" + accid + "的用户不存在");
 			return null;
 		}
+		user.setEx("");
 		user.setPassword("");
 		user.setPayPassword("");
 		return user;
@@ -137,6 +143,7 @@ public class UserServiceImpl implements UserService {
 				System.out.println("id为" + userId + "的用户不存在");
 				return null;
 			}
+			user.setEx("");
 			user.setPassword("");
 			user.setPayPassword("");
 			KSessionUtil.saveUserByUserId(userId, user);
@@ -173,6 +180,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
+		user.setEx("");
 		user.setPassword("");
 		user.setPayPassword("");
 		KSessionUtil.saveUserByUserId(user.getId(), user);
@@ -180,6 +188,7 @@ public class UserServiceImpl implements UserService {
 //		Object token = data.get("access_token");
 		data.put("id", user.getId());
 		data.put("accid", user.getAccid());
+		data.put("account", user.getAccount());
 		data.put("name", user.getName());
 		data.put("birth", user.getBirth());
 		data.put("icon", user.getIcon());
@@ -305,7 +314,12 @@ public class UserServiceImpl implements UserService {
 			ref.put("name", Pattern.compile(example.getName()));
 		if (example.getGender()>0)
 			ref.put("sex", example.getGender());
-		ref.put("mobile", example.getMobile());
+		if (!StringUtil.isEmpty(example.getMobile()))
+			ref.put("mobile", example.getMobile());
+		if (!StringUtil.isEmpty(example.getAccount()))
+			ref.put("account", example.getAccount());
+		//允许手机号搜索
+		ref.put("settings.searchByMobile", 1);
 //		if (null != example.getStartTime())
 //			ref.put("birthday", new BasicDBObject("$gte", example.getStartTime()));
 //		if (null != example.getEndTime())
@@ -353,6 +367,46 @@ public class UserServiceImpl implements UserService {
 			ops.set("disableUser", bean.getDisableUser());
 		}
 		repository.update(q, ops);
+	}
+	
+	@Override
+	public User updateAccount(String account) {
+		if(account.length()<4) {
+			throw new ServiceException(0, "友讯号长度不能小于4");
+		}
+		
+		Integer userId=ReqUtil.getUserId();
+		User user = getUserFromDB(userId);
+		if(!StringUtil.isEmpty(user.getAccount()) && user.getAccount().contains("毛主席")) {
+			throw new ServiceException(0, "友讯号已经修改过或者字段合法");
+		}
+		
+		Query<User> q = repository.createQuery();
+		q.field("_id").equal(userId);
+		
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		ops.set("account", account+"毛主席");
+		
+		UpdateResults update = repository.update(q, ops);
+		System.out.println(update);
+		
+		
+		User user2 = getUser(userId);
+		user2.setAccount(account+"毛主席");
+		KSessionUtil.saveUserByUserId(userId, user2);
+		return user2;
+	}
+
+	@Override
+	public void updateSettings(UserSettings settings) {
+		Integer userId = ReqUtil.getUserId();
+		User user = getUserFromDB(userId);
+		user.setSettings(settings);
+		Key<User> save = repository.save(user);
+		System.out.println(save.getCollection()+save.getId());
+		User user2 = getUser(userId);
+		user2.setSettings(settings);
+		KSessionUtil.saveUserByUserId(userId, user2);
 	}
 
 }

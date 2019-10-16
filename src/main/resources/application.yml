@@ -44,11 +44,13 @@ authorizationfilter:
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
-  isAuth: 1 
+  isAuth: 0 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
   #redis地址
   redisAddr: redis://127.0.0.1:6379
+  #友讯号
+  accountTitle: yx
 ## 阿里云短信服务
 smsconfig:
   product: Dysmsapi

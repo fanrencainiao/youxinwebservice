@@ -5,7 +5,9 @@ import java.util.Map;
 
 import com.mongodb.DBObject;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
+import com.youxin.app.utils.PageResult;
 
 
 public interface UserService {
@@ -72,4 +74,15 @@ public interface UserService {
 	 * @return
 	 */
 	User getUserFromDB(Integer userId);
+	/**
+	 * 更改有讯号
+	 * @param account
+	 */
+	User updateAccount(String account);
+	/**
+	 * 修改用户隐私设置
+	 * @param settings
+	 * @return
+	 */
+	void updateSettings(UserSettings settings);
 }

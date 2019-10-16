@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "sysinfo")
+@ConfigurationProperties(prefix = "youxin")
 public class SysInfo {
 	
 	private String apiKey;

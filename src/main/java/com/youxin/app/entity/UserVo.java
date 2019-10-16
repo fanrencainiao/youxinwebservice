@@ -75,5 +75,9 @@ public class UserVo {
 	 */
 	@ApiModelProperty(value="用户名片扩展字段，最大长度1024字符，用户可自行扩展，建议封装成JSON字符串，也可以设置为空字符串")
 	private String ex;
+	
+	@Id
+	@ApiModelProperty(value="友讯号")
+	private String account;
 
 }
