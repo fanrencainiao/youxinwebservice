@@ -96,6 +96,7 @@ public class UserServiceImpl implements UserService {
 		if (StringUtil.isEmpty(bean.getToken())) {
 			throw new ServiceException(0, "token缺失，注册失败");
 		}
+		bean.setSettings(new UserSettings());
 		// 保存本地数据库
 		repository.save(bean);
 		// 加系统客服好友
@@ -350,8 +351,7 @@ public class UserServiceImpl implements UserService {
 			if (null == user) {
 				System.out.println("id为" + userId + "的用户不存在");
 				return null;
-			} else
-				KSessionUtil.saveUserByUserId(userId, user);
+			}
 
 			return user;
 	}
@@ -401,9 +401,11 @@ public class UserServiceImpl implements UserService {
 	public void updateSettings(UserSettings settings) {
 		Integer userId = ReqUtil.getUserId();
 		User user = getUserFromDB(userId);
+		
 		user.setSettings(settings);
-		Key<User> save = repository.save(user);
-		System.out.println(save.getCollection()+save.getId());
+		System.out.println(user.toString());
+		repository.save(user);
+		
 		User user2 = getUser(userId);
 		user2.setSettings(settings);
 		KSessionUtil.saveUserByUserId(userId, user2);

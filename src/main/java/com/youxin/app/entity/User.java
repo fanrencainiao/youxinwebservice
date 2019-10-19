@@ -158,17 +158,17 @@ public class User {
 
 	@Data
 	public static class UserSettings {
-		@ApiModelProperty(value = "可根据手机号搜索（0否 1是）")
+		@ApiModelProperty(value = "可根据手机号搜索（0否 1是）默认1")
 		private int searchByMobile=1;
-		@ApiModelProperty(value = "允许添加方式（0所有方式，1手机号，2友讯号，3二维码）")
+		@ApiModelProperty(value = "允许添加方式（0所有方式，1手机号，2友讯号，3二维码）默认0")
 		private int addType=0;
-		@ApiModelProperty(value = "加好友是否需要验证（0不需要，1需要）")
+		@ApiModelProperty(value = "加好友是否需要验证（0不需要，1需要）默认1")
 		private int isInvide=1;
-		@ApiModelProperty(value = "消息加密传输（0不需要，1需要）")
+		@ApiModelProperty(value = "消息加密传输（0不需要，1需要）默认0")
 		private int isCodeMsg=0;
-		@ApiModelProperty(value = "是否震动（0不需要，1需要）")
+		@ApiModelProperty(value = "是否震动（0不需要，1需要）默认0")
 		private int isActive=0;
-		@ApiModelProperty(value = "是否向我推荐通讯录好友（0不需要，1需要）")
+		@ApiModelProperty(value = "是否向我推荐通讯录好友（0不需要，1需要）默认1")
 		private int pushLocalFriends=1;
 	}
 

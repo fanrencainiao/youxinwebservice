@@ -8,7 +8,7 @@ spring:
       enabled: false
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:28018/admin
+      uri: mongodb://47.92.125.197:28018/admin
       host: 127.0.0.1
       username: 
       password: 
@@ -28,11 +28,11 @@ spring:
       seconds: 10000
     jedis:
       pool:
-        max-active: 1024
+        max-active: 10000
         max-wait:
           seconds: 10000
-        max-idle: 200
-        min-idle: 1800000
+        max-idle: 100
+        min-idle: 1000
         
        
 authorizationfilter:
