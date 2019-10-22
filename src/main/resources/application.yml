@@ -40,6 +40,7 @@ authorizationfilter:
   requestUriList[1]: /user/login
   requestUriList[2]: /other/randcode/sendSms
   requestUriList[3]: /user/updatePwdForSms
+  requestUriList[4]: /config/get
 
 youxin:
   apiKey: youxin 

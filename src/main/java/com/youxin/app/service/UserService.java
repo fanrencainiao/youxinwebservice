@@ -75,6 +75,12 @@ public interface UserService {
 	 */
 	User getUserFromDB(Integer userId);
 	/**
+	 * 通过手机号直接从数据库获取用户信息
+	 * @param userId
+	 * @return
+	 */
+	User getUserByMobile(String mobile);
+	/**
 	 * 更改有讯号
 	 * @param account
 	 */

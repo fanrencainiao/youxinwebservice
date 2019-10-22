@@ -12,10 +12,12 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.youxin.app.controller.TestController;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.KSession;
 import com.youxin.app.entity.User;
 import com.youxin.app.utils.redis.RedisUtil;
 import com.youxin.app.yx.UUIDUtil;
+
 @Component
 public final class KSessionUtil {
 	private static Log log = LogFactory.getLog(KSessionUtil.class);
@@ -176,7 +178,24 @@ public final class KSessionUtil {
 		redisUtil.removeKey(key);
 	}
 
+	public static void setConfig(Config config) {
+		redisUtil.saveString(GET_CONFIG, config.toString());
+	}
+	public static Config getConfig() {
+		String config=redisUtil.getKey(GET_CONFIG);
+		return StringUtil.isEmpty(config) ? null : JSON.parseObject(config, Config.class);
+	}
 
-
+	
+	public static final String GET_ADDRESS_BYIP="clientIp:%s";
+	public static String getAddressByIp(String ip){
+		String key = String.format(GET_ADDRESS_BYIP, ip);
+		return redisUtil.getKey(key);
+	}
+	public static void setAddressByIp(String ip,String address){
+		String key = String.format(GET_ADDRESS_BYIP, ip);
+		redisUtil.saveTimeKey(key, address,KConstants.Expire.HOUR12);
+		
+	}
 	
 }

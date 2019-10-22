@@ -411,4 +411,15 @@ public class UserServiceImpl implements UserService {
 		KSessionUtil.saveUserByUserId(userId, user2);
 	}
 
+	@Override
+	public User getUserByMobile(String mobile) {
+		User user = repository.findOne("mobile", mobile);
+		if (null == user) {
+			System.out.println("mobile为" + mobile + "的用户不存在");
+			return null;
+		}
+
+		return user;
+	}
+
 }
