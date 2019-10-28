@@ -53,6 +53,8 @@ youxin:
   redisAddr: redis://127.0.0.1:6379
   #友讯号
   accountTitle: yx
+  #是否开启定时任务
+  openTask: 0
 ## 阿里云短信服务
 smsconfig:
   product: Dysmsapi
