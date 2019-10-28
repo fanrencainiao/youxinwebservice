@@ -153,8 +153,10 @@ public class AuthorizationFilter implements Filter {
 		Integer userId = null;
 
 		try {
+			System.out.println(_AccessToken);
 			userId = Integer.valueOf(KSessionUtil.getUserIdBytoken(_AccessToken));
 		} catch (Exception e) {
+			System.out.println("sdsdsds");
 			e.printStackTrace();
 		}
 

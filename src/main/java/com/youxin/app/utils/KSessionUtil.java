@@ -59,7 +59,13 @@ public final class KSessionUtil {
 //				accessToken = redisUtil.getKey(atKey);
 //			if (StringUtils.isBlank(accessToken))
 				accessToken = UUIDUtil.getUUID();
-			removeAccessToken(userKey);
+			try {
+				removeAccessToken(userKey);
+			} catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+			
 			redisUtil.saveTimeKey(atKey, accessToken, expire);
 			String userIdKey = String.format(GET_USERID_BYTOKEN, accessToken);
 			redisUtil.saveTimeKey(userIdKey, String.valueOf(userId), expire);

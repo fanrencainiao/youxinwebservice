@@ -8,7 +8,7 @@ spring:
       enabled: false
   data:
     mongodb:
-      uri: mongodb://47.92.125.197:28018/admin
+      uri: mongodb://127.0.0.1:28018/admin
       host: 127.0.0.1
       username: 
       password: 
@@ -22,7 +22,7 @@ spring:
     host: 127.0.0.1
     port: 6379
     password: 
-    database: 0
+    database: 2
     isCluster: false
     timeout:
       seconds: 10000
@@ -31,7 +31,7 @@ spring:
         max-active: 10000
         max-wait:
           seconds: 10000
-        max-idle: 100
+        max-idle: 1000
         min-idle: 1000
         
        
@@ -41,6 +41,7 @@ authorizationfilter:
   requestUriList[2]: /other/randcode/sendSms
   requestUriList[3]: /user/updatePwdForSms
   requestUriList[4]: /config/get
+  requestUriList[5]: /user/logout
 
 youxin:
   apiKey: youxin 

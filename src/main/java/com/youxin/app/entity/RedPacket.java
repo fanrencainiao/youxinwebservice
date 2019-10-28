@@ -8,41 +8,46 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 ///红包实体
+@ApiModel(value = "红包")
 @Entity(value="RedPacket",noClassnameStored=true)
 public class RedPacket {
-
+	@ApiModelProperty(hidden = true)
 	private @Id ObjectId id;
 	//发送者用户Id
+	@ApiModelProperty(value="发送者用户Id")
 	private @Indexed Integer userId; 
-	
+	@ApiModelProperty(value="发送到那个房间")
 	private String roomJid;// 发送到那个房间
-	
+	@ApiModelProperty(value="发送给那个人")
 	private Integer toUserId;// 发送给那个人
 	
-	//红包发送者昵称
+	@ApiModelProperty(value="红包发送者昵称")
 	private String userName;
-	//祝福语
+	@ApiModelProperty(value="祝福语")
 	private String greetings;
-	//发送时间
+	@ApiModelProperty(value="发送时间")
 	private long sendTime;
-	//红包类型
-	private @Indexed int type; // 1：普通红包  2：拼手气红包  3:口令红包
-	//红包个数
+	@ApiModelProperty(value="红包类型 1：普通红包  2：拼手气红包  3:口令红包")
+	private @Indexed int type; // 
+	@ApiModelProperty(value="红包个数")
 	private int count;
-	//已领取个数
+	@ApiModelProperty(value="已领取个数")
 	private int receiveCount=0;
-	//红包金额
+	@ApiModelProperty(value="红包金额")
 	private Double money;
 	
-	//红包剩余金额
+	@ApiModelProperty(value="红包剩余金额")
 	private Double over;
-	//超时时间
+	@ApiModelProperty(value="超时时间")
 	private long outTime;
-	//红包状态
-	private @Indexed int status=1; // 1 ：发出   2：已领完       -1：已退款        //3:未领完退款
+	@ApiModelProperty(value="红包状态  1 ：发出   2：已领完       -1：已退款        //3:未领完退款")
+	private @Indexed int status=1;
 	
-	//领取该红包的 userId
+	@ApiModelProperty(value="领取该红包的 userId")
 	private List<Integer> userIds=new ArrayList<Integer>(); 
 	
 	public ObjectId getId() {

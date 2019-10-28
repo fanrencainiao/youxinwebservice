@@ -170,6 +170,8 @@ public class User {
 		private int isActive=0;
 		@ApiModelProperty(value = "是否向我推荐通讯录好友（0不需要，1需要）默认1")
 		private int pushLocalFriends=1;
+		@ApiModelProperty(value = "是否允许添加我（0不允许，1允许）默认1")
+		private int isAllowAddMy=1;
 	}
 
 	@Data

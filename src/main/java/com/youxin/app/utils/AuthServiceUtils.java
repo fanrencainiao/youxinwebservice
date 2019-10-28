@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 
 
+
 /**
  * 各种 加密 权限验证的类
  * @author lidaye
@@ -451,7 +452,198 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			String key=Md5Util.md5Hex(secret);
 			return key;
 		}
+		
+		
+		public static boolean authRedPacket(String payPassword,String userId,String token,long time,String secret) {
+			
+			if(!authRequestTime(time)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(secret)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(payPassword)){
+				return false;
+			}
+				
+			String secretKey=getRedPacketSecret(payPassword,userId, token,time);
+			
+			if(!secretKey.equals(secret)) {
+				return false;
+			}else {
+				return true;
+			}
+			
+		}
+		public static boolean authRedPacketV1(String payPassword,String userId,String token,long time,String money,String secret) {
+			if(!authRequestTime(time)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(secret)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(payPassword)){
+				return false;
+			}
+				
+			String secretKey=getRedPacketSecretV1(payPassword,userId, token,time,money);
+			
+			if(!secretKey.equals(secret)) {
+				return false;
+			}else {
+				return true;
+			}
+			
+		}
+		public static boolean authRedPacket(String userId,String token,long time,String secret) {
+			if(!authRequestTime(time)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(secret)) {
+				return false;
+			}
+				
+			String secretKey=getRedPacketSecret(userId, token,  time);
+			
+			if(!secretKey.equals(secret)) {
+				return false;
+			}else {
+				return true;
+			}
+			
+		}
+		
+		/**
+		 * 检验授权 红包相关接口
+		 * @param payPassword
+		 * @param userId
+		 * @param token
+		 * @param openid
+		 * @param time
+		 * @param secret
+		 * @return
+		 */
+		public static String getRedPacketSecret(String payPassword,String userId,String token,long time) {
+			
+			/**
+			 * 密钥 
+				md5( md5(apikey+time) +userid+token) 
+			 */
+			
+			/**
+			 * apikey+time+money
+			 */
+			String apiKey_time=new StringBuffer()
+					.append(apiKey)
+					.append(time).toString();
+			
+			/**
+			 * userid+token
+			 */
+			String userid_token=new StringBuffer()
+					.append(userId)
+					.append(token).toString();
+			/**
+			 * payPassword
+			 */
+			String md5payPassword=payPassword;
+			/**
+			 * md5(apikey+time+money)
+			 */
+			String md5ApiKey_time=Md5Util.md5Hex(apiKey_time);
+			
+			/**
+			 *  md5(apikey+time+money) +userid+token+payPassword
+			 */
+			String key =new StringBuffer()
+						.append(md5ApiKey_time)
+						.append(userid_token)
+						.append(md5payPassword).toString();
+			
+			return Md5Util.md5Hex(key);
+			
+		}
+		
+		public static String getRedPacketSecretV1(String payPassword,String userId,String token,long time,String money) {
+			/**
+			 * 密钥 
+				md5( md5(apikey+time+money) +userid+token) 
+			 */
+			
+			/**
+			 * apikey+time+money
+			 */
+			String apiKey_time_money=new StringBuffer()
+					.append(apiKey)
+					.append(time)
+					.append(money).toString();
+			
+			/**
+			 * userid+token
+			 */
+			String userid_token=new StringBuffer()
+					.append(userId)
+					.append(token).toString();
+			/**
+			 * payPassword
+			 */
+			String md5payPassword=payPassword;
+			/**
+			 * md5(apikey+time+money)
+			 */
+			String md5ApiKey_time_money=Md5Util.md5Hex(apiKey_time_money);
+			
+			/**
+			 *  md5(apikey+time+money) +userid+token+payPassword
+			 */
+			String key =new StringBuffer()
+						.append(md5ApiKey_time_money)
+						.append(userid_token)
+						.append(md5payPassword).toString();
+			
+			return Md5Util.md5Hex(key);
+			
+		}
 
+		public static String getRedPacketSecret(String userId,String token,long time) {
+			
+			/**
+			 * 密钥 
+				md5( md5(apikey+time) +userid+token) 
+			 */
+			
+			/**
+			 * apikey+time
+			 */
+			String apiKey_time=new StringBuffer()
+					.append(apiKey)
+					.append(time).toString();
+			
+			/**
+			 * userid+token
+			 */
+			String userid_token=new StringBuffer()
+					.append(userId)
+					.append(token).toString();
+//			/**
+//			 * payPassword
+//			 */
+//			String md5payPassword=payPassword;
+			/**
+			 * md5(apikey+time)
+			 */
+			String md5ApiKey_time=Md5Util.md5Hex(apiKey_time);
+			
+			/**
+			 *  md5(apikey+time) +userid+token+payPassword
+			 */
+			String key =new StringBuffer()
+						.append(md5ApiKey_time)
+						.append(userid_token).toString();
+			
+			return Md5Util.md5Hex(key);
+			
+		}
 
 		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

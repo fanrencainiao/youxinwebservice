@@ -38,8 +38,6 @@ import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 
 
-
-
 @Service
 public class RedPacketManagerImpl{
 	
@@ -476,4 +474,23 @@ public class RedPacketManagerImpl{
 			
 		}
 	}
+	/**
+	 * 获取红包固定设置金额信息
+	 * @param userId
+	 * @param jid
+	 * @return
+	 */
+	public WalletFour getUserWallet(Integer userId, String jid) {
+		try {
+			WalletFour query = walletFourRepository.createQuery().field("userId")
+					.equal(userId).field("jid").equal(jid).get();
+
+			return query;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
 }
