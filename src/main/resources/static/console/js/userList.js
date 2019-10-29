@@ -43,16 +43,6 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'balance', title: '余额',sort:'true', width:100}
           ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:100}
           ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:100}
-         /* ,{field: 'limitNum', title: '好友限制',sort:'true', width:140}
-          ,{field: 'limitgmNum', title: '群成员限制',sort:'true', width:140}
-          ,{field: 'limitfNum', title: '发朋友圈限制',sort:'true', width:140}
-          ,{field: 'updateUserId', title: '修改人id',sort:'true', width:100}
-          ,{field: 'des', title: '描述',sort:'true', width:250}
-          ,{field: 'updateUserId', title: '修改人id',sort:'true', width:140}
-          ,{field: 'state', title: '状态',sort:'true', width:110,templet: function(d){
-          		return d.state==1?"启用":"禁用";
-          }}*/
-          
           ,{fixed: 'right', width: 200,title:"操作", align:'left', toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
@@ -172,97 +162,57 @@ var Base={
 	add:function(){
 		$("#baseList").hide();
 		$("#addConfig").show();
-        $("#id").val("");
-        $("#vip").val("");
-        $("#money").val("");
-        $("#beMoney").val("");
-        $("#iosMoney").val("");
-        $("#iosBeMoney").val("");
-        $("#firstMoney").val("");
-        $("#secondMoney").val("");
-        $("#des").val("");
-        $("#limitNum").val("");
-        $("#limitgmNum").val("");
-        $("#limitfNum").val("");
-        $("#state").val("");
+        $("#userId").val("");
+        $("#name").val("");
+        $("#mobile").val("");
+        $("#password").val("");
+        $("#birth").val("");
+        $("#gender").val("");
+        
         // 重新渲染
         layui.form.render();
 		$("#addConfigTitle").empty();
-		$("#addConfigTitle").append("新增vip配置");
+		$("#addConfigTitle").append("新增用户");
 	},
 	// 提交新增用户
 	commit_add:function(){
 		
-		if($("#vip").val()==""){
-			layui.layer.alert("请输入vip级别");
+		if($("#name").val()==""){
+			layui.layer.alert("请输入昵称");
 			return;
 		}
-		if($("#money").val()==""){
-			layui.layer.alert("请输入vip金额");
+		if($("#mobile").val()==""){
+			layui.layer.alert("请输入手机号");
+			return;
+		}else{
+			 var patrn = /^[0-9]*$/;
+             if (patrn.exec($("#mobile").val()) == null || $("#telephone").val() == "") {
+                 layui.layer.alert("请使用手机号注册");
+                 return;
+             }
+		}
+		if($("#password").val()==""){
+			layui.layer.alert("请输入密码");
 			return;
 		}
-		if($("#beMoney").val()==""){
-			layui.layer.alert("请输入折前金额");
+		if($("#birth").val()==""){
+			layui.layer.alert("请输入生日");
 			return;
 		}
-		if($("#iosMoney").val()==""){
-			layui.layer.alert("请输入iosVip金额");
+		if($("#gender").val()==""){
+			layui.layer.alert("请输入性别");
 			return;
 		}
-		if($("#iosBeMoney").val()==""){
-			layui.layer.alert("请输入ios折前金额");
-			return;
-		}
-		if($("#firstMoney").val()==""){
-			layui.layer.alert("请输入一级提成金额");
-			return;
-		}
-		if($("#beMoney").val()<=$("#money").val()){
-			layui.layer.alert("折前金额要大于vip金额");
-			return;
-		}
-		if($("#iosBeMoney").val()<=$("#iosMoney").val()){
-			layui.layer.alert("ios折前金额要大于iosvip金额");
-			return;
-		}
-		if($("#secondMoney").val()==""){
-			layui.layer.alert("请输入二级提成金额");
-			return;
-		}
-		if($("#limitNum").val()==""){
-			layui.layer.alert("请输入好友限制");
-			return;
-		}
-		if($("#limitgmNum").val()==""){
-			layui.layer.alert("请输入群成员限制");
-			return;
-		}
-		if($("#limitfNum").val()==""){
-			layui.layer.alert("请输入朋友圈限制");
-			return;
-		}
-
-		if($("#state").val()==""){
-            layui.layer.alert("请选择状态");
-            return;
-        }
-
+		
 		$.ajax({
 			url:request('/console/updateUserVipConfig'),
 			data:{
-				asid:$("#id").val(),
-				vip:$("#vip").val(),
-				money:$("#money").val(),
-				beMoney:$("#beMoney").val(),
-				iosMoney:$("#iosMoney").val(),
-				iosBeMoney:$("#iosBeMoney").val(),
-				firstMoney:$("#firstMoney").val(),
-				secondMoney:$("#secondMoney").val(),
-				limitNum:$("#limitNum").val(),
-				limitgmNum:$("#limitgmNum").val(),
-				limitfNum:$("#limitfNum").val(),		
-				state:$("#state").val(),
-				des:$("#des").val(),
+				id:$("#userId").val(),
+				name:$("#name").val(),
+				mobile:$("#mobile").val(),
+				password:$("#password").val(),
+				birth:$("#birth").val(),
+				gender:$("#gender").val(),
 				updateUserId:localStorage.getItem("account")
 			},
 			dataType:'json',
@@ -314,19 +264,12 @@ var Base={
 			success:function(result){
                 
 				if(result.data!=null){
-					$("#id").val(result.data.id);
-					$("#vip").val(result.data.vip);
-					$("#money").val(result.data.money),
-					$("#beMoney").val(result.data.beMoney),
-					$("#iosMoney").val(result.data.iosMoney),
-					$("#iosBeMoney").val(result.data.iosBeMoney),
-					$("#firstMoney").val(result.data.firstMoney),
-					$("#secondMoney").val(result.data.secondMoney),
-					$("#limitNum").val(result.data.limitNum);
-					$('#limitgmNum').val(result.data.limitgmNum);
-					$("#limitfNum").val(result.data.limitfNum);
-					$("#state").val(result.data.state);
-					$("#des").val(result.data.des);
+					$("#userId").val(result.data.id),
+					$("#name").val(result.data.name),
+					$("#mobile").val(result.data.mobile),
+					$("#password").val(result.data.password),
+					$("#birth").val(result.data.birth),
+				    $("#gender").val(result.data.gender)
 					
 				}
 				$("#addConfigTitle").empty();

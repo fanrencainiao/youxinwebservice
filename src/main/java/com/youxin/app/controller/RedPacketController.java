@@ -115,7 +115,9 @@ public class RedPacketController extends AbstractController{
 	@SuppressWarnings("static-access")
 	@ApiOperation(value = "发送红包",response=Result.class)
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "moneyStr", value = "金额", required = true, paramType = "query")})
+		@ApiImplicitParam(name = "moneyStr", value = "金额", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "time", value = "时间", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "secret", value = "密钥 md5(md5(apikey+time+money) +userid+token+payPassword", required = true, paramType = "query")})
 	@PostMapping("sendRedPacket")
 	public Result sendRedPacketV1(@RequestBody RedPacket packet,
 			@RequestParam(defaultValue="0") long time,@RequestParam(defaultValue="") String moneyStr,
@@ -208,8 +210,11 @@ public class RedPacketController extends AbstractController{
 	}
 	//打开红包
 	@ApiOperation(value = "打开红包",response=Result.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "红包id", required = true, paramType = "query")})
+	@ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "红包id", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "time", value = "时间", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "secret", value = "密钥 md5(md5(apikey+time+money) +userid+token", required = true, paramType = "query")})
 	@PostMapping("openRedPacket")
+//	md5( md5(apikey+time) +userid+token) 
 	public Result openRedPacket(String id,
 			@RequestParam(defaultValue="0") long time,
 			@RequestParam(defaultValue="") String secret) {

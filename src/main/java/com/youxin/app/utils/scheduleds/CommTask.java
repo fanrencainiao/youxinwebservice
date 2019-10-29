@@ -70,7 +70,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 	 public CommTask() {
 			super();
 	 }
-	 @Value("${openTask}")
+	 @Value("${youxin.openTask}")
 	 private int openTask;
 	 @Override
 	public void onApplicationEvent(ApplicationContextEvent event) {

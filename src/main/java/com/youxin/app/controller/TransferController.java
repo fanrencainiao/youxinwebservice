@@ -7,6 +7,9 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,11 @@ import com.youxin.app.utils.scheduleds.CommTask;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+
 /**
  * 
  * @Description: TODO(用户转账接口)
@@ -36,6 +44,7 @@ import com.youxin.app.yx.request.Msg;
  * @date 2019年2月18日 下午3:22:43
  * @version V1.0
  */
+@Api(tags = "用户转账管理")
 @RestController
 @RequestMapping("/skTransfer")
 public class TransferController extends AbstractController {
@@ -57,8 +66,13 @@ public class TransferController extends AbstractController {
 	 * @param secret
 	 * @return
 	 */
-	@RequestMapping(value = "/sendTransfer")
-	public Result sendTransfer(Transfer transfer, @RequestParam(defaultValue = "") String money,
+	@ApiOperation(value = "用户转账", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "money", value = "加密金额",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "time", value = "加密时间", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "secret", value = "安全加密 md5(md5(apikey+time+money) +userid+token+payPassword)", required = true, paramType = "query") })
+	@PostMapping(value = "/sendTransfer")
+	public Result sendTransfer(@RequestBody Transfer transfer, @RequestParam(defaultValue = "") String money,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		Integer userId = ReqUtil.getUserId();
 		String token = getAccess_token();
@@ -83,7 +97,12 @@ public class TransferController extends AbstractController {
 	 * @param secret
 	 * @return
 	 */
-	@RequestMapping(value = "/receiveTransfer")
+	@ApiOperation(value = "用户接受转账", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "id", value = "转账id",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "time", value = "加密时间", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token) ", required = true, paramType = "query") })
+	@PostMapping(value = "/receiveTransfer")
 	public Result receiverTransfer(@RequestParam(defaultValue = "") String id,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		String token = getAccess_token();
@@ -103,7 +122,12 @@ public class TransferController extends AbstractController {
 	 * @param money
 	 * @param transferId
 	 */
-	@RequestMapping(value = "/transferRecedeMoney")
+	@ApiOperation(value = "转账退回", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "toUserId", value = "退回人",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "money", value = "退回金额", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "transferId", value = "转账id", required = true, paramType = "query") })
+	@PostMapping(value = "/transferRecedeMoney")
 	public Result transferRecedeMoney(@RequestParam(defaultValue = "0") Integer toUserId,
 			@RequestParam(defaultValue = "0") double money, @RequestParam(defaultValue = "") String transferId) {
 		ObjectId tid = null;
@@ -191,7 +215,11 @@ public class TransferController extends AbstractController {
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping(value = "/getTransferInfo")
+	@ApiOperation(value = "获取转账信息", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "id", value = "转账Id",required = true, paramType = "query"),
+			 })
+	@GetMapping(value = "/getTransferInfo")
 	public Result getTransferInfo(@RequestParam(defaultValue = "") String id) {
 		Result result = tm.getTransferById(ReqUtil.getUserId(), new ObjectId(id));
 		return result;
@@ -204,7 +232,12 @@ public class TransferController extends AbstractController {
 	 * @param pageSize
 	 * @return
 	 */
-	@RequestMapping(value = "/getTransferList")
+	@ApiOperation(value = "获取用户转账列表", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "pageIndex", value = "页码",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "pageSize", value = "长度",required = true, paramType = "query"),
+			 })
+	@GetMapping(value = "/getTransferList")
 	public Result getTransferList(@RequestParam(defaultValue = "0") int pageIndex,
 			@RequestParam(defaultValue = "10") int pageSize) {
 		Object data = tm.getTransferList(ReqUtil.getUserId(), pageIndex, pageSize);
@@ -218,7 +251,12 @@ public class TransferController extends AbstractController {
 	 * @param pageSize
 	 * @return
 	 */
-	@RequestMapping(value = "getReceiveList")
+	@ApiOperation(value = "获取用户接受转账列表", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "pageIndex", value = "页码",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "pageSize", value = "长度",required = true, paramType = "query"),
+			 })
+	@GetMapping(value = "/getReceiveList")
 	public Result getReceiveList(@RequestParam(defaultValue = "0") int pageIndex,
 			@RequestParam(defaultValue = "10") int pageSize) {
 		Object data = tm.getTransferReceiveList(ReqUtil.getUserId(), pageIndex,

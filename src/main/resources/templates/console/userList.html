@@ -66,70 +66,63 @@
 			<table class="layui-table">
 				<thead>
 					<tr>
-						<td width="20%">vip配置参数</td>
-						<td>vip信息</td>
+						<td width="20%">用户信息</td>
+						<td>用户信息</td>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td>vip级别</td>
-						<td><input id="configId" type="" name="" style="display: none" ><input id="vip" type="" name="" class="layui-input" ></td>
+						<td>用户昵称</td>
+						<td><input id="userId" type="" name="" style="display: none"><input id="name" type="" name="" class="layui-input" ></td>
 					</tr>
 					<tr>
-						<td>金额</td>
-						<td><input id="money" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
+						<td>手机号码</td>
+						<td><input id="mobile" type="" name="" class="layui-input"></td>
+					</tr>
+					<tr class="password">
+						<td>密码</td>
+						<td><input id="password" type="" name="" class="layui-input"></td>
 					</tr>
 					<tr>
-						<td>折前金额</td>
-						<td><input id="beMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额,需大于money"></td>
+						<td>出生日期</td>
+						<td>
+							<div class="layui-form">
+								<div class="layui-input-inline">
+									<input class="layui-input" id="birth" placeholder="yyyy-MM-dd HH:mm:ss" type="text">
+								</div>
+							</div>
+						</td>
+
 					</tr>
 					<tr>
-						<td>ios金额</td>
-						<td><input id="iosMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
-					</tr>
-					<tr>
-						<td>ios折前金额</td>
-						<td><input id="iosBeMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额,需大于money"></td>
-					</tr>
-					<tr>
-						<td>一级提成金额</td>
-						<td><input id="firstMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
-					</tr>
-					<tr>
-						<td>二级提成金额</td>
-						<td><input id="secondMoney" type="text" name="" class="layui-input" lay-verify="number" placeholder="请输入数字金额"></td>
-					</tr>
-					<tr>
-						<td>好友限制</td>
-						<td><input id="limitNum" type="" name="" class="layui-input"></td>
-					</tr>
-					<tr>
-						<td>群成员限制</td>
-						<td><input id="limitgmNum" type="" name="" class="layui-input"></td>
-					</tr>
-					<tr>
-						<td>发朋友圈限制</td>
-						<td><input id="limitfNum" type="" name="" class="layui-input"></td>
-					</tr>
-					<tr>
-						<td>描述</td>
-						<td><textarea id="des"  name="" class="layui-textarea" placeholder="请输入内容"></textarea></td>
-					</tr>
-				
-					<tr>
-						<td>状态</td>
+						<td>性别</td>
 						<td>
 							<form class="layui-form" action="" style="">
 								<div class="layui-form-item">
-									<select id="state" class="layui-select" style="width: 100%">
+									<select id="gender" class="layui-select" style="width: 100%">
 										<option selected="selected" value="">请选择</option>
-										<option value="0">禁用</option>
-										<option value="1">启用</option>
+										<option value="0">女</option>
+										<option value="1">男</option>
 									</select>
 								</div>
 							</form>
 						</td>
 					</tr>
+			<!-- 		<tr>
+						<td>是否设置为公众号</td>
+						<td>
+							<form class="layui-form" action="" style="">
+								<div class="layui-form-item">
+									<select id="isPublic" class="layui-select" style="width: 100%">
+										<option selected="selected" value="">请选择</option>
+										<option value="0">否</option>
+										<option value="2">是</option>
+										<option value="1">否</option>
+									</select>
+								</div>
+							</form>
+						</td>
+					</tr> -->
 				
 				</tbody>
 			</table>

@@ -531,7 +531,7 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			 */
 			
 			/**
-			 * apikey+time+money
+			 * apikey+time
 			 */
 			String apiKey_time=new StringBuffer()
 					.append(apiKey)
@@ -548,12 +548,12 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			 */
 			String md5payPassword=payPassword;
 			/**
-			 * md5(apikey+time+money)
+			 * md5(apikey+time)
 			 */
 			String md5ApiKey_time=Md5Util.md5Hex(apiKey_time);
 			
 			/**
-			 *  md5(apikey+time+money) +userid+token+payPassword
+			 *  md5(apikey+time) +userid+token+payPassword
 			 */
 			String key =new StringBuffer()
 						.append(md5ApiKey_time)
@@ -567,7 +567,7 @@ public class AuthServiceUtils implements ApplicationContextAware{
 		public static String getRedPacketSecretV1(String payPassword,String userId,String token,long time,String money) {
 			/**
 			 * 密钥 
-				md5( md5(apikey+time+money) +userid+token) 
+				md5(md5(apikey+time+money) +userid+token+payPassword) 
 			 */
 			
 			/**
@@ -635,7 +635,7 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			String md5ApiKey_time=Md5Util.md5Hex(apiKey_time);
 			
 			/**
-			 *  md5(apikey+time) +userid+token+payPassword
+			 *  md5(apikey+time) +userid+token
 			 */
 			String key =new StringBuffer()
 						.append(md5ApiKey_time)
