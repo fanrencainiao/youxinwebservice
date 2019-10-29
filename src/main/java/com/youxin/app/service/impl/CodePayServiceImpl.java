@@ -123,6 +123,7 @@ public class CodePayServiceImpl implements CodePayService {
 		Msg messageBean = new Msg();
 		messageBean.setFrom(sysUser.getId().toString());
 		messageBean.setMsgtype(0);//点对点
+		messageBean.setOpe(0);//点对点
 		messageBean.setTo(fromUserId.toString());
 		messageBean.setAttach("");//自定义内容 json
 		messageBean.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
@@ -159,6 +160,7 @@ public class CodePayServiceImpl implements CodePayService {
 		Msg message = new Msg();
 		message.setFrom(sysUser.getId().toString());
 		message.setMsgtype(0);//点对点
+		message.setOpe(0);//点对点
 		message.setTo(userId.toString());
 		message.setAttach("");//自定义内容 json
 		message.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
@@ -257,6 +259,7 @@ public class CodePayServiceImpl implements CodePayService {
 		Msg message = new Msg();
 		message.setFrom(sysUser.getId().toString());
 		message.setMsgtype(0);//点对点
+		message.setOpe(0);
 		message.setTo(userId.toString());
 		message.setAttach("");//自定义内容 json
 		message.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
@@ -293,6 +296,7 @@ public class CodePayServiceImpl implements CodePayService {
 		Msg messageBean = new Msg();
 		messageBean.setFrom(sysUser.getId().toString());
 		messageBean.setMsgtype(0);//点对点
+		messageBean.setOpe(0);
 		messageBean.setTo(fromUserId.toString());
 		messageBean.setAttach("");//自定义内容 json
 		messageBean.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。

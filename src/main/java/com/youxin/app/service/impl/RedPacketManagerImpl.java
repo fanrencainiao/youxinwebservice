@@ -7,12 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.LastWallet;
@@ -36,11 +40,14 @@ import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
+import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.Msg;
+
 
 
 @Service
 public class RedPacketManagerImpl{
-	
+	protected Log log=LogFactory.getLog("pay");
 	@Autowired
 	private UserService userManager;
 	@Autowired
@@ -300,6 +307,35 @@ public class RedPacketManagerImpl{
 //			e.printStackTrace();
 //			System.out.println("发送单聊消息===>红包测试失败");
 //		}
+		
+		Msg messageBean = new Msg();
+		messageBean.setFrom(user.getId().toString());
+		
+		if (packet.getRoomJid() != null) {
+			messageBean.setOpe(1);//群消息
+			messageBean.setMsgtype(1);//群消息自定义通知
+			messageBean.setTo(packet.getUserId().toString());
+		}else {
+			messageBean.setOpe(0);//群消息
+			messageBean.setMsgtype(0);//群消息自定义通知
+			messageBean.setTo(packet.getRoomJid());
+		}
+		
+		messageBean.setAttach("");//自定义内容 json
+		messageBean.setPushcontent(JSON.toJSONString(packet));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
+//		messageBean.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
+//		messageBean.setSound("");//声音
+		messageBean.setSave(2);//会存离线
+//		messageBean.setOption("");
+		messageBean.setMsgid(StringUtil.randomUUID());
+		try {
+			JSONObject sendAttachMsg = SDKService.sendAttachMsg(messageBean);
+			if(sendAttachMsg.getInteger("code")!=200) 
+				log.debug("付款 sdk消息发送失败");
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.debug("付款 sdk消息发送失败"+e.getMessage());
+		}
 		// 开启一个线程 添加一条消费记录
 		new Thread(new Runnable() {
 			@Override
