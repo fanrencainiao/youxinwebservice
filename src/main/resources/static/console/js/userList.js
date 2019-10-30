@@ -74,7 +74,35 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     	  Base.disableUser(data.id,data.accid,0);
       }else if(layEvent === 'update'){// 修改用户    
     	  Base.update(obj.data,obj.data.id);
-      }
+      }else if(layEvent==='recharge'){ //后台充值
+
+
+		  layer.prompt({title: '请输入充值金额', formType: 0,value: '50'}, function(money, index){
+            // 充值金额（正整数）的正则校验
+			
+				Common.invoke({
+				      path : request('/console/recharge'),
+				      data : {
+				      	money:money,
+				      	userId:data.id
+				      },
+				      successMsg : "成功",
+				      errorMsg :  "失败，请稍后重试",
+				      successCb : function(result) {
+
+				        var data = result.data; //DataSort(result.data);
+				      	layer.close(index); //关闭弹框
+				      	renderTable();
+
+				      },
+				      errorCb : function(result) {
+
+				      }
+			    });
+
+		  });
+
+  }
   });
 
 
@@ -163,6 +191,7 @@ var Base={
 		$("#baseList").hide();
 		$("#addConfig").show();
         $("#userId").val("");
+        $("#accid").val("");
         $("#name").val("");
         $("#mobile").val("");
         $("#password").val("");
@@ -205,9 +234,10 @@ var Base={
 		}
 		
 		$.ajax({
-			url:request('/console/updateUserVipConfig'),
+			url:request('/console/updateUser'),
 			data:{
 				id:$("#userId").val(),
+				accid:$("#accid").val(),
 				name:$("#name").val(),
 				mobile:$("#mobile").val(),
 				password:$("#password").val(),
@@ -218,8 +248,8 @@ var Base={
 			dataType:'json',
 			async:false,
 			success:function(result){
-				if(result.resultCode==1){
-					if($("#id").val()==""){
+				if(result.code==1){
+					if($("#userId").val()==""){
 						layer.alert("添加成功");
                         $("#baseList").show();
                         $("#addConfig").hide();
@@ -240,16 +270,16 @@ var Base={
 					}
 
 				}else{
-					if(typeof(result.data) == "undefined"){
-						layer.alert(result.resultMsg);
+					if(result.data == null){
+						layer.alert(result.msg);
 					}
-					layer.alert(result.data.resultMsg);
+					layer.alert(result.data);
 				}
 
 			},
 			error:function(result){
-				if(result.resultCode==0){
-					layer.alert(result.resultMsg);
+				if(result.code==0){
+					layer.alert(result.msg);
 				}
 			}
 		})
@@ -257,14 +287,15 @@ var Base={
 	// 修改用户
 	update:function(data,id){
 		myFn.invoke({
-			url:request('/console/getUpdateUserVipConfig'),
+			url:request('/console/getUpdateUser'),
 			data:{
-				id:id
+				userId:id
 			},
 			success:function(result){
                 
 				if(result.data!=null){
 					$("#userId").val(result.data.id),
+					$("#accid").val(result.data.accid),
 					$("#name").val(result.data.name),
 					$("#mobile").val(result.data.mobile),
 					$("#password").val(result.data.password),

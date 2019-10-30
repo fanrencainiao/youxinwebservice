@@ -55,7 +55,7 @@
 			{{#  } }}
 							
 				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update">修改</a>
-				
+				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="recharge">充值/扣除</a>
 			</script>
 
 		</div>
@@ -73,14 +73,14 @@
 				<tbody>
 					<tr>
 						<td>用户昵称</td>
-						<td><input id="userId" type="" name="" style="display: none"><input id="name" type="" name="" class="layui-input" ></td>
+						<td><input id="userId" type="" name="" style="display: none"><input id="accid" type="" name="" style="display: none"><input id="name" type="" name="" class="layui-input" ></td>
 					</tr>
 					<tr>
 						<td>手机号码</td>
 						<td><input id="mobile" type="" name="" class="layui-input"></td>
 					</tr>
 					<tr class="password">
-						<td>密码</td>
+						<td>密码(修改之后将重置)</td>
 						<td><input id="password" type="" name="" class="layui-input"></td>
 					</tr>
 					<tr>
@@ -150,15 +150,15 @@
 
 <!-- 日期选择器 -->
 <script>
-/* 	layui.use('laydate', function() {
+	layui.use('laydate', function() {
 		var laydate = layui.laydate;
         //日期时间选择器
         laydate.render({
-            elem: '#configTime'
-            ,type: 'datetime'
+            elem: '#birth'
+            ,type: 'date'
 			,max: 0 //最大时间
         });
-	}) */
+	})
 
 </script>
 

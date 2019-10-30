@@ -62,7 +62,7 @@ public class AlipayNotify {
         //获得签名验证结果
 //        boolean isSign = false;
 //        if(AlipayConfig.sign_type.equals("RSA")){
-        boolean isSign= AlipaySignature.rsaCheckV1(Params, AliPayUtil.ALIPAY_PUBLIC_KEY, "utf-8","RSA2");
+        boolean isSign= AlipaySignature.rsaCheckV1(Params, AliPayUtil.ALIPAY_PUBLIC_KEY(), "utf-8","RSA2");
 //        }
         return isSign;
     }

@@ -1,21 +1,16 @@
 package com.youxin.app.utils.alipay.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
@@ -27,18 +22,22 @@ import com.youxin.app.utils.alipay.config.AlipayConfig;
 import com.youxin.app.utils.alipay.sign.RSA;
 import com.youxin.app.utils.applicationBean.AliPayConfig;
 
-
 public class AliPayUtil  implements ApplicationContextAware{
 	private static AliPayConfig aliPayConfig;
 	@Autowired
 	private AliPayConfig aliPayConfigs;
-	public static String APP_ID=aliPayConfig.getAppid();
-	public static String APP_PRIVATE_KEY=aliPayConfig.getAppPrivateKey();
-	public static String CHARSET=aliPayConfig.getCharset();
-	public static String ALIPAY_PUBLIC_KEY=aliPayConfig.getAlipayPublicKey();
-	public static String callBackUrl=aliPayConfig.getCallBackUrl();
 	
-	public static String AppCode=aliPayConfig.getAppCode();
+	public static String APP_ID(){
+		return aliPayConfig.getAppid();
+	}
+	public static String APP_PRIVATE_KEY() {
+		return aliPayConfig.getAppPrivateKey();
+	}
+	public static String CHARSET() {return aliPayConfig.getCharset();}
+	public static String ALIPAY_PUBLIC_KEY() {return aliPayConfig.getAlipayPublicKey();}
+	public static String callBackUrl() {return aliPayConfig.getCallBackUrl();}
+	
+	public static String AppCode() {return aliPayConfig.getAppCode();}
 	
 	static AlipayClient alipayClient;
 	
@@ -46,7 +45,7 @@ public class AliPayUtil  implements ApplicationContextAware{
 		if(alipayClient!=null){
 			return alipayClient;
 		}else{
-			alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", APP_ID, APP_PRIVATE_KEY, "json", CHARSET, ALIPAY_PUBLIC_KEY, "RSA2");
+			alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", APP_ID(), APP_PRIVATE_KEY(), "json", CHARSET(), ALIPAY_PUBLIC_KEY(), "RSA2");
 		}
 		return alipayClient;
 	}
@@ -78,7 +77,7 @@ public class AliPayUtil  implements ApplicationContextAware{
 			model.setProductCode("QUICK_MSECURITY_PAY");
 //			model.setGoodsType("0");
 			request.setBizModel(model);
-			request.setNotifyUrl(callBackUrl);
+			request.setNotifyUrl(callBackUrl());
 			try {
 		        //这里和普通的接口调用不同，使用的是sdkExecute
 		        AlipayTradeAppPayResponse response = getAliPayClient().sdkExecute(request);

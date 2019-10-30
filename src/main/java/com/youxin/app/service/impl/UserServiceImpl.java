@@ -59,18 +59,7 @@ public class UserServiceImpl implements UserService {
 	private String accountTitle;
 	@Override
 	public Map<String, Object> register(User bean) {
-		if (StringUtil.isEmpty(bean.getMobile())) {
-			throw new ServiceException(0, "手机号必填");
-		}
-		if (StringUtil.isEmpty(bean.getSmsCode())) {
-			throw new ServiceException(0, "短信验证码必填");
-		}
-		if (!smsServer.isAvailable("86" + bean.getMobile(), bean.getSmsCode()))
-			throw new ServiceException("短信验证码不正确!");
-		long mobileCount = this.mobileCount(bean.getMobile());
-		if (mobileCount >= 1) {
-			throw new ServiceException(0, "手机号已被注册");
-		}
+		
 		//创建主键
 		Integer userId = createUserId();
 		bean.setId(userId);
@@ -195,6 +184,7 @@ public class UserServiceImpl implements UserService {
 		data.put("icon", user.getIcon());
 		data.put("token", user.getToken());
 		data.put("mobile", user.getMobile());
+		System.out.println(data);
 		return data;
 	}
 
@@ -284,8 +274,9 @@ public class UserServiceImpl implements UserService {
 				ops.inc("totalRecharge", money);
 				user.setBalance(Double.valueOf(df.format(user.getBalance() + money)));
 			} else {
-				if (this.getUser(userId).getBalance() < money) {
+				if (this.getUserMoeny(userId) < money) {
 					// 余额不足
+					System.out.println("余额不足");
 					return 0.0;
 				}
 				ops.inc("balance", -money);
@@ -295,6 +286,18 @@ public class UserServiceImpl implements UserService {
 			repository.update(q, ops);
 			KSessionUtil.saveUserByUserId(userId, user);
 			return q.get().getBalance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0.0;
+		}
+	}
+	
+	// 获取用户金额
+	public Double getUserMoeny(Integer userId) {
+		try {
+			DecimalFormat df=new DecimalFormat("#.00");
+			User user=this.getUserFromDB(userId);
+			return Double.valueOf(df.format(user.getBalance())) ;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0.0;

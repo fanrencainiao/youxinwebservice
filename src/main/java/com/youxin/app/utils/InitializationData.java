@@ -123,6 +123,8 @@ public class InitializationData  implements CommandLineRunner {
 				u.setCreateTime(DateUtil.currentTimeSeconds());
 				u=createAccid(u,"10000");
 				dfds.save(u);
+				Role role1 = new Role(10000, "10000", (byte) 2, (byte) 1, 0);
+				dfds.save(role1);
 //				KXMPPServiceImpl.getInstance().registerSystemNo("10000", DigestUtils.md5Hex("10000"));
 			} catch (Exception e) {
 				e.printStackTrace();

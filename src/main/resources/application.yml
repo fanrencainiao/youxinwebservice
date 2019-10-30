@@ -8,7 +8,7 @@ spring:
       enabled: false
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:28018/admin
+      uri: mongodb://120.76.101.139:28018/admin
       host: 127.0.0.1
       username: 
       password: 
@@ -46,7 +46,7 @@ authorizationfilter:
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
-  isAuth: 0 
+  isAuth: 1 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
   #redis地址

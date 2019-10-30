@@ -63,7 +63,7 @@ public final class KSessionUtil {
 				removeAccessToken(userKey);
 			} catch (Exception e) {
 				// TODO: handle exception
-				e.printStackTrace();
+				System.out.println("redis链接失败");
 			}
 			
 			redisUtil.saveTimeKey(atKey, accessToken, expire);
@@ -72,6 +72,7 @@ public final class KSessionUtil {
 
 			data.put("access_token", accessToken);
 			data.put("expires_in", expire);
+			System.out.println("access_token=="+accessToken+"expires_in==="+expire);
 			// data.put("userId", userId);
 			// data.put("nickname", user.getNickname());
 

@@ -126,6 +126,9 @@ public class User {
 
 	@ApiModelProperty(value = "禁用用户（1禁用 0解禁）")
 	private int disableUser = 0;
+	
+	@ApiModelProperty(value = "用户类型 0普通用户(默认)，2公众号")
+	private int userType = 0;
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();

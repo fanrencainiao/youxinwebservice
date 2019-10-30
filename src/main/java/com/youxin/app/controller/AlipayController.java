@@ -63,7 +63,7 @@ public class AlipayController extends AbstractController{
 			String tradeNo = params.get("out_trade_no");
 			log.info("订单号    "+tradeNo);
 			
-			boolean flag = AlipaySignature.rsaCheckV1(params,AliPayUtil.ALIPAY_PUBLIC_KEY, AliPayUtil.CHARSET,"RSA2");
+			boolean flag = AlipaySignature.rsaCheckV1(params,AliPayUtil.ALIPAY_PUBLIC_KEY(), AliPayUtil.CHARSET(),"RSA2");
 			if(flag){
 				log.info("支付宝回调成功"+flag);
 

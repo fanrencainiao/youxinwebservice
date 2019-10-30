@@ -56,6 +56,18 @@ public class UserController extends AbstractController{
 	@ApiOperation(value = "注册")
 	@PostMapping("register")
 	public Object register(@RequestBody @Valid User user){
+		if (StringUtil.isEmpty(user.getMobile())) {
+			throw new ServiceException(0, "手机号必填");
+		}
+		if (StringUtil.isEmpty(user.getSmsCode())) {
+			throw new ServiceException(0, "短信验证码必填");
+		}
+		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
+			throw new ServiceException("短信验证码不正确!");
+		long mobileCount = userService.mobileCount(user.getMobile());
+		if (mobileCount >= 1) {
+			throw new ServiceException(0, "手机号已被注册");
+		}
 		Map<String, Object> data=userService.register(user);
 		return Result.success(data);
 	}
