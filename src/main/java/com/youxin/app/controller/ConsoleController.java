@@ -204,11 +204,10 @@ public class ConsoleController extends AbstractController{
 			userService.register(example);
 
 		} else {
-		
 			com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
-			BeanUtils.copyProperties(example, u);
 			User userFromDB = userService.getUserFromDB(example.getId());
 			BeanUtils.copyProperties(example, userFromDB);
+			BeanUtils.copyProperties(userFromDB, u);
 			JSONObject updateUinfo = SDKService.updateUinfo(u);
 			if(updateUinfo.getIntValue("code")==200) {
 				ur.save(userFromDB);
