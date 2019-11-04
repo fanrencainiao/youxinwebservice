@@ -110,7 +110,7 @@ public class UserController extends AbstractController{
 			sdkLoginInfo=new SdkLoginInfo();
 			sdkLoginInfo.setUserId(ReqUtil.getUserId());
 			sdkLoginInfo.setLoginInfo(loginInfo);
-			sdkLoginInfo.setType(2);
+			sdkLoginInfo.setType(sdkType);
 			sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
 			dfds.save(sdkLoginInfo);
 			return Result.success(sdkLoginInfo);
