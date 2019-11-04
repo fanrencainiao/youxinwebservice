@@ -98,16 +98,24 @@ public class User {
 	private int loginType;// 登录类型 0：账号密码登录，1：短信验证码登录，2.友信号密码登录
 	@ApiModelProperty(value = "密码", required = true)
 	private String password;
-	@ApiModelProperty(value = "角色", hidden = true)
-	@NotSaved
-	private List<Integer> role;//
 	@ApiModelProperty(value = "创建时间", hidden = true)
 	private Long createTime;
 	@ApiModelProperty(value = "更新时间", hidden = true)
 	private Long updateTime;
+	
+	@ApiModelProperty(value = "角色", hidden = true)
+	@NotSaved
+	private List<Integer> role;//
 	@ApiModelProperty(value = "短信验证码")
 	@NotSaved
 	private String smsCode;
+	@ApiModelProperty(value = "第三方登录标识")
+	@NotSaved
+	private String loginInfo;
+	@ApiModelProperty(value = "sdk类型：1qq,2微信")
+	@NotSaved
+	private int sdkType;
+	
 	@ApiModelProperty(value = "用户总余额")
 	private Double balance = 0.0; // 用户余额
 	@ApiModelProperty(value = "充值总金额")
@@ -119,14 +127,11 @@ public class User {
 
 	@ApiModelProperty(value = "支付宝买家id")
 	private String aliUserId;
-
 	@ApiModelProperty(value = "友讯号")
 	@Indexed(unique = true)
 	private String account;
-
 	@ApiModelProperty(value = "禁用用户（1禁用 0解禁）")
 	private int disableUser = 0;
-	
 	@ApiModelProperty(value = "用户类型 0普通用户(默认)，2公众号")
 	private int userType = 0;
 

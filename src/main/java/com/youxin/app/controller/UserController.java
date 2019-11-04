@@ -6,11 +6,14 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
+import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
+import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
@@ -33,7 +39,6 @@ import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -51,9 +56,11 @@ public class UserController extends AbstractController{
 	private UserRepository repository;
 	@Autowired
 	private SMSServiceImpl sendSms;
+	@Autowired
+	@Qualifier("get")
+	private Datastore dfds;
 	
-	
-	@ApiOperation(value = "注册")
+	@ApiOperation(value = "注册",notes="若是sdk注册，请携带sdkType和loginInfo值")
 	@PostMapping("register")
 	public Object register(@RequestBody @Valid User user){
 		if (StringUtil.isEmpty(user.getMobile())) {
@@ -70,6 +77,80 @@ public class UserController extends AbstractController{
 		}
 		Map<String, Object> data=userService.register(user);
 		return Result.success(data);
+	}
+	
+	@ApiOperation(value = "sdk登录",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "loginInfo", value = "sdk登录标识", required = true, paramType = "query"),
+		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信", required = true, paramType = "query")})
+	@PostMapping("sdkLogin")
+	public Object sdkLogin(@RequestParam int sdkType,
+			@RequestParam String loginInfo) {
+		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
+		if (sdkLoginInfo != null) {
+			User user = userService.getUserFromDB(sdkLoginInfo.getUserId());
+			Object data = userService.login(user);
+			return Result.success(data);
+		} else {
+			// 未绑定手机号码
+			return Result.failure(ResultCode.UNBindingTelephone);
+		}
+	}
+	/**
+	 * 绑定
+	 * @param loginInfo
+	 * @return
+	 */
+	@ApiOperation(value = "绑定第三方sdk",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "loginInfo", value = "sdk登录标识", required = true, paramType = "query"),
+		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信", required = true, paramType = "query")})
+	@PostMapping("bingdingSDK")
+	public Object bingdingSDK(@RequestParam int sdkType,@RequestParam String loginInfo) {
+		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
+		if (sdkLoginInfo == null) {
+			sdkLoginInfo=new SdkLoginInfo();
+			sdkLoginInfo.setUserId(ReqUtil.getUserId());
+			sdkLoginInfo.setLoginInfo(loginInfo);
+			sdkLoginInfo.setType(2);
+			sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
+			dfds.save(sdkLoginInfo);
+			return Result.success(sdkLoginInfo);
+		} else {
+			// 微信已经被绑定
+			return Result.failure(ResultCode.BINGDINGWXED);
+		}
+	}
+	/**
+	 * 解绑
+	 * @param loginInfo
+	 * @return
+	 */
+	@ApiOperation(value = "解绑第三方sdk",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "loginInfo", value = "sdk登录标识", required = true, paramType = "query"),
+		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信", required = true, paramType = "query")})
+	@DeleteMapping("unBingding")
+	public Object unBingdingSDK(@RequestParam int sdkType,@RequestParam String loginInfo) {
+		return Result.success(userService.delSdkLoginInfo(sdkType,loginInfo));
+	}
+	/**
+	 * 获取绑定信息
+	 * @param loginInfo
+	 * @return
+	 */
+	@ApiOperation(value = "获取第三方绑定集合",response=Result.class)
+	@GetMapping("getBingding")
+	public Object getBingding() {
+		return Result.success(userService.getSdkLoginInfo());
+	}
+	
+	/**
+	 * 获取微信openid等信息
+	 * @return
+	 */
+	@ApiOperation(value = "获取微信openid等信息",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "code", value = "code", required = true, paramType = "query")})
+	@GetMapping("getOpenids")
+	public Object getOpenids(@RequestParam String code) {
+		return Result.success(userService.getWxOpenId(code));
 	}
 	
 	@ApiOperation(value = "获取用户信息（优先从缓存获取）",response=Result.class)
@@ -89,14 +170,16 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "登录",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
-	,@ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
-	@ApiImplicitParam(name = "loginType", value = "登录类型(0：账号密码登录，1：短信验证登录)", paramType = "query"),
+	,@ApiImplicitParam(name = "account", value = "友讯号", paramType = "query"),
+	@ApiImplicitParam(name = "password", value = "密码", paramType = "query"),
+	@ApiImplicitParam(name = "loginType", value = "登录类型(0：账号密码登录，1：短信验证登录,2：友讯号登录)", paramType = "query"),
 	@ApiImplicitParam(name = "smsCode", value = "短信验证码", paramType = "query"),
 	})
 	@PostMapping("login")
-	public Object login(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String password,@RequestParam(defaultValue="") String smsCode,@RequestParam(defaultValue="-1") int loginType){
+	public Object login(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String account,@RequestParam(defaultValue="") String password,@RequestParam(defaultValue="") String smsCode,@RequestParam(defaultValue="-1") int loginType){
 		User user=new User();
 		user.setMobile(mobile);
+		user.setAccount(account);
 		user.setPassword(password);
 		user.setLoginType(loginType);
 		user.setSmsCode(smsCode);

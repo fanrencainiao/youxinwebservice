@@ -25,6 +25,8 @@ public enum ResultCode {
     USER_HAS_EXISTED(20005, "用户已存在"),
     USER_ERR_TOKEN(20006, "没有请求令牌"),
     USER_OUT_TOKEN(20007, "请求令牌过期"),
+    UNBindingTelephone(20008, "未绑定手机"),
+    BINGDINGWXED(20009, "微信已经被绑定，请先解绑"),
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
 

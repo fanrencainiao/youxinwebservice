@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
@@ -24,22 +23,25 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.internal.operation.WriteConcernHelper;
+import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
+import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ReqUtil;
-import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.utils.WXUserUtils;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
+
+
 
 
 @Service
@@ -88,6 +90,19 @@ public class UserServiceImpl implements UserService {
 		bean.setSettings(new UserSettings());
 		// 保存本地数据库
 		repository.save(bean);
+		// 第三方注册绑定信息
+		if(!StringUtil.isEmpty(bean.getLoginInfo())) {
+			SdkLoginInfo findSdkLoginInfo = findSdkLoginInfo(bean.getSdkType(), bean.getLoginInfo());
+			if(findSdkLoginInfo==null) {
+				SdkLoginInfo sdkLoginInfo=new SdkLoginInfo();
+				sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
+				sdkLoginInfo.setLoginInfo(bean.getLoginInfo());
+				sdkLoginInfo.setType(2);
+				sdkLoginInfo.setUserId(bean.getId());
+				dfds.save(sdkLoginInfo);
+			}
+		}
+		
 		// 加系统客服好友
 		Friends friends = new Friends();
 		friends.setAccid(accid);
@@ -149,7 +164,9 @@ public class UserServiceImpl implements UserService {
 			user = repository.findOne("_id", bean.getId());
 		else {
 			user = repository.findOne("mobile", bean.getMobile());
-
+			if(null == user) {
+				user=repository.findOne("account", bean.getAccount());
+			}
 		}
 		if (null == user) {
 			throw new ServiceException(20004, "帐号不存在, 请注册!");
@@ -158,14 +175,22 @@ public class UserServiceImpl implements UserService {
 				// 账号密码登录
 				String password = bean.getPassword();
 				if (!password.equals(user.getPassword()))
-					throw new ServiceException(20002, "帐号或密码错误");
+					throw new ServiceException(20002, "密码错误");
 			} else if (1 == bean.getLoginType()) {
 				// 短信验证码登录
 				if (null == bean.getSmsCode())
 					throw new ServiceException("短信验证码不能为空!");
 				if (!smsServer.isAvailable("86" + user.getMobile(), bean.getSmsCode()))
 					throw new ServiceException("短信验证码不正确!");
-			} else {
+			} else if (2 == bean.getLoginType()) {
+				// 友讯号密码登录
+				String password = bean.getPassword();
+				if (!password.equals(user.getPassword()))
+					throw new ServiceException(20002, "密码错误");
+			} else if (3 == bean.getLoginType()) {
+				// sdk登录
+				
+			}else {
 				throw new ServiceException(20002, "登录方式错误");
 			}
 
@@ -424,5 +449,39 @@ public class UserServiceImpl implements UserService {
 
 		return user;
 	}
+	
+	@Override
+	public SdkLoginInfo findSdkLoginInfo(int type, String loginInfo) {
+		Query<SdkLoginInfo> query = dfds.createQuery(SdkLoginInfo.class).field("type").equal(type)
+				.field("loginInfo").equal(loginInfo);
+		return query.get();
+	}
+	@Override
+	public List<SdkLoginInfo> delSdkLoginInfo(int type, String loginInfo) {
+		Query<SdkLoginInfo> query = dfds.createQuery(SdkLoginInfo.class).field("type").equal(type)
+				.field("loginInfo").equal(loginInfo);
+		dfds.delete(query);
+		return getSdkLoginInfo();
+	}
+
+	@Override
+	public List<SdkLoginInfo> getSdkLoginInfo() {
+		Query<SdkLoginInfo> q = dfds.createQuery(SdkLoginInfo.class).field("userId").equal(ReqUtil.getUserId());
+		return q.asList();
+	}
+	
+	@Override
+	public JSONObject getWxOpenId(String code) {
+		if (StringUtil.isEmpty(code)) {
+			return null;
+		}
+		JSONObject jsonObject = WXUserUtils.getWxOpenId(code);
+		String openid = jsonObject.getString("openid");
+		if (StringUtil.isEmpty(openid)) {
+			return null;
+		}
+		return jsonObject;
+	}
+	
 
 }

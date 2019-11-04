@@ -42,6 +42,8 @@ authorizationfilter:
   requestUriList[3]: /user/updatePwdForSms
   requestUriList[4]: /config/get
   requestUriList[5]: /user/logout
+  requestUriList[6]: /user/sdkLogin
+  requestUriList[7]: /user/getOpenids
 
 youxin:
   apiKey: youxin 

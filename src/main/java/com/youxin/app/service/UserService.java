@@ -3,7 +3,9 @@ package com.youxin.app.service;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
@@ -91,4 +93,31 @@ public interface UserService {
 	 * @return
 	 */
 	void updateSettings(UserSettings settings);
+	/**
+	 * 根据平台与表示查找信息
+	 * @param type
+	 * @param loginInfo
+	 * @return
+	 */
+	SdkLoginInfo findSdkLoginInfo(int type, String loginInfo);
+	/**
+	 * 删除sdk绑定信息
+	 * @param type
+	 * @param loginInfo
+	 * @return 
+	 */
+	List<SdkLoginInfo> delSdkLoginInfo(int type, String loginInfo);
+	/**
+	 * 获取sdk绑定信息
+	 * @param type
+	 * @param loginInfo
+	 * @return 
+	 */
+	List<SdkLoginInfo> getSdkLoginInfo();
+	/**
+	 * 获取微信openid
+	 * @param code
+	 * @return
+	 */
+	JSONObject getWxOpenId(String code);
 }
