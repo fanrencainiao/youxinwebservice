@@ -566,6 +566,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
+			
 			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
@@ -1542,6 +1543,7 @@ public class SDKService {
 	private static JSONObject getJson(JSONObject json, String res) {
 		if (!StringUtil.isEmpty(res)) {
 			json = JSONObject.parseObject(res);
+			System.out.println("json"+json);
 			if (json.getIntValue("code") != 200)
 				throw new ServiceException(-1, json.getString("desc"));
 		} else
@@ -1566,7 +1568,8 @@ public class SDKService {
 		for (int i = 0; i < fields.length; i++) {
 			Field f = fields[i];
 			f.setAccessible(true);
-			params.add(new BasicNameValuePair(f.getName(), f.get(e) + ""));
+			if(f.get(e)!=null)
+				params.add(new BasicNameValuePair(f.getName(), f.get(e) + ""));
 			System.out.println("属性名:" + f.getName() + " 属性值:" + f.get(e));
 		}
 		System.out.println(params);

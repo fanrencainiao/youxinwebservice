@@ -45,6 +45,7 @@ import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
+import com.youxin.app.yx.request.MsgRequest;
 
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -216,8 +217,27 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 //			e.printStackTrace();
 //		}
 		
+		MsgRequest messageBean = new MsgRequest();
+		messageBean.setType(0);// 文本
+		messageBean.setOpe(0);// 个人消息
+		if (toUser!=null) {
+			messageBean.setFrom(toUser.getAccid());
+		}else {
+			messageBean.setFrom(userManager.getUser(1100).getAccid());
+		}
+		messageBean.setTo(userManager.getUser(userId).getAccid());
+		messageBean.setBody("{\"msg\":"+id+"}");
+		try {
+			JSONObject json=SDKService.sendMsg(messageBean);
+			if(json.getInteger("code")!=200) 
+				log.debug("红包领取 sdk消息发送失败");
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.debug("红包领取 sdk消息发送失败"+e.getMessage());
+		}
 		
-		System.out.println(userId+"  发出的红包,剩余金额   "+money+"  未领取  退回余额!");
+		
+		log.debug(userId+"  发出的红包,剩余金额   "+money+"  未领取  退回余额!");
 	}
 
 	// 转账超时未领取 退回余额
@@ -249,13 +269,13 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			 money =(Double) dbObject.get("money");
 			 toUserId=(Integer) dbObject.get("toUserId");
 			 transferId=(ObjectId) dbObject.get("_id");
-			 transferRecedeMoney(userId, toUserId, money, transferId);
+			 transferRecedeMoney(userId, money, transferId);
 		}
 		System.out.println("转账超时未领取的数量 ======> "+objs.size());
 	}
 	
 	// 转账退回
-	public void transferRecedeMoney(Integer userId,Integer toUserId,double money,ObjectId transferId){
+	public void transferRecedeMoney(Integer userId,double money,ObjectId transferId){
 		if(0<money){
 			// 格式化数据
 			DecimalFormat df = new DecimalFormat("#.00");
@@ -281,44 +301,24 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		User sysUser=userManager.getUser(1100);
 		Transfer transfer=ds.createQuery(Transfer.class).field("_id").equal(transferId).get();
 		transfer.setId(null);
-//		MessageBean messageBean=new MessageBean();
-//		messageBean.setType(KXMPPServiceImpl.REFUNDTRANSFER);
-//		
-//		messageBean.setFromUserId(sysUser.getUserId().toString());
-//		messageBean.setFromUserName(sysUser.getNickname());
-//		
-//		messageBean.setContent(JSONObject.toJSON(transfer));
-//		messageBean.setToUserId(userId.toString());
-//		messageBean.setMsgType(0);// 单聊消息
-//		messageBean.setMessageId(StringUtil.randomUUID());
-//		try {
-//			KXMPPServiceImpl.getInstance().send(messageBean);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		Msg messageBean = new Msg();
-		messageBean.setFrom(sysUser.getId().toString());
+
+		MsgRequest messageBean = new MsgRequest();
+		messageBean.setFrom(sysUser.getAccid());
+		messageBean.setType(0);// 文本
+	
+		messageBean.setOpe(0);// 个人消息
+		messageBean.setTo(userManager.getUser(userId).getAccid());
 		
-		messageBean.setOpe(0);//单聊
-		messageBean.setMsgtype(0);//点对点
-		messageBean.setTo(userId.toString());
-		
-		messageBean.setAttach("");//自定义内容 json
-		messageBean.setPushcontent(JSONObject.toJSONString(transfer));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
-//		messageBean.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
-//		messageBean.setSound("");//声音
-		messageBean.setSave(2);//会存离线
-//		messageBean.setOption("");
-		messageBean.setMsgid(StringUtil.randomUUID());
+		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
 		try {
-			JSONObject sendAttachMsg = SDKService.sendAttachMsg(messageBean);
-			if(sendAttachMsg.getInteger("code")!=200) 
-				log.debug("转账退款发送失败");
+			JSONObject json=SDKService.sendMsg(messageBean);
+			if(json.getInteger("code")!=200) 
+				log.debug("转账退款 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.debug("转账退款消息发送失败"+e.getMessage());
+			log.debug("转账退款 sdk消息发送失败"+e.getMessage());
 		}
 		
-		System.out.println(userId+"  发出转账,剩余金额   "+money+"  未收钱  退回余额!");
+		log.debug(userId+"  发出转账,剩余金额   "+money+"  未收钱  退回余额!");
 	}
 }

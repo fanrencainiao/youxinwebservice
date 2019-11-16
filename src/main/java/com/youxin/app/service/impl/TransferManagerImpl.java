@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.Transfer;
@@ -28,6 +29,7 @@ import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
+import com.youxin.app.yx.request.MsgRequest;
 
 @Service
 public class TransferManagerImpl{
@@ -151,29 +153,18 @@ public class TransferManagerImpl{
 		//修改金额
 		userService.rechargeUserMoeny(userId, transfer.getMoney(), KConstants.MOENY_ADD);
 		// 发送xmpp消息
-//		Msg messageBean=new Msg();
-//		messageBean.setType(0);
-//		messageBean.setFromUserId(user.getId().toString());
-//		messageBean.setFromUserName(user.getNickname());
-//		messageBean.setContent(transfer.getId().toString());
-//		messageBean.setToUserId(transfer.getUserId().toString());
-//		messageBean.setMsgType(0);// 单聊消息
-//		messageBean.setMessageId(StringUtil.randomUUID());
-		Msg messageBean = new Msg();
-		messageBean.setFrom(user.getId().toString());
-		messageBean.setMsgtype(0);//点对点
-		messageBean.setOpe(0);//点对点
-		messageBean.setTo(transfer.getUserId().toString());
-		messageBean.setAttach("");//自定义内容 json
-		messageBean.setPushcontent(JSONObject.toJSONString(transfer));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
-//		messageBean.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
-//		messageBean.setSound("");//声音
-		messageBean.setSave(2);//会存离线
-//		messageBean.setOption("");
-		messageBean.setMsgid(StringUtil.randomUUID());
+
+		MsgRequest messageBean = new MsgRequest();
+		messageBean.setFrom(user.getAccid());
+		messageBean.setType(0);// 文本
+	
+		messageBean.setOpe(0);// 个人消息
+		messageBean.setTo(transfer.getAccid());
+		
+		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
 		try {
-			JSONObject sendAttachMsg = SDKService.sendAttachMsg(messageBean);
-			if(sendAttachMsg.getInteger("code")!=200) 
+			JSONObject json=SDKService.sendMsg(messageBean);
+			if(json.getInteger("code")!=200) 
 				log.debug("付款 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -33,12 +33,15 @@ import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KSessionUtil;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.Friends;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -151,6 +154,26 @@ public class UserController extends AbstractController{
 	@GetMapping("getOpenids")
 	public Object getOpenids(@RequestParam String code) {
 		return Result.success(userService.getWxOpenId(code));
+	}
+	
+	
+	/**
+	 * 绑定手机
+	 * @param loginInfo
+	 * @return
+	 */
+	@ApiOperation(value = "修改手机",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "新手机号", required = true, paramType = "query"),
+		})
+	@PostMapping("updateMoblie")
+	public Object updateMoblie(@RequestParam String mobile) {
+		long mobileCount = userService.mobileCount(mobile);
+		if (mobileCount>0) {
+			return Result.failure(ResultCode.BINGDINGMOBILED);
+		} else {
+			userService.updateMobile(mobile);
+			return Result.success(mobile);
+		}
 	}
 	
 	@ApiOperation(value = "获取用户信息（优先从缓存获取）",response=Result.class)
@@ -267,6 +290,24 @@ public class UserController extends AbstractController{
 			return Result.failure(ResultCode.USER_NOT_EXIST);
 		}
 		return Result.success(u);
+	}
+	@ApiOperation(value = "初始化密码",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "payPassword", value = "密码", required = true, paramType = "query")
+	})
+	@PostMapping("setPayPassword")
+	public Object setPayPassword(@RequestParam(defaultValue="") String payPassword){
+		if(StringUtil.isEmpty(payPassword)) 
+			return Result.error("请输入密码");
+
+		User u = userService.getUserFromDB(ReqUtil.getUserId());
+		if(u!=null&&StringUtil.isEmpty(u.getPayPassword())) {
+			u.setPayPassword(payPassword);
+			repository.save(u);
+			KSessionUtil.saveUserByUserId(u.getId(), u);
+		}else {
+			return Result.error("密码已存在，不可初始化");
+		}
+		return Result.success();
 	}
 	@ApiOperation(value = "刷新token(云信指定token)",response=Result.class)
 	@PostMapping("refreshToken")
@@ -389,6 +430,40 @@ public class UserController extends AbstractController{
 	@PostMapping("updateSettings")
 	public Object updateSettings(@RequestBody UserSettings settings){
 		userService.updateSettings(settings);
+		return Result.success();
+	}
+	
+	@ApiOperation(value = "第三方加好友，如小程序",response=Result.class)
+	@PostMapping("addByOther")
+	public Object addByOther(@RequestParam String name,@RequestParam String icon,@RequestParam String loginInfo,@RequestParam int sdkType,@RequestParam String accid){
+		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
+		log.debug(loginInfo+"=="+sdkType+"=="+accid);
+		Friends f=new Friends();
+		User newUser=new User();
+		f.setAccid(accid);
+		f.setType(1);
+		f.setMsg("小程序添加好友");
+		if(sdkLoginInfo!=null) {
+			log.debug("已注册添加好友开始");
+			//已经注册
+			f.setFaccid(sdkLoginInfo.getAccid());
+			SDKService.friendAdd(f);
+			log.debug("已注册添加好友结束");
+		}else {
+			log.debug("未注册添加好友开始");
+			//未注册
+			newUser.setName(name);
+			newUser.setIcon(icon);
+			newUser.setMobile(loginInfo);
+			newUser.setPassword(Md5Util.md5Hex("123456"));
+			Map<String, Object> register = userService.register(newUser);
+			String newAccid = register.get("accid").toString();
+			
+			f.setFaccid(newAccid);
+			SDKService.friendAdd(f);
+			log.debug("未注册添加好友结束");
+			return Result.success(register);
+		}
 		return Result.success();
 	}
 	

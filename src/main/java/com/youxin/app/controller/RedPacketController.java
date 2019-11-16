@@ -144,6 +144,7 @@ public class RedPacketController extends AbstractController{
 			return Result.error("支付密码错误!");
 		}
 		packet.setUserId(userId);
+		packet.setAccid(user.getAccid());
 		packet.setUserName(user.getName());
 		if(null != wallet_Four && wallet_Four.getIsSetUpMoney()==1) {
 			redPackgeMoney = wallet_Four.getRedPackgeMoney();
@@ -212,7 +213,7 @@ public class RedPacketController extends AbstractController{
 	@ApiOperation(value = "打开红包",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "红包id", required = true, paramType = "query"),
 		@ApiImplicitParam(name = "time", value = "时间", required = true, paramType = "query"),
-		@ApiImplicitParam(name = "secret", value = "密钥 md5(md5(apikey+time+money) +userid+token", required = true, paramType = "query")})
+		@ApiImplicitParam(name = "secret", value = "密钥 md5(md5(apikey+time) +userid+token", required = true, paramType = "query")})
 	@PostMapping("openRedPacket")
 //	md5( md5(apikey+time) +userid+token) 
 	public Result openRedPacket(String id,

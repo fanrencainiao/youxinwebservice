@@ -42,12 +42,12 @@ public abstract class AbstractController {
 	
 	protected KSession getSession() {
 		HttpServletRequest request = getRequest();
-		String access_token = request.getParameter("access_token");
+		String access_token = request.getHeader("access_token");
 		return KSessionUtil.getSession(access_token);
 	}
 	protected String getAccess_token() {
 		HttpServletRequest request = getRequest();
-		String access_token = request.getParameter("access_token");
+		String access_token = request.getHeader("access_token");
 		return access_token;
 	}
 	

@@ -21,8 +21,16 @@ public class Transfer {
 	private @Id ObjectId id;
 	@ApiModelProperty(value="发送者用户Id")
 	private @Indexed Integer userId;
+	
+	@ApiModelProperty(value="发送者用户accid")
+	private @Indexed String accid;
+	
 	@ApiModelProperty(value="接受者Id")
 	private Integer toUserId;
+	
+	@ApiModelProperty(value="发送者用户Id")
+	private String toAccid;
+	
 	@ApiModelProperty(value="转账发送者昵称")
 	private String userName;
 	

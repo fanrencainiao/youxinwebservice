@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService {
 				sdkLoginInfo.setLoginInfo(bean.getLoginInfo());
 				sdkLoginInfo.setType(2);
 				sdkLoginInfo.setUserId(bean.getId());
+				sdkLoginInfo.setAccid(accid);
 				dfds.save(sdkLoginInfo);
 			}
 		}
@@ -148,9 +149,7 @@ public class UserServiceImpl implements UserService {
 				System.out.println("id为" + userId + "的用户不存在");
 				return null;
 			}
-			user.setEx("");
-			user.setPassword("");
-			user.setPayPassword("");
+		
 			KSessionUtil.saveUserByUserId(userId, user);
 		}
 
@@ -195,9 +194,7 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
-		user.setEx("");
-		user.setPassword("");
-		user.setPayPassword("");
+	
 		KSessionUtil.saveUserByUserId(user.getId(), user);
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
 //		Object token = data.get("access_token");
@@ -383,6 +380,15 @@ public class UserServiceImpl implements UserService {
 
 			return user;
 	}
+	public String getAccid(Integer userId) {
+		User user = repository.findOne("_id", userId);
+		if (null == user) {
+			System.out.println("id为" + userId + "的用户不存在");
+			return null;
+		}
+
+		return user.getAccid();
+}
 
 	@Override
 	public void updateUser(User bean) {
@@ -481,6 +487,17 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 		return jsonObject;
+	}
+
+	@Override
+	public void updateMobile(String mobile) {
+		
+		Query<User> q = repository.createQuery();
+		q.field("_id").equal(ReqUtil.getUserId());
+		
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		ops.set("mobile", mobile);
+		repository.update(q, ops);
 	}
 	
 

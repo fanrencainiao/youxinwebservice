@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.Transfer;
@@ -31,6 +32,7 @@ import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.scheduleds.CommTask;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
+import com.youxin.app.yx.request.MsgRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -170,39 +172,25 @@ public class TransferController extends AbstractController {
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 
 			User sysUser = userManager.getUser(1100);
-			transfer.setId(null);
-//			MessageBean messageBean = new MessageBean();
-//			messageBean.setType(KXMPPServiceImpl.REFUNDTRANSFER);
-//
-//			messageBean.setFromUserId(sysUser.getUserId().toString());
-//			messageBean.setFromUserName(sysUser.getNickname());
-//
-//			messageBean.setContent(JSONObject.toJSON(transfer));
-//			messageBean.setToUserId(userId.toString());
-//			messageBean.setMsgType(0);// 单聊消息
-//			messageBean.setMessageId(StringUtil.randomUUID());
+			transfer.setId(null);		
+			MsgRequest messageBean = new MsgRequest();
+			messageBean.setFrom(sysUser.getAccid());
+			messageBean.setType(0);// 文本
+		
+			messageBean.setOpe(0);// 个人消息
+			messageBean.setTo(transfer.getAccid());
 			
-			Msg messageBean = new Msg();
-			messageBean.setFrom(sysUser.getId().toString());
-			messageBean.setMsgtype(0);//点对点
-			messageBean.setOpe(0);
-			messageBean.setTo(userId.toString());
-			messageBean.setAttach("");//自定义内容 json
-			messageBean.setPushcontent(JSONObject.toJSONString(transfer));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
-//			messageBean.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
-//			messageBean.setSound("");//声音
-			messageBean.setSave(2);//会存离线
-//			messageBean.setOption("");
-			messageBean.setMsgid(StringUtil.randomUUID());
+			messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
 			try {
-				JSONObject sendAttachMsg = SDKService.sendAttachMsg(messageBean);
-				if(sendAttachMsg.getInteger("code")!=200) 
-					log.debug("付款 sdk消息发送失败");
+				JSONObject json=SDKService.sendMsg(messageBean);
+				if(json.getInteger("code")!=200) 
+					log.debug("退款 sdk消息发送失败");
 			} catch (Exception e) {
 				e.printStackTrace();
-				log.debug("付款 sdk消息发送失败"+e.getMessage());
+				log.debug("退款 sdk消息发送失败"+e.getMessage());
 			}
-			System.out.println(userId + "  发出转账,剩余金额   " + money + "  未收钱  退回余额!");
+			
+			log.debug(userId + "  发出转账,剩余金额   " + money + "  未收钱  退回余额!");
 			return Result.success(userId + "  发出转账,剩余金额   " + money + "  未收钱  退回余额!");
 		} else {
 			return Result.error("该转账金额已经退回");

@@ -14,9 +14,10 @@ spring:
       password: 
       database: youxinapp
       port: 28018 
-      connectTimeout: 20000
-      socketTimeout: 20000
-      maxWaitTime: 2000
+      connect-timeout: 20000
+      socket-timeout: 20000
+      max-wait-time: 2000
+      max-connection-idle-time: 60000
 
   redis:
     host: 127.0.0.1
@@ -48,7 +49,7 @@ authorizationfilter:
 youxin:
   apiKey: youxin 
   #是否检验接口 0不检验，1检验
-  isAuth: 1 
+  isAuth: 0 
   #是否保存请求日志 0否，1是
   isSaveRequestLogs: 0 
   #redis地址

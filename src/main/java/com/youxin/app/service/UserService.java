@@ -88,6 +88,11 @@ public interface UserService {
 	 */
 	User updateAccount(String account);
 	/**
+	 * 更改手机号
+	 * @param account
+	 */
+	void updateMobile(String mobile);
+	/**
 	 * 修改用户隐私设置
 	 * @param settings
 	 * @return

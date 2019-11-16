@@ -11,24 +11,27 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
-import com.youxin.app.controller.TestController;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.KSession;
 import com.youxin.app.entity.User;
-import com.youxin.app.utils.redis.RedisUtil;
+import com.youxin.app.utils.jedis.RedisCRUD;
 import com.youxin.app.yx.UUIDUtil;
 
 @Component
 public final class KSessionUtil {
 	private static Log log = LogFactory.getLog(KSessionUtil.class);
 
-	private static RedisUtil redisUtil;
+//	private static RedisUtil redisUtil;
 
+//	@Autowired
+//	public KSessionUtil(RedisUtil redisUtil) {
+//		KSessionUtil.redisUtil = redisUtil;
+//	}
+	private static RedisCRUD redisCRUD;
 	@Autowired
-	public KSessionUtil(RedisUtil redisUtil) {
-		KSessionUtil.redisUtil = redisUtil;
+	public KSessionUtil(RedisCRUD redisCRUD) {
+		KSessionUtil.redisCRUD=redisCRUD;
 	}
-
 	/**
 	 * 根据用户Id获取access_token
 	 */
@@ -56,19 +59,20 @@ public final class KSessionUtil {
 			int expire = KConstants.Expire.DAY7 * 5;
 			String atKey = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userKey);
 			if (StringUtils.isBlank(accessToken))
-//				accessToken = redisUtil.getKey(atKey);
-//			if (StringUtils.isBlank(accessToken))
+				accessToken = redisCRUD.get(atKey);
+			if (StringUtils.isBlank(accessToken))
 				accessToken = UUIDUtil.getUUID();
 			try {
-				removeAccessToken(userKey);
+//				removeAccessToken(userKey);
 			} catch (Exception e) {
 				// TODO: handle exception
 				System.out.println("redis链接失败");
 			}
-			
-			redisUtil.saveTimeKey(atKey, accessToken, expire);
+			System.out.println("atKey"+atKey);
+			redisCRUD.setWithExpireTime(atKey, accessToken, expire);
 			String userIdKey = String.format(GET_USERID_BYTOKEN, accessToken);
-			redisUtil.saveTimeKey(userIdKey, String.valueOf(userId), expire);
+			System.out.println("userIdKey"+userIdKey);
+			redisCRUD.setWithExpireTime(userIdKey, String.valueOf(userId), expire);
 
 			data.put("access_token", accessToken);
 			data.put("expires_in", expire);
@@ -87,14 +91,14 @@ public final class KSessionUtil {
 		log.info("  removeAccessToken  =====  userKey  ======= :" + userKey);
 		// 根据userKey拿token
 		String key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userKey);
-		String access_token = redisUtil.getKey(key);
+		String access_token = redisCRUD.get(key);
 
 		if (!StringUtils.isBlank(access_token)) {
-			redisUtil.removeKey(key);
+			redisCRUD.delete(key);
 		}
 		if (!StringUtils.isBlank(access_token)) {
 			String userIdKey = String.format(GET_USERID_BYTOKEN, access_token);
-			redisUtil.removeKey(userIdKey);
+			redisCRUD.del(userIdKey);
 		}
 	}
 
@@ -102,15 +106,15 @@ public final class KSessionUtil {
 		Object userId = null;
 		if (!StringUtils.isBlank(token.toString())) {
 			String userIdKey = String.format(GET_USERID_BYTOKEN, token);
-			userId = redisUtil.getKey(userIdKey);
-			redisUtil.removeKey(userId.toString());
+			userId = redisCRUD.get(userIdKey);
+			redisCRUD.del(userId.toString());
 		}
 
 		// 根据userKey拿token
 		String key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userId);
-		String access_token =redisUtil.getKey(key);
+		String access_token =redisCRUD.get(key);
 		if (!StringUtils.isBlank(access_token)) {
-			redisUtil.removeKey(key);
+			redisCRUD.delete(key);
 		}
 
 	}
@@ -119,37 +123,38 @@ public final class KSessionUtil {
 		String key = String.format(GET_SESSION_BY_ACCESS_TOKEN, access_token);
 		if (StringUtils.isBlank(access_token))
 			return null;
-		String value = redisUtil.getKey(key);
+		String value = redisCRUD.get(key);
 		return StringUtils.isBlank(value) ? null : JSON.parseObject(value, KSession.class);
 	}
 
 	public static void saveSession(String access_token, KSession kSession) {
 		String key = String.format(GET_SESSION_BY_ACCESS_TOKEN, access_token);
 		String value = kSession.toString();
-		redisUtil.saveString(key, value);
+		redisCRUD.set(key, value);
 	}
 
 	public static void setAccessToken(String access_token, KSession kSession) {
 		String key = String.format(GET_SESSION_BY_ACCESS_TOKEN, access_token);
 		String value = kSession.toString();
-		redisUtil.saveString(key, value);
+		redisCRUD.set(key, value);
 		// pipe.expire(key, KConstants.Expire.DAY7);
 
 		key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, kSession.getUserId());
 		value = access_token;
-		redisUtil.saveString(key, value);
+		redisCRUD.set(key, value);
 		// pipe.expire(key, KConstants.Expire.DAY7);
 
 	}
 
 	public static String getAccess_token(Object userId) {
 		String key = String.format(GET_ACCESS_TOKEN_BY_USER_ID, userId);
-		return redisUtil.getKey(key);
+		return redisCRUD.get(key);
 	}
 
 	public static String getUserIdBytoken(String token) {
 		String key = String.format(GET_USERID_BYTOKEN, token);
-		return redisUtil.getKey(key);
+		System.out.println("key:"+key);
+		return redisCRUD.get(key);
 	}
 
 	/**
@@ -160,7 +165,7 @@ public final class KSessionUtil {
 	 */
 	public static User getUserByUserId(Object userId) {
 		String key = String.format(GET_USER_BY_USERID, userId);
-		String value = redisUtil.getKey(key);
+		String value = redisCRUD.get(key);
 		User user = null;
 		try {
 			user = JSON.parseObject(value, User.class);
@@ -175,21 +180,26 @@ public final class KSessionUtil {
 
 	public static void saveUserByUserId(Integer userId, User user) {
 		String key = String.format(GET_USER_BY_USERID, userId);
+		user.setEx("");
 		user.setPassword("");
-		redisUtil.saveTimeKey(key, user.toString(), KConstants.Expire.DAY1);
+		if(StringUtil.isEmpty(user.getPayPassword())||"0".equals(user.getPayPassword())) 
+			user.setPayPassword("0");
+		else
+			user.setPayPassword("1");
+		redisCRUD.setWithExpireTime(key, user.toString(), KConstants.Expire.DAY1);
 
 	}
 
 	public static void deleteUserByUserId(Integer userId) {
 		String key = String.format(GET_USER_BY_USERID, userId);
-		redisUtil.removeKey(key);
+		redisCRUD.del(key);
 	}
 
 	public static void setConfig(Config config) {
-		redisUtil.saveString(GET_CONFIG, config.toString());
+		redisCRUD.set(GET_CONFIG, config.toString());
 	}
 	public static Config getConfig() {
-		String config=redisUtil.getKey(GET_CONFIG);
+		String config=redisCRUD.get(GET_CONFIG);
 		return StringUtil.isEmpty(config) ? null : JSON.parseObject(config, Config.class);
 	}
 
@@ -197,11 +207,11 @@ public final class KSessionUtil {
 	public static final String GET_ADDRESS_BYIP="clientIp:%s";
 	public static String getAddressByIp(String ip){
 		String key = String.format(GET_ADDRESS_BYIP, ip);
-		return redisUtil.getKey(key);
+		return redisCRUD.get(key);
 	}
 	public static void setAddressByIp(String ip,String address){
 		String key = String.format(GET_ADDRESS_BYIP, ip);
-		redisUtil.saveTimeKey(key, address,KConstants.Expire.HOUR12);
+		redisCRUD.setWithExpireTime(key, address,KConstants.Expire.HOUR12);
 		
 	}
 	

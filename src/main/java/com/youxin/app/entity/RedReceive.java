@@ -14,6 +14,7 @@ public class RedReceive {
 	private @Indexed ObjectId redId;//红包Id
 	
 	private @Indexed Integer userId;//接受者用户ID
+	private @Indexed String accid;//接受者用户ID
 	
 	private @Indexed Integer sendId;
 	//接受者用户名称
@@ -45,6 +46,14 @@ public class RedReceive {
 
 	public void setRedId(ObjectId redId) {
 		this.redId = redId;
+	}
+
+	public String getAccid() {
+		return accid;
+	}
+
+	public void setAccid(String accid) {
+		this.accid = accid;
 	}
 
 	public Integer getUserId() {

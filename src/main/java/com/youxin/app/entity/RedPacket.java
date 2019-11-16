@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.NotSaved;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,13 +18,20 @@ import io.swagger.annotations.ApiModelProperty;
 public class RedPacket {
 	@ApiModelProperty(hidden = true)
 	private @Id ObjectId id;
+	@ApiModelProperty(hidden = true)
+	@NotSaved
+	private String rid;
 	//发送者用户Id
 	@ApiModelProperty(value="发送者用户Id")
 	private @Indexed Integer userId; 
+	@ApiModelProperty(value="发送者用户accid")
+	private @Indexed String accid; 
 	@ApiModelProperty(value="发送到那个房间")
 	private String roomJid;// 发送到那个房间
 	@ApiModelProperty(value="发送给那个人")
 	private Integer toUserId;// 发送给那个人
+	@ApiModelProperty(value="发送给那个人")
+	private String toAccid;// 发送给那个人
 	
 	@ApiModelProperty(value="红包发送者昵称")
 	private String userName;
@@ -140,6 +148,24 @@ public class RedPacket {
 	}
 	public void setToUserId(Integer toUserId) {
 		this.toUserId = toUserId;
+	}
+	public String getAccid() {
+		return accid;
+	}
+	public void setAccid(String accid) {
+		this.accid = accid;
+	}
+	public String getToAccid() {
+		return toAccid;
+	}
+	public void setToAccid(String toAccid) {
+		this.toAccid = toAccid;
+	}
+	public String getRid() {
+		return rid;
+	}
+	public void setRid(String rid) {
+		this.rid = rid;
 	}
 	
 	

@@ -36,7 +36,7 @@ public class MsgRequest {
 	/**
 	 * 对于对接了易盾反垃圾功能的应用，本消息是否需要指定经由易盾检测的内容（antispamCustom）。true或false, 默认false。只对消息类型为：100 自定义消息类型 的消息生效。
 	 */
-	private String antispam;
+	private String antispam="false";
 	/**
 	 * 在antispam参数为true时生效。
 	 *	自定义的反垃圾检测内容, JSON格式，长度限制同body字段，不能超过5000字符，要求antispamCustom格式如下：

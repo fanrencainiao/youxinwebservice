@@ -15,6 +15,8 @@ public class SdkLoginInfo {
 	
 	private Integer userId;
 	
+	private String accid;
+	
 	private int type;// 第三方登录类型   1：QQ 2:微信 
 	
 	private String loginInfo;// 登录标识  例 微信的openId
