@@ -70,11 +70,11 @@ public class TransferController extends AbstractController {
 	 */
 	@ApiOperation(value = "用户转账", response = Result.class)
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "money", value = "加密金额",required = true, paramType = "query"),
+			@ApiImplicitParam(name = "moneyStr", value = "加密金额",required = true, paramType = "query"),
 			@ApiImplicitParam(name = "time", value = "加密时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "安全加密 md5(md5(apikey+time+money) +userid+token+payPassword)", required = true, paramType = "query") })
 	@PostMapping(value = "/sendTransfer")
-	public Result sendTransfer(@RequestBody Transfer transfer, @RequestParam(defaultValue = "") String money,
+	public Result sendTransfer(@RequestBody Transfer transfer, @RequestParam(defaultValue = "") String moneyStr,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		Integer userId = ReqUtil.getUserId();
 		String token = getAccess_token();
@@ -82,12 +82,13 @@ public class TransferController extends AbstractController {
 		User user = userManager.getUserFromDB(userId);
 		transfer.setUserId(user.getId());
 		transfer.setUserName(user.getName());
+		transfer.setAccid(user.getAccid());
 		// 转账授权校验
-		if (!AuthServiceUtils.authRedPacketV1(user.getPayPassword(), userId + "", token, time, money, secret)) {
+		if (!AuthServiceUtils.authRedPacketV1(user.getPayPassword(), userId + "", token, time,  moneyStr, secret)) {
 			return Result.error("支付密码错误!");
 		}
 
-		Result result = tm.sendTransfer(userId, money, transfer);
+		Result result = tm.sendTransfer(userId,  moneyStr, transfer);
 		return result;
 	}
 
@@ -171,24 +172,26 @@ public class TransferController extends AbstractController {
 
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 
-			User sysUser = userManager.getUser(1100);
-			transfer.setId(null);		
-			MsgRequest messageBean = new MsgRequest();
-			messageBean.setFrom(sysUser.getAccid());
-			messageBean.setType(0);// 文本
-		
-			messageBean.setOpe(0);// 个人消息
-			messageBean.setTo(transfer.getAccid());
-			
-			messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
-			try {
-				JSONObject json=SDKService.sendMsg(messageBean);
-				if(json.getInteger("code")!=200) 
-					log.debug("退款 sdk消息发送失败");
-			} catch (Exception e) {
-				e.printStackTrace();
-				log.debug("退款 sdk消息发送失败"+e.getMessage());
-			}
+//			User sysUser = userManager.getUser(1100);
+//			transfer.setId(null);		
+//			MsgRequest messageBean = new MsgRequest();
+//			messageBean.setFrom(sysUser.getAccid());
+//			messageBean.setType(100);// 文本
+//		
+//			messageBean.setOpe(0);// 个人消息
+//			messageBean.setTo(transfer.getAccid());
+//			
+////			messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
+//			messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERBACK+",\"data\":"+JSON.toJSONString(transfer)+"}");
+//			
+//			try {
+//				JSONObject json=SDKService.sendMsg(messageBean);
+//				if(json.getInteger("code")!=200) 
+//					log.debug("退款 sdk消息发送失败");
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				log.debug("退款 sdk消息发送失败"+e.getMessage());
+//			}
 			
 			log.debug(userId + "  发出转账,剩余金额   " + money + "  未收钱  退回余额!");
 			return Result.success(userId + "  发出转账,剩余金额   " + money + "  未收钱  退回余额!");

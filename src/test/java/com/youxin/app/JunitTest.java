@@ -45,7 +45,7 @@ public class JunitTest {
 		
 		return Math.abs(c);
 	}
-	@Test
+//	@Test
 	public void sendMsgTest() {
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setFrom("d515adcd7b3c3d05b5b9f6ebeb94ae51");

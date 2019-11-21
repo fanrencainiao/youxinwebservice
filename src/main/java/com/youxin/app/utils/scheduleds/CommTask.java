@@ -34,6 +34,7 @@ import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.DateUtil;
@@ -218,7 +219,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 //		}
 		
 		MsgRequest messageBean = new MsgRequest();
-		messageBean.setType(0);// 文本
+		messageBean.setType(100);// 自定义
 		messageBean.setOpe(0);// 个人消息
 		if (toUser!=null) {
 			messageBean.setFrom(toUser.getAccid());
@@ -226,7 +227,10 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			messageBean.setFrom(userManager.getUser(1100).getAccid());
 		}
 		messageBean.setTo(userManager.getUser(userId).getAccid());
-		messageBean.setBody("{\"msg\":"+id+"}");
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, id)));
+//		messageBean.setBody("{\"type\":"+KConstants.MsgType.BACKREDPACKET+",\"data\":"+id.toString()+"}");
+		
+		
 		try {
 			JSONObject json=SDKService.sendMsg(messageBean);
 			if(json.getInteger("code")!=200) 
@@ -304,12 +308,14 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setFrom(sysUser.getAccid());
-		messageBean.setType(0);// 文本
+		messageBean.setType(100);// 文本
 	
 		messageBean.setOpe(0);// 个人消息
 		messageBean.setTo(userManager.getUser(userId).getAccid());
-		
-		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
+		transfer.setRid(transferId.toString());
+//		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
+//		messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERBACK+",\"data\":"+JSON.toJSONString(transfer)+"}");
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.TRANSFERBACK, transfer)));
 		try {
 			JSONObject json=SDKService.sendMsg(messageBean);
 			if(json.getInteger("code")!=200) 

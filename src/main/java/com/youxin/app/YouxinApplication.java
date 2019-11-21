@@ -21,7 +21,7 @@ import com.youxin.app.utils.applicationBean.WxConfig;
 @SpringBootApplication
 @EntityScan("com.youxin.app.entity")
 @ComponentScan(basePackages ="com.youxin.app")
-@EnableConfigurationProperties(value = { AuthorizationFilterProperties.class, SmsConfig.class,AliPayConfig.class})
+@EnableConfigurationProperties(value = { AuthorizationFilterProperties.class, SmsConfig.class,AliPayConfig.class,WxConfig.class})
 @ServletComponentScan
 public class YouxinApplication {
 

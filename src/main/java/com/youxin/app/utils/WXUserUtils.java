@@ -9,8 +9,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.youxin.app.controller.TestController;
 import com.youxin.app.utils.applicationBean.WxConfig;
 
 
@@ -19,7 +21,15 @@ import com.youxin.app.utils.applicationBean.WxConfig;
  * @author lidaye
  *
  */
-public class WXUserUtils implements ApplicationContextAware{
+@Component
+public class WXUserUtils{
+	
+	
+	private static WxConfig wxConfig;
+	@Autowired
+	public WXUserUtils(WxConfig wxConfig) {
+		WXUserUtils.wxConfig = wxConfig;
+	}
 	
 	private final static String GETOPENIDURL=
 			"https://api.weixin.qq.com/sns/oauth2/access_token";
@@ -31,10 +41,8 @@ public class WXUserUtils implements ApplicationContextAware{
 	private final static String GETUSERURL=
 			"https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID";
 	
-	@Autowired
-	private WxConfig wxConfigs;
+
 	
-	private static WxConfig wxConfig;
 	//获取小程序连接
 	private final static String GETWXACODEUNLIMIT=
 			"https://api.weixin.qq.com/wxa/getwxacodeunlimit";
@@ -157,11 +165,7 @@ public class WXUserUtils implements ApplicationContextAware{
 		
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		// TODO Auto-generated method stub
-		wxConfig=wxConfigs;
-	}
+
 
 	
 }

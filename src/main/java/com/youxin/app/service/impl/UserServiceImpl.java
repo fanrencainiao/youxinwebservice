@@ -286,14 +286,15 @@ public class UserServiceImpl implements UserService {
 			q.field("_id").equal(userId);
 			UpdateOperations<User> ops = repository.createUpdateOperations();
 			User user = getUser(userId);
+			User dbUser=q.get();
 			if (null == user)
 				return 0.0;
 			DecimalFormat df = new DecimalFormat("#.00");
 			money = Double.valueOf(df.format(money));
 
 			if (KConstants.MOENY_ADD == type) {
-				ops.inc("balance", money);
-				ops.inc("totalRecharge", money);
+				ops.set("balance", Double.valueOf(df.format(dbUser.getBalance() + money)));
+				ops.set("totalRecharge", Double.valueOf(df.format(dbUser.getTotalRecharge() + money)));
 				user.setBalance(Double.valueOf(df.format(user.getBalance() + money)));
 			} else {
 				if (this.getUserMoeny(userId) < money) {
@@ -301,8 +302,8 @@ public class UserServiceImpl implements UserService {
 					System.out.println("余额不足");
 					return 0.0;
 				}
-				ops.inc("balance", -money);
-				ops.inc("totalConsume", money);
+				ops.set("balance", Double.valueOf(df.format(dbUser.getBalance() - money)));
+				ops.set("totalConsume", Double.valueOf(df.format(dbUser.getTotalConsume() + money)));
 				user.setBalance(Double.valueOf(df.format(user.getBalance() - money)));
 			}
 			repository.update(q, ops);
@@ -414,7 +415,9 @@ public class UserServiceImpl implements UserService {
 		if(!StringUtil.isEmpty(user.getAccount()) && user.getAccount().contains("毛主席")) {
 			throw new ServiceException(0, "友讯号已经修改过或者字段合法");
 		}
-		
+		if(getUserByAccount(account)!=null) {
+			throw new ServiceException(0, "友讯号已存在");
+		}
 		Query<User> q = repository.createQuery();
 		q.field("_id").equal(userId);
 		
@@ -456,6 +459,17 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 	
+	
+	public User getUserByAccount(String account) {
+		User user = repository.findOne("account", account);
+		if (null == user) {
+			System.out.println("account为" + account + "的用户不存在");
+			return null;
+		}
+
+		return user;
+	}
+	
 	@Override
 	public SdkLoginInfo findSdkLoginInfo(int type, String loginInfo) {
 		Query<SdkLoginInfo> query = dfds.createQuery(SdkLoginInfo.class).field("type").equal(type)
@@ -482,7 +496,7 @@ public class UserServiceImpl implements UserService {
 			return null;
 		}
 		JSONObject jsonObject = WXUserUtils.getWxOpenId(code);
-		String openid = jsonObject.getString("openid");
+		String openid = jsonObject.getString("unionid");
 		if (StringUtil.isEmpty(openid)) {
 			return null;
 		}
@@ -498,6 +512,17 @@ public class UserServiceImpl implements UserService {
 		UpdateOperations<User> ops = repository.createUpdateOperations();
 		ops.set("mobile", mobile);
 		repository.update(q, ops);
+	}
+
+	@Override
+	public User getUserFromDB(String accid) {
+		User user = repository.findOne("accid", accid);
+		if (null == user) {
+			System.out.println("accid为" + accid + "的用户不存在");
+			return null;
+		}
+
+		return user;
 	}
 	
 

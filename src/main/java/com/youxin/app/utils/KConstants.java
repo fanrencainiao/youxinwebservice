@@ -176,6 +176,15 @@ public class KConstants {
 			public static final int SYSTEMPAY = 4;// 系统支付
 			public static final int IOSINBUY = 5;// ios内购
 		}
+		//消息类型
+		public interface MsgType {
+			public static final int OPENREDPACKET = 10;// 打开红包
+			public static final int BACKREDPACKET = 11;// 超时退回红包
+			public static final int TRANSFERRECIEVE = 13;// 转账收钱
+			public static final int TRANSFERBACK = 14;// 转账退回
+		}
+
+
 	
 	public interface ResultMsgs {
 		

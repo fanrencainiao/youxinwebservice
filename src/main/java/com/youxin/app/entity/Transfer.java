@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.annotations.NotSaved;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,6 +20,9 @@ public class Transfer {
 	
 	@ApiModelProperty(hidden = true)
 	private @Id ObjectId id;
+	@ApiModelProperty(hidden = true)
+	@NotSaved
+	private String rid;
 	@ApiModelProperty(value="发送者用户Id")
 	private @Indexed Integer userId;
 	

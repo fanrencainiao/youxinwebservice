@@ -25,6 +25,7 @@ import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.UserWallet;
 import com.youxin.app.entity.WalletFour;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.repository.LastWalletRepository;
 import com.youxin.app.repository.RedPacketRepository;
 import com.youxin.app.repository.RedReceiveRepository;
@@ -96,11 +97,11 @@ public class RedPacketManagerImpl{
 				return Result.success(map);
 			} else {
 				map.put("list", redReceivesByRedId);
-				return Result.error(null, map); // 你已经领过了 !
+				return Result.error("你已经领过了", map); // 你已经领过了 !
 			}
 		} else {// 红包已经领完了
 			map.put("list", redReceivesByRedId);
-			return Result.error(null, map);
+			return Result.error("红包已经领完了", map);
 		}
 	}
 
@@ -294,17 +295,17 @@ public class RedPacketManagerImpl{
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setFrom(user.getAccid());
 		messageBean.setType(100);// 文本
-		if (packet.getRoomJid() == null) {
+		if (StringUtil.isEmpty(packet.getRoomJid())) {
 			messageBean.setOpe(0);// 个人消息
-			messageBean.setTo(packet.getToAccid());
+			messageBean.setTo(packet.getAccid());
 		}else {
 			messageBean.setOpe(1);// 群消息
 			messageBean.setTo(packet.getRoomJid());
 		}
 		packet.setRid(packet.getId().toString());
 //		messageBean.setBody("{\"data\":"+JSON.toJSONString(packet)+"}");
-		messageBean.setBody("{\"type\":"+10+",\"data\":"+JSON.toJSONString(packet)+"}");
-		
+//		messageBean.setBody("{\"type\":"+KConstants.MsgType.OPENREDPACKET+",\"data\":"+JSON.toJSONString(packet)+"}");
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.OPENREDPACKET, packet)));
 		try {
 			JSONObject json=SDKService.sendMsg(messageBean);
 			if(json.getInteger("code")!=200) 

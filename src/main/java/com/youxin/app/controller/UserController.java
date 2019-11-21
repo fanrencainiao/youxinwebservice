@@ -91,6 +91,7 @@ public class UserController extends AbstractController{
 		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
 		if (sdkLoginInfo != null) {
 			User user = userService.getUserFromDB(sdkLoginInfo.getUserId());
+			user.setLoginType(3);
 			Object data = userService.login(user);
 			return Result.success(data);
 		} else {
@@ -208,6 +209,27 @@ public class UserController extends AbstractController{
 		user.setSmsCode(smsCode);
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
+	}
+	@ApiOperation(value = "密码验证",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "pwd", value = "密码", required = true, paramType = "query"),
+    @ApiImplicitParam(name = "type", value = "密码类型(1登录密码，2支付密码)", required = true, paramType = "query"),
+		})
+	@PostMapping("validPwd")
+	public Object validPwd(String pwd,int type){
+		Integer userId = ReqUtil.getUserId();
+		User userFromDB = userService.getUserFromDB(userId);
+		if(type==1) {
+			if(pwd.equals(userFromDB.getPassword())) {
+				return Result.success();
+			}
+		}else if(type==2) {
+			if(pwd.equals(userFromDB.getPayPassword())) {
+				return Result.success();
+			}
+		}else {
+			Result.error("验证类型错误");
+		}
+		return Result.error("密码错误");
 	}
 	@ApiOperation(value = "退出登录",response=Result.class)
 	@DeleteMapping("logout")

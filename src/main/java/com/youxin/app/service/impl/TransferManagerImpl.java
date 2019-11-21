@@ -18,6 +18,7 @@ import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.TransferReceive;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.repository.TransferRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
@@ -63,11 +64,11 @@ public class TransferManagerImpl{
 //		map.put("transfer", transfer);
 		//判断转账是否超时
 		if(DateUtil.currentTimeSeconds()>transfer.getOutTime()){
-			return Result.success("该转账已超过24小时");
+			return Result.error("该转账已超过24小时",transfer);
 		}
 		// 判断转账状态是否正常
 		if(transfer.getStatus()!=1){
-			return Result.success("该转账已完成或退款");
+			return Result.error("该转账已完成或退款",transfer);
 		}
 		
 		return Result.success(transfer);
@@ -129,7 +130,7 @@ public class TransferManagerImpl{
 		}
 		
 		// 判断是否发送给该用户的转账
-		if(!transfer.getToUserId().equals(userId)){
+		if(!userService.getUserFromDB(transfer.getToAccid()).getId().equals(userId)){
 			return Result.error("收款人不正确",transfer);
 		}
 		
@@ -156,19 +157,20 @@ public class TransferManagerImpl{
 
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setFrom(user.getAccid());
-		messageBean.setType(0);// 文本
+		messageBean.setType(100);// 文本
 	
 		messageBean.setOpe(0);// 个人消息
 		messageBean.setTo(transfer.getAccid());
-		
-		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
+		transfer.setRid(transfer.getId().toString());
+//		messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERRECIEVE+",\"data\":"+JSON.toJSONString(transfer)+"}");
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.TRANSFERRECIEVE, transfer)));
 		try {
 			JSONObject json=SDKService.sendMsg(messageBean);
 			if(json.getInteger("code")!=200) 
-				log.debug("付款 sdk消息发送失败");
+				log.debug("收钱 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.debug("付款 sdk消息发送失败"+e.getMessage());
+			log.debug("收钱 sdk消息发送失败"+e.getMessage());
 		}
 		
 		//开启一个线程 添加一条消费记录
