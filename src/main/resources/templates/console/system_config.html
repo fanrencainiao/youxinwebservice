@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="../../static/common/layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="../../static/console/css/public.css" media="all" />
+</head>
+<body class="childrenBody">
+<div class="layui-container" style="width: 90%;margin-top: 30px;">
+	<form class="layui-form">
+		<table class="layui-table mag0">
+			<colgroup>
+				<col width="25%">
+				<col width="45%">
+				<col>
+		    </colgroup>
+		    <thead>
+		    	<tr>
+		    		<th>参数说明</th>
+		    		<th>参数值</th>
+		    		<th>变量名</th>
+		    		<th>参数说明</th>
+		    	</tr>
+		    </thead>
+		    <tbody>
+		    
+		    	<tr>
+		    		<td>HTTP是否安全验证</td>
+		    		<td>
+		    			<select class="layui-input-inline authApi">
+		    				<option value="1">开启</option>
+		    				<option value="0">关闭</option>
+		    			</select>
+		    		</td>
+		    		<td>
+		    			isAuthApi
+		    		</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>是否开启swagger在线调试文档（如开启，无法获取objectid，导致部分程序出错，需谨慎）</td>
+		    		<td>
+		    			<select class="layui-input-inline isOpenSwagger">
+		    				<option value="1">开启</option>
+		    				<option value="0">关闭</option>
+		    			</select>
+		    		</td>
+		    		<td>
+		    			isOpenSwagger
+		    		</td>
+		    		<td></td>
+		    	</tr>
+				<tr>
+		    		<td>apiUrl</td>
+		    		<td><input type="text" class="layui-input apiUrl" placeholder=" "></td>
+		    		<td pc>apiUrl</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>通讯录自动添加好友</td>
+		    		<td>
+		    			<select class="layui-input-inline isAutoAddressBook">
+		    				<option value="1">是</option>
+		    				<option value="0">否</option>
+		    			</select>
+		    		</td>
+		    		<td>
+		    			isAutoAddressBook
+		    		</td>
+		    		<td></td>
+		    	</tr>
+		    	
+		    	
+		    	<tr>
+		    		<td>Android最新版本号</td>
+		    		<td><input type="text" class="layui-input androidVersion" placeholder=" "></td>
+		    		<td pc>androidVersion</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>Android最新下载URL</td>
+		    		<td><input type="text" class="layui-input androidAppUrl" placeholder=" "></td>
+		    		<td pc>androidAppUrl</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>Android更新说明</td>
+		    		<td><input type="text" class="layui-input androidExplain" placeholder=" "></td>
+		    		<td pc>androidExplain</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>IOS最新版本号</td>
+		    		<td><input type="text" class="layui-input iosVersion" placeholder=" "></td>
+		    		<td pc>iosVersion</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>IOS最新下载URL</td>
+		    		<td><input type="text" class="layui-input iosAppUrl" placeholder=" "></td>
+		    		<td pc>iosAppUrl</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>IOS更新说明</td>
+		    		<td><input type="text" class="layui-input iosExplain" placeholder=" "></td>
+		    		<td pc>iosExplain</td>
+		    		<td></td>
+		    	</tr>
+			
+
+		    <!-- 	<tr>
+		    		<td>XMPP是否加密传输</td>
+		    		<td>
+		    			<select class="layui-input-inline isEncrypt">
+		    				<option value="1">是</option>
+		    				<option value="0">否</option>
+		    			</select>
+		    		</td>
+		    		<td>isEncrypt</td>
+		    		<td></td>
+		    	</tr>
+		    	<tr>
+		    		<td>是否支持多点登录</td>
+		    		<td>
+		    			<select class="layui-input-inline isMultiLogin">
+		    				<option value="1">是</option>
+		    				<option value="0">否</option>
+		    			</select>
+		    		</td>
+		    		<td>
+		    			isMultiLogin
+		    		</td>
+		    		<td></td>
+		    	</tr> -->
+		  
+
+		    </tbody>
+		</table>
+		<div class="magt10 layui-center">
+			<div class="layui-input-block" style="margin-left: 0px">
+				<button class="layui-btn save" lay-submit="" lay-filter="systemConfig">保存</button>
+		    </div>
+		</div>
+	</form>
+</div>
+	<script type="text/javascript" src="/static/common/layui/layui.js"></script>
+	<script type="text/javascript" src="/static/common/jquery/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+	<script type="text/javascript" src="/static/console/js/common.js"></script>
+	<script type="text/javascript" src="/static/console/js/system_config.js"></script>
+	
+
+</body>
+</html>

@@ -72,14 +72,17 @@
     </appender>
 
     <logger name="api.log" level="debug">
+     <appender-ref ref="CONSOLE"/>
         <appender-ref ref="paifile"/>
     </logger>
     
      <logger name="sdk" level="debug">
+      <appender-ref ref="CONSOLE"/>
         <appender-ref ref="sdkfile"/>
     </logger>
     
      <logger name="pay" level="debug">
+      <appender-ref ref="CONSOLE"/>
         <appender-ref ref="payfile"/>
     </logger>
 
@@ -87,6 +90,8 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="logfile"/>
     </root>
+
+
 
 
 </configuration>

@@ -63,7 +63,7 @@ public class UserConsumeController extends AbstractController {
 		Integer userId = ReqUtil.getUserId();
 		// 充值接口授权
 		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
-			System.out.println("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
+			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
 			return Result.errorMsg("权限验证失败!");
 		}
 		Map<String, String> map = Maps.newLinkedHashMap();

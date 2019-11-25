@@ -21,11 +21,13 @@ import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.youxin.app.utils.alipay.config.AlipayConfig;
 import com.youxin.app.utils.alipay.sign.RSA;
 import com.youxin.app.utils.applicationBean.AliPayConfig;
-
-public class AliPayUtil  implements ApplicationContextAware{
+@Component
+public class AliPayUtil{
 	private static AliPayConfig aliPayConfig;
 	@Autowired
-	private AliPayConfig aliPayConfigs;
+	public AliPayUtil(AliPayConfig aliPayConfig){
+		AliPayUtil.aliPayConfig=aliPayConfig;
+	}
 	
 	public static String APP_ID(){
 		return aliPayConfig.getAppid();
@@ -179,10 +181,5 @@ public class AliPayUtil  implements ApplicationContextAware{
 //		
 //	   }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		// TODO Auto-generated method stub
-		aliPayConfig=aliPayConfigs;
-	}
 	
 }

@@ -10,20 +10,8 @@
 				{
 					"title": "服务器配置",
 					"icon": "&#xe857;",
-					"href": "/pages/console/system_config.html",
+					"href": "/templates/console/system_config.html",
 					"spread": false
-				},
-				{
-					"title": "客户端配置",
-					"icon": "&#xe7ae;",
-					"href": "/pages/console/clientConfig.html",
-					"spread": false
-				},
-				{
-					"title":"集群配置",
-					"icon":"&#xe656;",
-					"href":"/pages/console/clusterConfig.html",
-					"spread":false
 				}
 			]
 			
@@ -32,6 +20,12 @@
 			"title": "用户管理",
 			"icon":"&#xe66f;",
 			"href": "/templates/console/userList.html",
+			"spread": false
+		},
+		{
+			"title": "红包管理",
+			"icon": "&#xe65e;",
+			"href": "/templates/console/redEnvelope.html",
 			"spread": false
 		}
 

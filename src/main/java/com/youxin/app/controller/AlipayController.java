@@ -45,6 +45,9 @@ public class AlipayController extends AbstractController{
 	private Datastore dfds;
 	@RequestMapping("/callBack")
 	public String payCheck(HttpServletRequest request, HttpServletResponse response){
+		log.debug("支付宝request    "+request);
+		log.debug("支付宝request.getParameterMap    "+request.getParameterMap());
+		
 		Map<String,String> params = new HashMap<String,String>();
 		Map requestParams = request.getParameterMap();
 		for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
@@ -61,20 +64,20 @@ public class AlipayController extends AbstractController{
 		}
 		try {
 			String tradeNo = params.get("out_trade_no");
-			log.info("订单号    "+tradeNo);
+			log.debug("订单号    "+tradeNo);
 			
 			boolean flag = AlipaySignature.rsaCheckV1(params,AliPayUtil.ALIPAY_PUBLIC_KEY(), AliPayUtil.CHARSET(),"RSA2");
 			if(flag){
-				log.info("支付宝回调成功"+flag);
+				log.debug("支付宝回调成功"+flag);
 
 				String tradeStatus = params.get("trade_status");// 获取交易状态 
 				
 				ConsumeRecord entity = cr.getConsumeRecordByNo(tradeNo);
 				long total_amount = new BigDecimal(params.get("total_amount")).multiply(new BigDecimal(100)).longValue();
 				long sys_total_amount=new BigDecimal(entity.getMoney()).multiply(new BigDecimal(100)).longValue();
-				System.out.println("支付宝支付成功金额："+total_amount);
-				System.out.println("支付宝支付成功本系统中金额："+entity.getMoney());
-				System.out.println("支付宝支付返回订单状态："+tradeStatus);
+				log.debug("支付宝支付成功金额："+total_amount);
+				log.debug("支付宝支付成功本系统中金额："+entity.getMoney());
+				log.debug("支付宝支付返回订单状态："+tradeStatus);
 				if(entity.getStatus()!=KConstants.OrderStatus.END
 						&&("TRADE_SUCCESS".equals(tradeStatus)||"TRADE_FINISHED".equals(tradeStatus))
 						&&total_amount==sys_total_amount){
@@ -82,22 +85,28 @@ public class AlipayController extends AbstractController{
 					//把支付宝返回的订单信息存到数据库
 					AliPayParam aliCallBack=new AliPayParam();
 					BeanUtils.populate(aliCallBack, params);
+					log.debug("支付宝支付返回用户id："+entity.getUserId());
 					User user=userService.getUser(entity.getUserId());
+					log.debug("支付宝支付返回用户："+user);
 					user.setAliUserId(aliCallBack.getBuyer_id());
+					log.debug("支付宝支付返回aliid："+aliCallBack.getBuyer_id());
 					crpository.save(entity);
+					log.debug("支付宝支付返回保存消费记录：");
 					dfds.save(aliCallBack);
+					log.debug("支付宝支付返回保存支付宝消费记录：");
 					userService.rechargeUserMoeny(entity.getUserId(), entity.getMoney(), KConstants.MOENY_ADD);
+					log.debug("支付宝支付进行金额处理：");
 				}
 
 				return "success";
 			}else{
-				log.info("支付宝回调失败"+flag);
+				log.debug("支付宝回调失败"+flag);
 				return "failure";
 				
 			}
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
-			log.info("支付宝回调失败"+e.getMessage());
+			log.debug("支付宝回调失败"+e.getMessage());
 			return "failure";
 		}
 	}

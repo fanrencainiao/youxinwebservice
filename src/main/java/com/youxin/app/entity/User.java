@@ -10,15 +10,17 @@ import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.NotSaved;
 
 import com.alibaba.fastjson.JSONObject;
+import com.youxin.app.entity.exam.BaseExample;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
-import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.StringUtil;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户
@@ -27,9 +29,10 @@ import lombok.Data;
  *
  */
 @Entity(value = "user", noClassnameStored = true)
-@Data
+@Getter
+@Setter
 @ApiModel(value = "用户")
-public class User {
+public class User extends BaseExample{
 
 	@Id
 	@ApiModelProperty(hidden = true)
@@ -78,7 +81,7 @@ public class User {
 	/**
 	 * 用户mobile，最大长度32字符，非中国大陆手机号码需要填写国家代码(如美国：+1-xxxxxxxxxx)或地区代码(如香港：+852-xxxxxxxx)，可设置为空字符串
 	 */
-	@ApiModelProperty(value = "用户mobile，最大长度32字符，非中国大陆手机号码需要填写国家代码(如美国：+1-xxxxxxxxxx)或地区代码(如香港：+852-xxxxxxxx)，可设置为空字符串")
+	@ApiModelProperty(value = "(解密显示：（n-7）/3)用户mobile，最大长度32字符，非中国大陆手机号码需要填写国家代码(如美国：+1-xxxxxxxxxx)或地区代码(如香港：+852-xxxxxxxx)，可设置为空字符串")
 	private String mobile;
 	/**
 	 * 用户性别，0表示未知，1表示男，2女表示女，其它会报参数错误
@@ -134,6 +137,8 @@ public class User {
 	private int disableUser = 0;
 	@ApiModelProperty(value = "用户类型 0普通用户(默认)，2公众号")
 	private int userType = 0;
+	@ApiModelProperty(value = "身份二维码标识，用于刷新二维码")
+	private String codeSign = "code";
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();

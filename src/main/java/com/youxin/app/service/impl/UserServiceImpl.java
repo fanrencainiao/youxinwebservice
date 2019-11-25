@@ -1,6 +1,7 @@
 package com.youxin.app.service.impl;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.mongodb.BasicDBObject;
@@ -25,8 +27,11 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.LoginLog;
+import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
+import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
@@ -34,12 +39,15 @@ import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.MongoOperator;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.WXUserUtils;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
+
+
 
 
 
@@ -113,16 +121,8 @@ public class UserServiceImpl implements UserService {
 		SDKService.friendAdd(friends);
 
 		// 缓存用户token
-		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(bean.getId(), bean.getId(), null);
-		data.put("id", bean.getId());
-		data.put("accid", bean.getAccid());
-		data.put("account", bean.getAccount());
-		data.put("name", bean.getName());
-		data.put("birth", bean.getBirth());
-		data.put("icon", bean.getIcon());
-		data.put("token", bean.getToken());
-		data.put("mobile", bean.getMobile());
-
+		Map<String, Object> data = saveLoginInfo(bean);
+		
 		return data;
 	}
 
@@ -136,10 +136,14 @@ public class UserServiceImpl implements UserService {
 		}
 		user.setEx("");
 		user.setPassword("");
-		user.setPayPassword("");
+		if(StringUtil.isEmpty(user.getPayPassword())||"0".equals(user.getPayPassword())) 
+			user.setPayPassword("0");
+		else
+			user.setPayPassword("1");
+		user.setMobile(StringUtil.phoneEncryption(user.getMobile()));
 		return user;
 	}
-
+	
 	public User getUser(Integer userId) {
 		// 先从 Redis 缓存中获取
 		User user = KSessionUtil.getUserByUserId(userId);
@@ -196,17 +200,7 @@ public class UserServiceImpl implements UserService {
 		}
 	
 		KSessionUtil.saveUserByUserId(user.getId(), user);
-		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
-//		Object token = data.get("access_token");
-		data.put("id", user.getId());
-		data.put("accid", user.getAccid());
-		data.put("account", user.getAccount());
-		data.put("name", user.getName());
-		data.put("birth", user.getBirth());
-		data.put("icon", user.getIcon());
-		data.put("token", user.getToken());
-		data.put("mobile", user.getMobile());
-		System.out.println(data);
+		Map<String, Object> data = saveLoginInfo(user);
 		return data;
 	}
 
@@ -271,7 +265,11 @@ public class UserServiceImpl implements UserService {
 //		SDKService.friendAdd(friends);
 
 //		System.out.println(SDKService.getUinfos("['2dd0c6c424d1afbf925b8be4fbe85981']"));
+
+
 	}
+
+	
 
 	@Override
 	public String getUserName(Integer userId) {
@@ -353,6 +351,7 @@ public class UserServiceImpl implements UserService {
 //			ref.put("birthday", new BasicDBObject("$lte", example.getEndTime()));
 		DBObject fields = new BasicDBObject();
 		fields.put("password", 0);
+		fields.put("payPassword", 0);
 		fields.put("token", 0);
 		fields.put("loginType", 0);
 		fields.put("balance", 0);
@@ -364,7 +363,8 @@ public class UserServiceImpl implements UserService {
 			DBObject obj = cursor.next();
 			obj.put("userId", obj.get("_id"));
 			obj.removeField("_id");
-
+			obj.put("mobile", StringUtil.phoneEncryption(obj.get("mobile").toString()));
+			
 			list.add(obj);
 		}
 
@@ -403,6 +403,8 @@ public class UserServiceImpl implements UserService {
 		}
 		repository.update(q, ops);
 	}
+	
+
 	
 	@Override
 	public User updateAccount(String account) {
@@ -524,6 +526,109 @@ public class UserServiceImpl implements UserService {
 
 		return user;
 	}
+
+	@Override
+	public Map<String, Object> saveLoginInfo(User user) {
+		// 获取上次登录日志
+		User.LoginLog login = getLogin(user.getId());
+
+		// 保存登录日志
+		updateUserLoginLog(user.getId(), user);
+		
+		
+		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
+//		Object token = data.get("access_token");
+		data.put("id", user.getId());
+		data.put("accid", user.getAccid());
+		data.put("account", user.getAccount());
+		data.put("name", user.getName());
+		data.put("birth", user.getBirth());
+		data.put("icon", user.getIcon());
+		data.put("token", user.getToken());
+		data.put("mobile", StringUtil.phoneEncryption(user.getMobile()));
+		data.put("codeSign", user.getCodeSign());
+		data.put("login", login);
+		System.out.println(data);
+		return data;
+	}
+
+	@Override
+	public void updateUserByEle(User bean) {
+		if(bean==null || bean.getId()==null ||bean.getId()<1000)
+			log.debug("用户信息更新失败");
+		Query<User> q = repository.createQuery();
+		q.field("_id").equal(bean.getId());
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		if(!StringUtil.isEmpty(bean.getCodeSign())) {
+			ops.set("codeSign", bean.getCodeSign());
+		}
+		repository.update(q, ops);
+		KSessionUtil.saveUserByUserId(bean.getId(), q.get());
+	}
 	
+//	@Override
+	public User.LoginLog getLogin(int userId) {
+
+		UserLoginLog userLoginLog = dfds.createQuery(UserLoginLog.class).field("_id").equal(userId).get();
+		if (null == userLoginLog || null == userLoginLog.getLoginLog()) {
+			UserLoginLog loginLog = new UserLoginLog();
+			loginLog.setUserId(userId);
+			loginLog.setLoginLog(new LoginLog());
+			dfds.save(loginLog);
+			return loginLog.getLoginLog();
+		} else {
+			return userLoginLog.getLoginLog();
+		}
+
+	}
+	
+	public void updateUserLoginLog(int userId, User example) {
+		DBObject query = new BasicDBObject("_id", userId);
+
+		DBObject values = new BasicDBObject();
+		DBObject object = dfds.getCollection(UserLoginLog.class).findOne(query);
+		if (null == object)
+			values.put("_id", userId);
+
+		BasicDBObject loginLog = new BasicDBObject("isFirstLogin", 0);
+		loginLog.put("loginTime", DateUtil.currentTimeSeconds());
+		loginLog.put("apiVersion", example.getApiVersion());
+		loginLog.put("osVersion", example.getOsVersion());
+		loginLog.put("model", example.getModel());
+		loginLog.put("serial", example.getSerial());
+		loginLog.put("latitude", example.getLatitude());
+		loginLog.put("longitude", example.getLongitude());
+		loginLog.put("location", example.getLocation());
+		loginLog.put("address", example.getAddress());
+		values.put("loginLog", loginLog);
+
+		dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
+				true, false);
+
+		// updateAttribute(userId, "appId", example.getAppId());
+	}
+
+	public void updateLoginLogTime(int userId) {
+		DBObject query = new BasicDBObject("_id", userId);
+
+		DBObject values = new BasicDBObject();
+		DBObject object = dfds.getCollection(UserLoginLog.class).findOne(query);
+		BasicDBObject loginLog = null;
+		if (null == object || null == object.get("loginLog")) {
+			values.put("_id", userId);
+
+			loginLog = new BasicDBObject("isFirstLogin", 0);
+			loginLog.put("loginTime", DateUtil.currentTimeSeconds());
+			values.put("loginLog", loginLog);
+			dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
+					true, false);
+		} else {
+			values.put("loginLog.loginTime", DateUtil.currentTimeSeconds());
+			dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
+					true, false);
+
+		}
+
+	}
 
 }

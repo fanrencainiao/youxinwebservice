@@ -92,7 +92,8 @@ public class RedPacketManagerImpl{
 		if (packet.getCount() > packet.getReceiveCount()) {
 			// 判断当前用户是否领过该红包
 			if (null == packet.getUserIds() || !packet.getUserIds().contains(userId)) {
-				
+				if(packet.getStatus()==-1)
+					return  Result.error("红包已过期", map);
 				map.put("list", redReceivesByRedId);
 				return Result.success(map);
 			} else {

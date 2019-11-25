@@ -1,7 +1,7 @@
 /**
  * 公共的 js
  */
-var apiKey ="5e29f483c48848";
+var apiKey ="youxin";
 var ivKey=[1,2,3,4,5,6,7,8];
 var iv=getStrFromBytes(ivKey);
 function getStrFromBytes (arr) {

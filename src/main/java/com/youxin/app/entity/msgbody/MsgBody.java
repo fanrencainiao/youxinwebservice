@@ -13,5 +13,9 @@ public class MsgBody {
 		this.type=type;
 		this.data=data;
 	}
+	@Data
+	public static class ID {
+		private String id;
+	}
 
 }

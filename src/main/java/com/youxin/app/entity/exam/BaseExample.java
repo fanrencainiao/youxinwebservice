@@ -1,20 +1,35 @@
 package com.youxin.app.entity.exam;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class BaseExample {
-
+	@ApiModelProperty(value = "客户端使用的接口版本号")
 	protected String apiVersion;// 客户端使用的接口版本号
+	@ApiModelProperty(value = "客户端设备型号")
 	protected String model;// 客户端设备型号
+	@ApiModelProperty(value = "客户端设备操作系统版本号")
 	protected String osVersion;// 客户端设备操作系统版本号
+	@ApiModelProperty(value = "客户端设备序列号")
 	protected String serial;// 客户端设备序列号
-
+	
+	
+	@ApiModelProperty(value = "区县Id")
 	protected Integer areaId;// 区县Id
+	@ApiModelProperty(value = "城市Id")
 	protected Integer cityId;// 城市Id
+	@ApiModelProperty(value = "城市名称")
 	protected String cityName;// 城市名称
+	@ApiModelProperty(value = "国家Id")
 	protected Integer countryId;// 国家Id
+	@ApiModelProperty(value = "省份Id")
 	protected Integer provinceId;// 省份Id
+	@ApiModelProperty(value = "详细地址")
 	protected String address;// 详细地址
+	@ApiModelProperty(value = "位置描述")
 	protected String location;// 位置描述
+	@ApiModelProperty(value = "纬度")
 	protected double latitude;// 纬度
+	@ApiModelProperty(value = "经度")
 	protected double longitude;// 经度
 
 	public String getApiVersion() {

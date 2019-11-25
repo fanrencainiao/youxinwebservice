@@ -2,6 +2,7 @@ package com.youxin.app.utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
@@ -488,5 +489,22 @@ public final class StringUtil {
 			return s;
 		else
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+	}
+	/**
+	 * 手机号加密
+	 * @param p
+	 * @return
+	 */
+	public static String phoneEncryption(String p) {
+		try {
+			char[] a=p.replace(" ", "").toCharArray();
+			String[] p1 = new String[11];
+			for (int i = 0; i < a.length; i++) {
+				p1[i]=String.valueOf(Integer.valueOf(String.valueOf(a[i]))*3+7);
+			}
+			return Arrays.toString(p1);
+		} catch (Exception e) {
+			return "";
+		}
 	}
 }

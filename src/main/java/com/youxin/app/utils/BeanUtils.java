@@ -63,7 +63,7 @@ public abstract class BeanUtils extends org.springframework.beans.BeanUtils {
 	
 	public static void populate(Object obj, Map<String, ?> map) {
 		try {
-			BeanUtils.populate(obj, map);;
+			org.apache.commons.beanutils.BeanUtils.populate(obj, map);;
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("map 转换 obj失败");

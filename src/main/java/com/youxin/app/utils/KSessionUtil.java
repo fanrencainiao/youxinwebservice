@@ -186,6 +186,7 @@ public final class KSessionUtil {
 			user.setPayPassword("0");
 		else
 			user.setPayPassword("1");
+		user.setMobile(StringUtil.phoneEncryption(user.getMobile()));
 		redisCRUD.setWithExpireTime(key, user.toString(), KConstants.Expire.DAY1);
 
 	}

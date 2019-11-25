@@ -3,10 +3,13 @@ package com.youxin.app.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
+
+import com.youxin.app.service.ConfigService;
 
 
 
@@ -20,6 +23,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AuthServiceUtils implements ApplicationContextAware{
 	
+	private static ConfigService cs;
+	
+	@Autowired
+	public AuthServiceUtils(ConfigService cs) {
+		AuthServiceUtils.cs=cs;
+	}
 	@Value("${youxin.apiKey}")
 	private  String apiKeys;
 	
@@ -54,7 +63,7 @@ public class AuthServiceUtils implements ApplicationContextAware{
 		/**
 		 * 判断  系统配置是否要校验
 		 */
-		if(0==isAuth) {
+		if(0==cs.getConfig().getIsAuthApi()) {
 			return true;
 		}
 		if(!authRequestTime(time)) {
@@ -88,7 +97,7 @@ public class AuthServiceUtils implements ApplicationContextAware{
 		/**
 		 * 判断  系统配置是否要校验
 		 */
-		if(0==isAuth) {
+		if(0==cs.getConfig().getIsAuthApi()) {
 			return true;
 		}
 		if(!authRequestTime(time)) {
@@ -648,6 +657,6 @@ public class AuthServiceUtils implements ApplicationContextAware{
 		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 			apiKey=apiKeys;
-			isAuth=isAuths;
+//			isAuth=isAuths;
 		}
 }

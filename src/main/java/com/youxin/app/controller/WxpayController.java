@@ -45,7 +45,7 @@ public class WxpayController extends AbstractController{
 	public void wxPayCallBack(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		//把如下代码贴到的你的处理回调的servlet 或者.do 中即可明白回调操作
-		log.info("微信支付回调数据开始");
+		log.debug("微信支付回调数据开始");
 		BufferedOutputStream out = null;
 		String inputLine;
 		String notityXml = "";
@@ -57,13 +57,13 @@ public class WxpayController extends AbstractController{
 			request.getReader().close();
 			
 			Map<String,String> m = WXNotify.parseXmlToList2(notityXml);
-			log.info("接收到的报文：" + m);
+			log.debug("接收到的报文：" + m);
 				String tradeNo=m.get("out_trade_no");
 				ConsumeRecord entity=cr.getConsumeRecordByNo(tradeNo);
 				if(null==entity)
-					log.info("交易订单号不存在！-----"+tradeNo);
+					log.debug("交易订单号不存在！-----"+tradeNo);
 				else if(0!=entity.getStatus())
-					log.info(tradeNo+"===status==="+entity.getStatus()+"=======交易已处理或已取消!");
+					log.debug(tradeNo+"===status==="+entity.getStatus()+"=======交易已处理或已取消!");
 				else if("SUCCESS".equals(m.get("result_code"))){
 					boolean flag=Double.valueOf(m.get("cash_fee"))==entity.getMoney()*100;
 					if(flag){
@@ -78,12 +78,12 @@ public class WxpayController extends AbstractController{
 						userService.rechargeUserMoeny(entity.getUserId(), entity.getMoney(), KConstants.MOENY_ADD);
 						log.info(tradeNo+"========>>微信支付成功!");
 					}else{
-						log.info("微信数据返回错误!");
-						log.info("localhost:Money---------"+entity.getMoney()*100);
-						log.info("Wxpay:Cash_fee---------"+m.get("cash_fee"));
+						log.debug("微信数据返回错误!");
+						log.debug("localhost:Money---------"+entity.getMoney()*100);
+						log.debug("Wxpay:Cash_fee---------"+m.get("cash_fee"));
 					}
 				}else{
-					log.info("微信支付失败======"+m.get("return_msg"));
+					log.debug("微信支付失败======"+m.get("return_msg"));
 					resXml = "<xml>" + "<return_code><![CDATA[FAIL]]></return_code>"
 					+ "<return_msg><![CDATA[报文为空]]></return_msg>" + "</xml> ";
 				}

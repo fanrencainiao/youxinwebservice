@@ -36,14 +36,14 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
       ,cols: [[ //表头
            {type:'checkbox',fixed:'left'}// 多选
           ,{field: 'id', title: 'ID',sort:'true', width:100}
-          ,{field: 'accid', title: 'accid',sort:'true', width:200}
+          ,{field: 'accid', title: 'accid',sort:'true', width:100}
           ,{field: 'name', title: '昵称',sort:'true', width:100}
           ,{field: 'token', title: '云信token',sort:'true', width:100}
-          ,{field: 'mobile', title: '手机号',sort:'true', width:100}
+          ,{field: 'mobile', title: '手机号',sort:'true', width:120}
           ,{field: 'balance', title: '余额',sort:'true', width:100}
           ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:100}
           ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:100}
-          ,{fixed: 'right', width: 200,title:"操作", align:'left', toolbar: '#baseListBar'}
+          ,{fixed: 'right', width: 400,title:"操作", align:'left', toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
                if(count==0&&lock==1){
@@ -54,6 +54,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                 $("#baseList").show();
                 $("#base_table").show();
                 $("#addConfig").hide();
+               
                 var pageIndex = baseTable.config.page.curr;//获取当前页码
                 var resCount = res.count;// 获取table总条数
                 currentCount = resCount;
@@ -102,7 +103,22 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 
 		  });
 
-  }
+  }else if(layEvent==='bill'){ //用户账单
+
+   	localStorage.setItem("currClickUser", data.id);
+   	layer.open({
+   	  title : "",
+			  type: 2,
+			  skin: 'layui-layer-rim', //加上边框
+			  area: ['750px', '500px'], //宽高
+			  content: 'userBill.html'
+			  ,success: function(index, layero){
+
+			  }
+
+			});
+
+}
   });
 
 

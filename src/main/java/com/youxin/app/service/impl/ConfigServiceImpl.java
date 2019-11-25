@@ -52,6 +52,8 @@ public class ConfigServiceImpl implements ConfigService {
 		Config config=new Config();
 		config.setId(10000);
 		config.setIsAutoAddressBook(0);
+		config.setIsAuthApi(0);
+		config.setIsOpenSwagger(0);
 		cr.save(config);
 		
 		return config;

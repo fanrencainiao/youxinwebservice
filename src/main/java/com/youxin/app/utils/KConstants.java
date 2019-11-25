@@ -31,7 +31,7 @@ public class KConstants {
 		
 		add("/redPacket/openRedPacket");// 打开红包
 		
-		add("/user/recharge/getSign");// 充值
+		add("/user/consume/recharge");// 充值
 		
 		add("/transfer/wx/pay");// 企业向个人支付转账
 		
@@ -44,6 +44,7 @@ public class KConstants {
 		add("/pay/codePayment");// 付款码支付
 		
 		add("/pay/codeReceipt");// 二维码收款
+
 		
 	}};
 

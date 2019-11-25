@@ -35,6 +35,7 @@ import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.msgbody.MsgBody;
+import com.youxin.app.entity.msgbody.MsgBody.ID;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.DateUtil;
@@ -227,7 +228,9 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			messageBean.setFrom(userManager.getUser(1100).getAccid());
 		}
 		messageBean.setTo(userManager.getUser(userId).getAccid());
-		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, id)));
+		ID ids=new ID();
+		ids.setId(id.toString());
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, ids)));
 //		messageBean.setBody("{\"type\":"+KConstants.MsgType.BACKREDPACKET+",\"data\":"+id.toString()+"}");
 		
 		

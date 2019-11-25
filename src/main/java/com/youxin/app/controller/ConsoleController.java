@@ -26,17 +26,21 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
+import com.youxin.app.entity.RedPacket;
+import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.UserLoginLog;
-import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.filter.LoginSign;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
+import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.BeanUtils;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
@@ -48,7 +52,9 @@ import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
 
-import io.swagger.annotations.ApiOperation;
+
+
+
 
 
 @RestController
@@ -67,7 +73,11 @@ public class ConsoleController extends AbstractController{
 	@Autowired
 	@Qualifier("get")
 	private Datastore dfds;
-
+	@Autowired
+	RedPacketManagerImpl rpm;
+	@Autowired
+	ConfigService cs;
+	
 	@PostMapping(value = "login")
 	public Object login(String name, String password, HttpServletRequest request) {
 		User login = consoleService.login(name, password);
@@ -265,6 +275,80 @@ public class ConsoleController extends AbstractController{
 			return Result.error(e.getMessage());
 		}
 
+	}
+	
+	/**
+	 * 	 用户账单
+	 * @param userId
+	 * @param page
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping(value = "userBill")
+	public Object userBill(@RequestParam int userId, int page, int limit) throws Exception {
+		try {
+
+			// 核验用户是否存在
+			if (null == userService.getUserFromDB(userId)) {
+				return Result.error("用户不存在!");
+			}
+			PageResult<ConsumeRecord> result = crm.consumeRecordList(userId, page-1,
+					limit);
+			User userFromDB = userService.getUserFromDB(userId);
+			result.setTotal(userFromDB.getBalance());
+			return Result.success(result);
+
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+
+	}
+	
+	/**
+	 * @Description:（红包记录）
+	 * @param pageIndex
+	 * @param pageSize
+	 * @return
+	 **/
+	@GetMapping("/redPacketList")
+	public Object getRedPacketList(@RequestParam(defaultValue = "") String userName,
+			@RequestParam(defaultValue = "0") int userId,
+			@RequestParam(defaultValue = "0") int toUserId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		try {
+			PageResult<RedPacket> result = rpm.getRedPacketList(userName,userId,toUserId, page-1, limit);
+			return Result.success(result);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+
+	@RequestMapping("receiveWater")
+	public Object receiveWater(@RequestParam(defaultValue = "") String redId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
+		try {
+			PageResult<RedReceive> result = rpm.receiveWater(redId, page-1, limit);
+			return Result.success(result);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+	@RequestMapping(value = "config")
+	public Object getConfig() {
+		Config config = cs.getConfig();
+		return Result.success(config);
+	}
+	// 设置服务端配置
+	@RequestMapping(value = "/config/set", method = RequestMethod.POST)
+	public Object setConfig(@ModelAttribute Config config) throws Exception {
+		try {
+			cs.setConfig(config);
+			return Result.success();
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
 	}
 
 

@@ -15,24 +15,28 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.youxin.app.utils.applicationBean.WxConfig;
 
 
 
-
-public class WXPayUtil implements ApplicationContextAware{
+@Component
+public class WXPayUtil{
 	
 	private static Object Server;
-	private static WxConfig wxConfig;
+	
 	private static String QRfromGoogle;
+
+	
+	private static WxConfig wxConfig;
 	@Autowired
-	private WxConfig wxconfigs;
+	public WXPayUtil(WxConfig wxConfig) {
+		WXPayUtil.wxConfig = wxConfig;
+	}
+	
 	/**
 	 * 把对象转换成字符串
 	 * @param obj
@@ -360,11 +364,7 @@ public class WXPayUtil implements ApplicationContextAware{
 	        return wpr;
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		// TODO Auto-generated method stub
-		wxConfig=wxconfigs;
-	}
+
 }
 	
 	

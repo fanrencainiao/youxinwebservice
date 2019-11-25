@@ -11,6 +11,7 @@ import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -76,8 +77,39 @@ public class UserController extends AbstractController{
 			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = userService.mobileCount(user.getMobile());
 		if (mobileCount >= 1) {
-			throw new ServiceException(0, "手机号已被注册");
+			if(StringUtil.isEmpty(user.getLoginInfo())) {
+				throw new ServiceException(0, "手机号已被注册");
+			}else {
+				// 第三方绑定
+				
+				SdkLoginInfo findSdkLoginInfo = userService.findSdkLoginInfo(user.getSdkType(), user.getLoginInfo());
+				
+				
+//				return q.asList();
+				if(findSdkLoginInfo==null) {
+					User ubm = userService.getUserByMobile(user.getMobile());
+					Query<SdkLoginInfo> q = dfds.createQuery(SdkLoginInfo.class).field("userId").equal(ubm.getId());
+					if(!CollectionUtils.isEmpty(q.asList())) {
+						throw new ServiceException(0, "此用户已绑定有第三方账户");
+					}
+					SdkLoginInfo sdkLoginInfo=new SdkLoginInfo();
+					sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
+					sdkLoginInfo.setLoginInfo(user.getLoginInfo());
+					sdkLoginInfo.setType(2);
+					sdkLoginInfo.setUserId(ubm.getId());
+					sdkLoginInfo.setAccid(ubm.getAccid());
+					dfds.save(sdkLoginInfo);
+					
+					return Result.success(userService.saveLoginInfo(ubm));
+				}else {
+					throw new ServiceException(0, "微信已绑定");
+				}
+				
+				
+			}
+			
 		}
+		//注册与绑定注册
 		Map<String, Object> data=userService.register(user);
 		return Result.success(data);
 	}
@@ -488,7 +520,16 @@ public class UserController extends AbstractController{
 		}
 		return Result.success();
 	}
-	
+	@ApiOperation(value = "刷新二维码",response=Result.class)
+	@PostMapping("refreshCode")
+	public Object refreshCode(){
+		String codeSign=StringUtil.randomString(4);
+		User user = new User();
+		user.setId(ReqUtil.getUserId());
+		user.setCodeSign(codeSign);
+		userService.updateUserByEle(user);
+		return Result.success(codeSign);
+	}
 	
 
 }

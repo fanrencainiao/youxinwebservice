@@ -26,7 +26,7 @@ public interface UserService {
 	 */
 	Map<String, Object> addUser(User bean);
 	/**
-	 * 根据指定字段修改用户信息
+	 * 禁用用户解禁用户
 	 * @param bean
 	 * @return
 	 */
@@ -131,4 +131,12 @@ public interface UserService {
 	 * @return
 	 */
 	JSONObject getWxOpenId(String code);
+	
+	Map<String, Object> saveLoginInfo(User user);
+	/**
+	 * 根据字段更新用户信息
+	 * @param bean
+	 */
+	void updateUserByEle(User bean);
+
 }

@@ -45,6 +45,8 @@ authorizationfilter:
   requestUriList[5]: /user/logout
   requestUriList[6]: /user/sdkLogin
   requestUriList[7]: /user/getOpenids
+  requestUriList[8]: /wxpay/callBack
+  requestUriList[9]: /alipay/callBack
 
 youxin:
   apiKey: youxin 
@@ -75,7 +77,7 @@ wxconfig:
   mchid: 1559973071
   secret: 31bbedb38c0707d6da871e353ff1f313
   api-key: youxunyouxunyouxunyouxunyouxunyx
-  call-back-url: http://youxinapp.cn/user/recharge/wxPayCallBack
+  call-back-url: http://youxinapp.cn/wxpay/callBack
   pk-path: D:/Eclipse/WorkPace/mianshi-parent/mianshi-im-api/youxin.p12
   
 #支付宝支付相关配置

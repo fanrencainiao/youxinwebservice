@@ -10,8 +10,17 @@ import lombok.Data;
 public class Config {
 	
 	private @Id long id=10000;
+	
 	/**
-	 * 0否，1是
+	 * 开启swagger 0否，1是
+	 */
+	private int isOpenSwagger;
+	/**
+	 *开启权限验证  0否，1是
+	 */
+	private int isAuthApi;
+	/**
+	 * 自动导入通讯录 0否，1是
 	 */
 	private int isAutoAddressBook;
 	/**

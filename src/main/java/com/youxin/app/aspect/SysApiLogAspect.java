@@ -45,7 +45,7 @@ import com.youxin.app.utils.Result;
 @Order(1)
 @Component
 public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
-	private Log log=LogFactory.getLog(SysApiLogAspect.class);
+	private Log log=LogFactory.getLog("api.log");
 	
 	@Value("${youxin.isSaveRequestLogs}")
 	int isSaveRequestLogs;
@@ -72,7 +72,7 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 					break;
 			}
 		} catch (Exception e) {
-			log.error(e.toString(), e);
+			log.debug(e.toString(), e);
 		} finally {
 // 			if(!list.isEmpty())
 //			 SKBeanUtils.getDatastore().save(list);
@@ -100,13 +100,13 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 
 		// 记录下请求内容
 
-		log.info("HTTP_METHOD : " + request.getMethod());
+		log.debug("HTTP_METHOD : " + request.getMethod());
 
-		log.info("CLASS_METHOD : " + joinPoint.getSignature().getDeclaringTypeName() + "."
+		log.debug("CLASS_METHOD : " + joinPoint.getSignature().getDeclaringTypeName() + "."
 
 				+ joinPoint.getSignature().getName());
 
-		log.info("ARGS : " + Arrays.toString(joinPoint.getArgs()));
+		log.debug("ARGS : " + Arrays.toString(joinPoint.getArgs()));
 
 		MDC.get("uri");
 
@@ -161,9 +161,9 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 		apiLog.setFullUri(fullUri.toString());
 		apiLog.setUserAgent(request.getHeader("User-Agent"));
 
-		log.info(String.format("请求参数： %s", apiLog.getFullUri()));
-		log.info(String.format("客户端ip [%s]  User-Agent %s ", apiLog.getClientIp(), apiLog.getUserAgent()));
-		log.info(String.format("【%s】类的【%s】方法", className, methodName));
+		log.debug(String.format("请求参数： %s", apiLog.getFullUri()));
+		log.debug(String.format("客户端ip [%s]  User-Agent %s ", apiLog.getClientIp(), apiLog.getUserAgent()));
+		log.debug(String.format("【%s】类的【%s】方法", className, methodName));
 		// 用于统计调用耗时
 		long startTime = System.currentTimeMillis();
 
@@ -183,9 +183,9 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 		// log.info("RESPONSE : " + response);
 
 		// 获取执行完的时间
-		log.info(String.format("接口【%s】总耗时(毫秒)：%s", methodName, totalTime));
+		log.debug(String.format("接口【%s】总耗时(毫秒)：%s", methodName, totalTime));
 
-		log.info("********************************************   ");
+		log.debug("********************************************   ");
 		/**
 		 * 代码异常了
 		 */
@@ -228,7 +228,7 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 			e.printStackTrace();
 			detailMsg = e.getMessage();
 		}
-		log.error(resultMsg);
+		log.debug(resultMsg);
 
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("resultCode", resultCode);
