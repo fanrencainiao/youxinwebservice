@@ -1,6 +1,5 @@
 package com.youxin.app.entity;
 
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
@@ -27,6 +26,21 @@ public class Config {
 	 * 接口地址
 	 */
 	private String apiUrl;
+	/**
+	 * 用户银行卡提现是否短信通知0不通知，1通知
+	 */
+	private int bankMsgState=0;  
+	/**
+	 * 发送手机号
+	 */
+	private String sendPhone;  
+	
+	/**
+	 * 短信类型
+	 */
+	private String SMSType="aliyun";
+	
+	
 	/**
 	 * ios下载地址
 	 */

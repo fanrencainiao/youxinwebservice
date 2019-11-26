@@ -1,10 +1,13 @@
 package com.youxin.app.utils.alipay.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +21,7 @@ import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.utils.alipay.config.AlipayConfig;
 import com.youxin.app.utils.alipay.sign.RSA;
 import com.youxin.app.utils.applicationBean.AliPayConfig;
@@ -147,39 +151,39 @@ public class AliPayUtil{
 	}
 	
 
-//	 public static String checkBankCard(MyCard myCard) {
-//		 String returnStr = null; // 返回结果定义
-//		 String host = "https://yunyidata.market.alicloudapi.com";
-//		    String path = "/bankAuthenticate4";
-//		    String method = "POST";
-//		    String appcode = AppCode;
-//		    Map<String, String> headers = new HashMap<String, String>();
-//		    //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
-//		    headers.put("Authorization", "APPCODE " + appcode);
-//		    //根据API的要求，定义相对应的Content-Type
-//		    headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-//		    Map<String, String> querys = new HashMap<String, String>();
-//		    Map<String, String> bodys = new HashMap<String, String>();
-//		    bodys.put("ReturnBankInfo", "YES");
-//		    bodys.put("cardNo", myCard.getBankCard());
-//		    bodys.put("idNo", myCard.getIdCard());
-//		    bodys.put("name", myCard.getName());
-//		    bodys.put("phoneNo", myCard.getPhone());
-//
-//
-//		    try {
-//		    	
-//		    	HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
-//		    	System.out.println(response.toString());
-//		    	//获取response的body
-////		    	System.out.println(EntityUtils.toString(response.getEntity()));
-//		    	returnStr=EntityUtils.toString(response.getEntity());
-//		    } catch (Exception e) {
-//		    	e.printStackTrace();
-//		    }
-//		return returnStr;
-//		
-//	   }
+	 public static String checkBankCard(MyCard myCard) {
+		 String returnStr = null; // 返回结果定义
+		 String host = "https://yunyidata.market.alicloudapi.com";
+		    String path = "/bankAuthenticate4";
+		    String method = "POST";
+		    String appcode = AppCode();
+		    Map<String, String> headers = new HashMap<String, String>();
+		    //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+		    headers.put("Authorization", "APPCODE " + appcode);
+		    //根据API的要求，定义相对应的Content-Type
+		    headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		    Map<String, String> querys = new HashMap<String, String>();
+		    Map<String, String> bodys = new HashMap<String, String>();
+		    bodys.put("ReturnBankInfo", "YES");
+		    bodys.put("cardNo", myCard.getBankCard());
+		    bodys.put("idNo", myCard.getIdCard());
+		    bodys.put("name", myCard.getName());
+		    bodys.put("phoneNo", myCard.getPhone());
+
+
+		    try {
+		    	
+		    	HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
+		    	System.out.println(response.toString());
+		    	//获取response的body
+//		    	System.out.println(EntityUtils.toString(response.getEntity()));
+		    	returnStr=EntityUtils.toString(response.getEntity());
+		    } catch (Exception e) {
+		    	e.printStackTrace();
+		    }
+		return returnStr;
+		
+	   }
 
 	
 }

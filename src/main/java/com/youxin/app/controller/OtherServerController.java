@@ -93,4 +93,6 @@ public class OtherServerController {
 		}
 		return Result.success(params);
 	}
+	
+	
 }

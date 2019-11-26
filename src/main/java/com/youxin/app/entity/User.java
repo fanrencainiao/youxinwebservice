@@ -3,6 +3,7 @@ package com.youxin.app.entity;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -290,5 +291,36 @@ public class User extends BaseExample{
 		}
 
 	}
+	
+	/**
+	 * 用户银行卡
+	 */
+	@Data
+	@Entity(value = "myCard", noClassnameStored = true)
+	public static class MyCard {
+		@Id
+		private ObjectId id;
+		@ApiModelProperty(value = "用户id")
+		private Integer userId;
+
+		@ApiModelProperty(value = "银行卡号")
+		private String bankCard;
+		@ApiModelProperty(value = "身份证")
+		private String idCard;
+		@ApiModelProperty(value = "实名")
+		private String name;
+		@ApiModelProperty(value = "银行预留手机号")
+		private String phone;
+		@ApiModelProperty(value = "银行卡名称")
+		private String bankName;
+		@ApiModelProperty(value = "银行卡状态0删除，1正常")
+		private Integer state;
+		@ApiModelProperty(value = "未知属性")
+		private String type;
+		
+		private Long createTime;
+		private Long updateTime;
+	}
+
 
 }

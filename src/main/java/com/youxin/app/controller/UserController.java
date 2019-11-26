@@ -205,7 +205,7 @@ public class UserController extends AbstractController{
 			return Result.failure(ResultCode.BINGDINGMOBILED);
 		} else {
 			userService.updateMobile(mobile);
-			return Result.success(mobile);
+			return Result.success(StringUtil.phoneEncryption(mobile));
 		}
 	}
 	

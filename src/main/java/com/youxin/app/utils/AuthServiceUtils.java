@@ -15,6 +15,7 @@ import com.youxin.app.service.ConfigService;
 
 
 
+
 /**
  * 各种 加密 权限验证的类
  * @author lidaye
@@ -652,6 +653,102 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			
 			return Md5Util.md5Hex(key);
 			
+		}
+		
+		/**
+		 * 银行卡转账验证
+		 * @param payPassword
+		 * @param userId
+		 * @param token
+		 * @param amount
+		 * @param bankCard
+		 * @param name
+		 * @param time
+		 * @param secret
+		 * @return
+		 */
+		public static boolean authBankTransferPay(String payPassword,String userId,String token,String amount,String bankCard,String name,long time,String secret) {
+			if(!authRequestTime(time)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(secret)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(payPassword)){
+				return false;
+			}
+			if(StringUtil.isEmpty(bankCard)){
+				return false;
+			}
+			if(StringUtil.isEmpty(name)){
+				return false;
+			}
+			String secretKey=getBankTransferPaySecret(payPassword,userId, token, amount, bankCard,name,time);
+			if(!secretKey.equals(secret)) {
+				return false;
+			}else {
+				return true;
+			}
+			
+		}
+		/**
+		 * 银行卡 提现 的 加密 认证方法
+		 * @return
+		 */
+		public static String getBankTransferPaySecret(String payPassword,String userId,String token,String amount,String bankCard,String name,long time) {
+			/**
+			 * 提现密钥 
+				md5(apiKey+userid + md5(token+amount+time)+ md5(bankCard+name)+payPassword(md5) ) 
+			 */
+			
+			/**
+			 * apiKey+userid
+			 */
+			String apiKey_userId=new StringBuffer()
+					.append(apiKey)
+					.append(userId).toString();
+			/**
+			 * token+amount+time
+			 */
+			String token_amount_time=new StringBuffer()
+					.append(token)
+					.append(amount)
+					.append(time).toString();
+		
+			/**
+			 * md5(token+amount+time)
+			 */
+			String md5Token=Md5Util.md5Hex(token_amount_time);
+			System.out.println("md5Token"+md5Token);
+
+			/**
+			 * bankCard+name
+			 */
+			String bankCard_name=new StringBuffer()
+					.append(bankCard)
+					.append(name)
+					.toString();
+			
+			/**
+			 * md5(bankCard+name)
+			 */
+			String md5bankCardName=Md5Util.md5Hex(bankCard_name);
+			System.out.println("md5bankCardName"+md5bankCardName);
+			/**
+			 * md5(payPassword)
+			 */
+			String md5PayPassword=payPassword;
+			
+			/**
+			 * apiKey+openid+userid + md5(token+amount+time)
+			 */
+			String key =new StringBuffer()
+						.append(apiKey_userId)
+						.append(md5Token)
+						.append(md5bankCardName)
+						.append(md5PayPassword).toString();
+			System.out.println("key"+key);
+			return Md5Util.md5Hex(key);
 		}
 
 		@Override

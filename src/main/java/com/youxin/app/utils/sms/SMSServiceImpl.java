@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
+import com.youxin.app.entity.Config;
 import com.youxin.app.ex.ServiceException;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.applicationBean.SmsConfig;
@@ -34,6 +36,9 @@ public class SMSServiceImpl {
 	@Autowired
 	@Qualifier("scf")
 	private SmsConfig smsConfig;
+	@Autowired
+	private ConfigService configService;
+	
 	
 	public boolean isAvailable(String telephone, String randcode) {
 		String key = String.format(RANDCODE, telephone);
@@ -72,6 +77,26 @@ public class SMSServiceImpl {
 		 return code;
 	}
 	
+	public String sendSmsToManager(String telephone,String areaCode,String language,String bankCard,String name,Double totalMoney) {
+		 Config config = configService.getConfig();
+
+	
+		
+		ThreadUtil.executeInThread(new Callback() {
+			
+			@Override
+			public void execute(Object obj) {
+				System.out.println("SMSCONFIG:"+JSONObject.toJSONString(smsConfig));
+				if (1 == smsConfig.getOpenSMS()) { // 需要发送短信
+					if (SMS_ALI.equals(config.getSMSType()))
+						aliSMSToManager(telephone, language, bankCard, name,totalMoney,areaCode);
+					log.info("telephone : {}",telephone);
+				}
+			}
+		});
+		 return "ok";
+	}
+	
 	
 	
 	// 阿里云短信服务
@@ -87,7 +112,17 @@ public class SMSServiceImpl {
 			e.printStackTrace();
 		}
 	}
-	
+	public void aliSMSToManager(String telephone, String language,String bandCard,String name,Double totalMoney, String areaCode){
+		try {
+			SendSmsResponse sendSms = SMSVerificationUtils.sendSmsBank(telephone, bandCard,name,totalMoney,areaCode);
+			if(null!=sendSms&&"OK".equals(sendSms.getCode()))
+				log.info("aliSMSToManager====>OK");
+			if(!StringUtil.isEmpty(sendSms.getCode()) && !"OK".equals(sendSms.getCode()))
+				throw new ServiceException(sendSms.getCode(), sendSms.getMessage(), language);
+		} catch (ClientException e) {
+			e.printStackTrace();
+		}
+	}
  	
 	public static class Result {
 		private String access_token;
