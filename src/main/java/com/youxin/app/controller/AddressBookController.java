@@ -46,7 +46,7 @@ public class AddressBookController extends AbstractController{
 			return new Result(KConstants.ResultCode.ParamsLack,"");
 		if(!StringUtil.isEmpty(uploadStr) && !StringUtil.isEmpty(uploadJsonStr))
 			return new Result(KConstants.ResultCode.ParamsLack,"参数有误");
-		User user = us.getUser(userId);
+		User user = us.getUserFromDB(userId);
 		uploadTelephone = abs.uploadTelephone(user,deleteStr, uploadStr, uploadJsonStr);
 		return Result.success(uploadTelephone);
 	}
@@ -84,7 +84,7 @@ public class AddressBookController extends AbstractController{
 	})
 	@GetMapping(value = "/getRegisterList")
 	public Result getRegisterList(@RequestParam(defaultValue="0") int pageIndex,@RequestParam(defaultValue="20") int pageSize) {
-		List<AddressBook> data=abs.findRegisterList(getSession(), pageIndex, pageSize);
+		List<AddressBook> data=abs.findRegisterList(us.getUserFromDB(ReqUtil.getUserId()).getMobile(), pageIndex, pageSize);
 		return Result.success(data);
 	}
 	

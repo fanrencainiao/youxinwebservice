@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.utils.PageResult;
@@ -138,5 +139,11 @@ public interface UserService {
 	 * @param bean
 	 */
 	void updateUserByEle(User bean);
+	/**
+	 * 更新登录状态
+	 * @param userId
+	 * @param info
+	 */
+	void saveLoginToken(Integer userId, DeviceInfo info);
 
 }

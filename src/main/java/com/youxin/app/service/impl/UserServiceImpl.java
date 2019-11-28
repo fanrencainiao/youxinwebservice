@@ -27,6 +27,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
@@ -46,6 +47,8 @@ import com.youxin.app.utils.WXUserUtils;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
+
+
 
 
 
@@ -627,6 +630,22 @@ public class UserServiceImpl implements UserService {
 			dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
 					true, false);
 
+		}
+
+	}
+	@Override
+	public void saveLoginToken(Integer userId, DeviceInfo info) {
+		Query<UserLoginLog> query = dfds.createQuery(UserLoginLog.class);
+		query.filter("_id", userId);
+		UpdateOperations<UserLoginLog> ops =dfds.createUpdateOperations(UserLoginLog.class);
+		try {
+			if (!StringUtil.isEmpty(info.getDeviceKey())) {
+				ops.set("deviceMap." + info.getDeviceKey(), info);
+			}
+			dfds.update(query, ops);
+			KSessionUtil.removeAndroidToken(userId);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}

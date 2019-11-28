@@ -17,6 +17,13 @@
 			
 		},
 		{
+			"title": "银行卡提现",
+			"icon": "&#xe65e;",
+			"href": "/templates/console/bankRecord.html",
+			"spread": false,
+			"redEnvelope": true
+		},
+		{
 			"title": "用户管理",
 			"icon":"&#xe66f;",
 			"href": "/templates/console/userList.html",

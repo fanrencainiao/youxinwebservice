@@ -44,9 +44,20 @@ public class KConstants {
 		add("/pay/codePayment");// 付款码支付
 		
 		add("/pay/codeReceipt");// 二维码收款
+		add("/bank/pay");// 银行卡提现
 
 		
 	}};
+	/**
+	* @Description: TODO(设备标识)
+	 */
+	public interface DeviceKey{
+		public static final String Android= "android";
+		public static final String IOS= "ios";
+		public static final String WEB= "web";
+		public static final String PC= "pc";
+		public static final String MAC="mac";
+	}
 
 	public interface Expire {
 		static final int DAY1 = 86400;
@@ -183,6 +194,7 @@ public class KConstants {
 			public static final int BACKREDPACKET = 11;// 超时退回红包
 			public static final int TRANSFERRECIEVE = 13;// 转账收钱
 			public static final int TRANSFERBACK = 14;// 转账退回
+			public static final int BANKOVERMONEY = 15;// 处理银行卡转账
 		}
 
 

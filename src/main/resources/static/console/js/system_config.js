@@ -33,6 +33,9 @@ function fillParameter(data){
     $(".isAutoAddressBook").val(data.isAutoAddressBook);
     $(".isOpenSwagger").val(data.isOpenSwagger);
     $(".authApi").val(data.isAuthApi);
+    $(".bankMsgState").val(data.bankMsgState);//是否开启银行手机通知
+//    $(".isHideFinance").val(data.isHideFinance);//是否隐藏app零钱相关功能
+    $(".sendPhone").val(nullData(data.sendPhone));  
     
     $(".androidVersion").val(nullData(data.androidVersion));
     $(".androidAppUrl").val(nullData(data.androidAppUrl));
@@ -99,6 +102,12 @@ layui.use(['form','jquery',"layer"],function() {
         systemConfig.isAutoAddressBook = $(".isAutoAddressBook").val();
         
         systemConfig.isOpenSwagger = $(".isOpenSwagger").val();
+        
+        systemConfig.bankMsgState = $(".bankMsgState").val();
+        
+//        systemConfig.isHideFinance = $(".isHideFinance").val();
+        
+        systemConfig.sendPhone = $(".sendPhone").val();
 
 
         if($(".androidVersion").val()=="" || $(".androidVersion").val() == null){

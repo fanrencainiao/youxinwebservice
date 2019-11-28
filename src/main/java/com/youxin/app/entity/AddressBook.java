@@ -7,7 +7,7 @@ import org.mongodb.morphia.annotations.Indexed;
 
 /**
  * 通讯录
- * @author Administrator
+ * @author cf
  *
  */
 

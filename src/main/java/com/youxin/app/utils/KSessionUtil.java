@@ -14,8 +14,11 @@ import com.alibaba.fastjson.JSONException;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.KSession;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.utils.jedis.RedisCRUD;
 import com.youxin.app.yx.UUIDUtil;
+
+
 
 @Component
 public final class KSessionUtil {
@@ -51,6 +54,8 @@ public final class KSessionUtil {
 	public static final String GET_CONFIG = "app:config";
 
 	public static final String GET_CLIENTCONFIG = "clientConfig";
+	
+	public static final String GET_LOGIN_KEY="login:upd:%s";
 
 	public static Map<String, Object> loginSaveAccessToken(Object userKey, Object userId, String accessToken) {
 		HashMap<String, Object> data = new HashMap<String, Object>();
@@ -214,6 +219,33 @@ public final class KSessionUtil {
 		String key = String.format(GET_ADDRESS_BYIP, ip);
 		redisCRUD.setWithExpireTime(key, address,KConstants.Expire.HOUR12);
 		
+	}
+	
+	/**
+	* @Description: TODO(保存 android 设备 信息)
+	* @param @param userId
+	* @param @param info    参数
+	 */
+	public static void saveAndroidToken(Integer userId,DeviceInfo info){
+		String key=String.format(GET_LOGIN_KEY, userId);
+		redisCRUD.setWithExpireTime(key, info.toString(),KConstants.Expire.DAY7);
+		
+		
+	}
+	/**
+	* @Description: TODO(获取 android 设备的 信息)
+	* @param @param userId
+	* @param @return    参数
+	 */
+	public static DeviceInfo getAndroidToken(Integer userId){
+		String key=String.format(GET_LOGIN_KEY, userId);
+		String value = redisCRUD.get(key);
+		return StringUtil.isEmpty(value) ? null : JSON.parseObject(value, DeviceInfo.class);
+		
+	}
+	public static void removeAndroidToken(Integer userId){
+		String key=String.format(GET_LOGIN_KEY, userId);
+		redisCRUD.del(key);
 	}
 	
 }

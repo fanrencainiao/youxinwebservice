@@ -25,6 +25,7 @@ import com.youxin.app.entity.AddressBook;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.KSession;
 import com.youxin.app.entity.User;
+import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.AddressBookRepository;
 import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
@@ -58,7 +59,8 @@ public class AddressBookServiceImpl {
 		if(!StringUtil.isEmpty(deleteStr))
 			deleteByStrs(user.getMobile(), deleteStr);
 		else if(!StringUtil.isEmpty(uploadStr))
-			books =	uploadTelephone(user.getId(),user.getAccid(),user.getMobile(), uploadStr);
+			throw new ServiceException("旧版已弃用");
+//			books =	uploadTelephone(user.getId(),user.getAccid(),user.getMobile(), uploadStr);
 		else if(!StringUtil.isEmpty(uploadJsonStr)){
 			books =	uploadJsonTelephone(user.getId(),user.getAccid(), user.getMobile(), uploadJsonStr);
 		}
@@ -124,9 +126,9 @@ public class AddressBookServiceImpl {
 		book.setToTelephone(str);
 		book.setRegisterEd(null == user ? 0 : 1);
 		book.setUserId(userId);
-		book.setToAccid(user.getAccid());
+		book.setToAccid(null == user ? null : user.getAccid());
 		book.setToUserId(null == user ? null : user.getId());
-		book.setRegisterTime(null == user ? 0 : user.getCreateTime());
+		book.setRegisterTime(null == user ? 0 : (null == user.getCreateTime()?0:user.getCreateTime()));
 		book.setToUserName(null == user ? null : user.getName());
 		book.setToRemarkName(toRemark);
 		Config config = cs.getConfig();
@@ -139,8 +141,8 @@ public class AddressBookServiceImpl {
 			
 			for(Friends f:listFrieds) {
 				//查询朋友的手机号
-				User fUser = uservice.getUser(f.getFaccid(), f.getFaccid());
-				if(fUser.getMobile().equals(str))
+				User fUser = uservice.getUserFromDB(f.getFaccid());
+				if(fUser!=null&&fUser.getMobile().equals(str))
 					isFriends=true;
 			}
 			if(!isFriends && 0 == config.getIsAutoAddressBook())
@@ -256,10 +258,10 @@ public class AddressBookServiceImpl {
 		abr.deleteByQuery(query);
 	}
 	
-	public List<AddressBook> findRegisterList(KSession session,int pageIndex,int pageSize){
+	public List<AddressBook> findRegisterList(String telephone,int pageIndex,int pageSize){
 		Query<AddressBook> query=abr.createQuery();
 		query.filter("registerEd", 1);
-		query.filter("telephone",session.getTelephone());
+		query.filter("telephone",telephone);
 		List<AddressBook> list=query.offset(pageIndex*pageSize).limit(pageSize).asList();
 		list.forEach(book ->{
 			book.setToUserName(uservice.getUserName(book.getToUserId()));
@@ -374,5 +376,6 @@ public class AddressBookServiceImpl {
 		log.debug("用户 "+userId+" : 的通讯录好友:{"+JSONObject.toJSONString(userIds)+"}");
 		return userIds;
 	}
+	
 
 }

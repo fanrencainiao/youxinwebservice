@@ -77,7 +77,7 @@ public class OtherServerController {
 			code=smsServer.sendSmsToInternational(telephone, areaCode,language,code);
 			//线程延时返回结果
 			Thread.sleep(2000);
-			params.put("code", code);
+			params.put("code", "0");
 			System.out.println("code >>>  "+code);
 			//return JSONMessage.success(null,params);
 		} catch (ServiceException e) {

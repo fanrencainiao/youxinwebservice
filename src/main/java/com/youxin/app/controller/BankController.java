@@ -268,7 +268,7 @@ public class BankController extends AbstractController{
 	 */
 	@ApiOperation(value = "实名认证银行卡", response = Result.class)
 	@PostMapping(value = "/checkBankCardAndAdd")
-	public Result checkBankCardAndAdd(@RequestBody MyCard myCard) {
+	public synchronized Result checkBankCardAndAdd(@RequestBody MyCard myCard) {
 		// 当前用户
 		Integer userId = ReqUtil.getUserId();
 

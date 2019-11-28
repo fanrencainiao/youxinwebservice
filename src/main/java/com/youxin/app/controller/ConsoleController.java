@@ -3,6 +3,7 @@ package com.youxin.app.controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,8 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,15 +27,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.entity.User.UserLoginLog;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.filter.LoginSign;
 import com.youxin.app.repository.UserRepository;
@@ -44,6 +51,7 @@ import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.BeanUtils;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.Result;
@@ -51,6 +59,9 @@ import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.MsgRequest;
+
+
 
 
 
@@ -77,6 +88,7 @@ public class ConsoleController extends AbstractController{
 	RedPacketManagerImpl rpm;
 	@Autowired
 	ConfigService cs;
+
 	
 	@PostMapping(value = "login")
 	public Object login(String name, String password, HttpServletRequest request) {
@@ -348,6 +360,90 @@ public class ConsoleController extends AbstractController{
 			return Result.success();
 		} catch (Exception e) {
 			return Result.error(e.getMessage());
+		}
+	}
+	
+	/**
+	 * 得到银行卡提现记录
+	 * 
+	 * @param bankCard
+	 * @param page
+	 * @param limit
+	 * @return
+	 */
+	@RequestMapping("/getBankList")
+	public Object getBankList(@RequestParam(defaultValue = "") String bankCard,
+			@RequestParam(defaultValue = "0") Integer userId, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int limit) {
+		try {
+			PageResult<BankRecord> result = consoleService.getBankRecordList(bankCard, userId, page-1,
+					limit);
+			return Result.success(result);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+
+	/**
+	 * 完成提现
+	 * 
+	 * @param bankCard
+	 * @param page
+	 * @param limit
+	 * @return
+	 */
+	@RequestMapping("/updateStatus")
+	public Object updateStatus(@RequestParam Integer status, @RequestParam String id) {
+		try {
+			MsgRequest messageBean = null;
+			int UserId = 1100;
+			User admin = userService.getUserFromDB(UserId);
+//			PageResult<BankRecord> result = SKBeanUtils.getAdminManager().getBankRecordList(bankCard, page, limit);
+			if (status == 1 || status == 0) {
+				Query<BankRecord> query = dfds.createQuery(BankRecord.class).field("_id")
+						.equal(new ObjectId(id));
+				BankRecord bankRecord = query.get();
+				if (null == bankRecord)
+					return Result.error("数据系统出错");
+				UpdateOperations<BankRecord> ops = dfds.createUpdateOperations(BankRecord.class);
+				long currentTimeSeconds = DateUtil.currentTimeSeconds();
+				ops.set("status", status);
+				ops.set("payTime", currentTimeSeconds);
+				dfds.update(query, ops);
+				String card = bankRecord.getBankCard();
+
+				List<MyCard> tocard = dfds.createQuery(MyCard.class).field("bankCard").equal(card)
+						.asList();
+				messageBean = new MsgRequest();
+				messageBean.setType(100);
+
+				BankRecord sendReulst = new BankRecord();
+				sendReulst.setTotalFee(bankRecord.getTotalFee());
+				sendReulst.setFee(bankRecord.getFee());
+				sendReulst.setRealFee(bankRecord.getRealFee());
+				sendReulst.setPayTime(currentTimeSeconds);
+				sendReulst.setBankCard(card.substring(card.length() - 4));
+				sendReulst.setBankName(tocard.get(0).getBankName());
+				sendReulst.setDes("预计2小时内到账，请注意查收!");
+				
+			
+				messageBean.setFrom(admin.getAccid());
+			
+				messageBean.setOpe(0);// 个人消息
+				messageBean.setTo(Md5Util.md5Hex(bankRecord.getUserId()+""));
+				messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BANKOVERMONEY, sendReulst)));
+				try {
+					JSONObject json=SDKService.sendMsg(messageBean);
+					if(json.getInteger("code")!=200) 
+						log.debug("银行卡提现 sdk消息发送失败");
+				} catch (Exception e) {
+					e.printStackTrace();
+					log.debug("银行卡提现 sdk消息发送失败"+e.getMessage());
+				}
+			}
+			return Result.success();
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
 		}
 	}
 

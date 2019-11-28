@@ -26,6 +26,7 @@ import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.entity.exam.UserExample;
@@ -33,6 +34,7 @@ import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
+import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ReqUtil;
@@ -197,10 +199,16 @@ public class UserController extends AbstractController{
 	 */
 	@ApiOperation(value = "修改手机",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "新手机号", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "smsCode", value = "手机验证码", required = true, paramType = "query"),
 		})
 	@PostMapping("updateMoblie")
-	public Object updateMoblie(@RequestParam String mobile) {
+	public Object updateMoblie(@RequestParam String mobile,@RequestParam String smsCode) {
 		long mobileCount = userService.mobileCount(mobile);
+		if (StringUtil.isEmpty(smsCode)) {
+			throw new ServiceException(0, "短信验证码必填");
+		}
+		if (!sendSms.isAvailable("86" + mobile, smsCode))
+			throw new ServiceException("短信验证码不正确!");
 		if (mobileCount>0) {
 			return Result.failure(ResultCode.BINGDINGMOBILED);
 		} else {
@@ -241,6 +249,16 @@ public class UserController extends AbstractController{
 		user.setSmsCode(smsCode);
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
+	}
+	@ApiOperation(value = "密码验证",response=Result.class)
+	@PostMapping("login/upd")
+	public Object loginUpd(@RequestBody DeviceInfo info) {
+
+		Integer userId = ReqUtil.getUserId();
+		userService.saveLoginToken(userId, info);
+		KSessionUtil.saveAndroidToken(userId, info);
+
+		return Result.success();
 	}
 	@ApiOperation(value = "密码验证",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "pwd", value = "密码", required = true, paramType = "query"),
