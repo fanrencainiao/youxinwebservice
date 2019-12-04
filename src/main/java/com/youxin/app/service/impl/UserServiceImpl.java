@@ -1,5 +1,6 @@
 package com.youxin.app.service.impl;
 
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -21,10 +23,14 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.Config;
+import com.youxin.app.entity.NearbyUser;
+import com.youxin.app.entity.Report;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
@@ -35,6 +41,7 @@ import com.youxin.app.entity.UserVo;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
@@ -43,13 +50,13 @@ import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoOperator;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.WXUserUtils;
 import com.youxin.app.utils.sms.SMSServiceImpl;
+import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
-
-
-
+import com.youxin.app.yx.request.team.QueryDetail;
 
 
 
@@ -68,6 +75,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private SMSServiceImpl smsServer;
 
+	@Autowired
+	private ConfigService configService;
+
 	@Value("${youxin.accountTitle}")
 	private String accountTitle;
 	@Override
@@ -83,7 +93,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public synchronized Map<String, Object> addUser(User bean) {
-		String accid = Md5Util.md5Hex(bean.getId() + "");
+		String accid = Md5Util.md5HexToAccid(bean.getId() + "");
 		bean.setAccid(accid);
 		com.youxin.app.yx.request.User.User u = new com.youxin.app.yx.request.User.User();
 		// sdk注册
@@ -99,6 +109,8 @@ public class UserServiceImpl implements UserService {
 			throw new ServiceException(0, "token缺失，注册失败");
 		}
 		bean.setSettings(new UserSettings());
+		bean.setCreateTime(DateUtil.currentTimeSeconds());
+		bean.setUpdateTime(DateUtil.currentTimeSeconds());
 		// 保存本地数据库
 		repository.save(bean);
 		// 第三方注册绑定信息
@@ -116,12 +128,16 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		// 加系统客服好友
-		Friends friends = new Friends();
-		friends.setAccid(accid);
-		friends.setFaccid(Md5Util.md5Hex("10000"));
-		friends.setType(1);
-		friends.setMsg("加客服好友");
-		SDKService.friendAdd(friends);
+		try {
+			Friends friends = new Friends();
+			friends.setAccid(accid);
+			friends.setFaccid(Md5Util.md5HexToAccid("10000"));
+			friends.setType(1);
+			friends.setMsg("加客服好友");
+			SDKService.friendAdd(friends);
+		} catch (Exception e) {
+			log.debug("加客服好友失败");
+		}
 
 		// 缓存用户token
 		Map<String, Object> data = saveLoginInfo(bean);
@@ -129,23 +145,23 @@ public class UserServiceImpl implements UserService {
 		return data;
 	}
 
-	@Override
-	public User getUser(String accid, String toaccid) {
-
-		User user = repository.findOne("accid", accid);
-		if (null == user) {
-			System.out.println("accid为" + accid + "的用户不存在");
-			return null;
-		}
-		user.setEx("");
-		user.setPassword("");
-		if(StringUtil.isEmpty(user.getPayPassword())||"0".equals(user.getPayPassword())) 
-			user.setPayPassword("0");
-		else
-			user.setPayPassword("1");
-		user.setMobile(StringUtil.phoneEncryption(user.getMobile()));
-		return user;
-	}
+//	@Override
+//	public User getUser(String accid, String toaccid) {
+//
+//		User user = repository.findOne("accid", accid);
+//		if (null == user) {
+//			System.out.println("accid为" + accid + "的用户不存在");
+//			return null;
+//		}
+//		user.setEx("");
+//		user.setPassword("");
+//		if(StringUtil.isEmpty(user.getPayPassword())||"0".equals(user.getPayPassword())) 
+//			user.setPayPassword("0");
+//		else
+//			user.setPayPassword("1");
+//		user.setMobile(StringUtil.phoneEncryption(user.getMobile()));
+//		return user;
+//	}
 	
 	public User getUser(Integer userId) {
 		// 先从 Redis 缓存中获取
@@ -177,6 +193,7 @@ public class UserServiceImpl implements UserService {
 		if (null == user) {
 			throw new ServiceException(20004, "帐号不存在, 请注册!");
 		} else {
+			user.setLoginLog(bean.getLoginLog());
 			if (bean.getLoginType() == 0) {
 				// 账号密码登录
 				String password = bean.getPassword();
@@ -348,6 +365,7 @@ public class UserServiceImpl implements UserService {
 			ref.put("account", example.getAccount());
 		//允许手机号搜索
 		ref.put("settings.searchByMobile", 1);
+		ref.put("disableUser", 1);
 //		if (null != example.getStartTime())
 //			ref.put("birthday", new BasicDBObject("$gte", example.getStartTime()));
 //		if (null != example.getEndTime())
@@ -401,7 +419,7 @@ public class UserServiceImpl implements UserService {
 		Query<User> q = repository.createQuery();
 		q.field("_id").equal(bean.getId());
 		UpdateOperations<User> ops = repository.createUpdateOperations();
-		if(bean.getDisableUser()==0 || bean.getDisableUser()==1) {
+		if(bean.getDisableUser()==-1 || bean.getDisableUser()==1) {
 			ops.set("disableUser", bean.getDisableUser());
 		}
 		repository.update(q, ops);
@@ -534,13 +552,15 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> saveLoginInfo(User user) {
 		// 获取上次登录日志
 		User.LoginLog login = getLogin(user.getId());
-
+		// 1=没有设备号、2=设备号一致、3=设备号不一致
+		int serialStatus = null == login ? 1 : (user.getLoginLog().getSerial().equals(login.getSerial()) ? 2 : 3);
 		// 保存登录日志
 		updateUserLoginLog(user.getId(), user);
 		
 		
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
 //		Object token = data.get("access_token");
+		data.put("serialStatus", serialStatus);
 		data.put("id", user.getId());
 		data.put("accid", user.getAccid());
 		data.put("account", user.getAccount());
@@ -565,11 +585,30 @@ public class UserServiceImpl implements UserService {
 		if(!StringUtil.isEmpty(bean.getCodeSign())) {
 			ops.set("codeSign", bean.getCodeSign());
 		}
+		if(bean.getCityId()>0) {
+			ops.set("cityId", bean.getCityId());
+		}
+		if(bean.getAreaId()>0) {
+			ops.set("areaId", bean.getAreaId());
+		}
+		if(bean.getCountryId()>0) {
+			ops.set("countryId", bean.getCountryId());
+		}
+		if(bean.getProvinceId()>0) {
+			ops.set("provinceId", bean.getProvinceId());
+		}
+		if(!StringUtil.isEmpty(bean.getAddress())) {
+			ops.set("address", bean.getAddress());
+		}
+		if(!StringUtil.isEmpty(bean.getCityName())) {
+			ops.set("cityName", bean.getCityName());
+		}
+		ops.set("updateTime",DateUtil.currentTimeSeconds());
 		repository.update(q, ops);
 		KSessionUtil.saveUserByUserId(bean.getId(), q.get());
 	}
 	
-//	@Override
+	@Override
 	public User.LoginLog getLogin(int userId) {
 
 		UserLoginLog userLoginLog = dfds.createQuery(UserLoginLog.class).field("_id").equal(userId).get();
@@ -593,22 +632,21 @@ public class UserServiceImpl implements UserService {
 		if (null == object)
 			values.put("_id", userId);
 
-		BasicDBObject loginLog = new BasicDBObject("isFirstLogin", 0);
+		BasicDBObject loginLog = new BasicDBObject("isFirstLogin", 1);
 		loginLog.put("loginTime", DateUtil.currentTimeSeconds());
-		loginLog.put("apiVersion", example.getApiVersion());
-		loginLog.put("osVersion", example.getOsVersion());
-		loginLog.put("model", example.getModel());
-		loginLog.put("serial", example.getSerial());
-		loginLog.put("latitude", example.getLatitude());
-		loginLog.put("longitude", example.getLongitude());
-		loginLog.put("location", example.getLocation());
-		loginLog.put("address", example.getAddress());
+		loginLog.put("apiVersion", example.getLoginLog().getApiVersion());
+		loginLog.put("osVersion", example.getLoginLog().getOsVersion());
+		loginLog.put("model", example.getLoginLog().getModel());
+		loginLog.put("serial", example.getLoginLog().getSerial());
+		loginLog.put("latitude", example.getLoginLog().getLatitude());
+		loginLog.put("longitude", example.getLoginLog().getLongitude());
+		loginLog.put("location", example.getLoginLog().getLocation());
+		loginLog.put("address", example.getLoginLog().getAddress());
 		values.put("loginLog", loginLog);
 
 		dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
 				true, false);
 
-		// updateAttribute(userId, "appId", example.getAppId());
 	}
 
 	public void updateLoginLogTime(int userId) {
@@ -634,20 +672,288 @@ public class UserServiceImpl implements UserService {
 
 	}
 	@Override
-	public void saveLoginToken(Integer userId, DeviceInfo info) {
-		Query<UserLoginLog> query = dfds.createQuery(UserLoginLog.class);
-		query.filter("_id", userId);
-		UpdateOperations<UserLoginLog> ops =dfds.createUpdateOperations(UserLoginLog.class);
-		try {
-			if (!StringUtil.isEmpty(info.getDeviceKey())) {
-				ops.set("deviceMap." + info.getDeviceKey(), info);
-			}
-			dfds.update(query, ops);
-			KSessionUtil.removeAndroidToken(userId);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public void updateLoginoutLogTime(int userId) {
+		DBObject query = new BasicDBObject("_id", userId);
+
+		DBObject values = new BasicDBObject();
+		DBObject object = dfds.getCollection(UserLoginLog.class).findOne(query);
+		BasicDBObject loginLog = null;
+		if (null == object || null == object.get("loginLog")) {
+			values.put("_id", userId);
+
+			loginLog = new BasicDBObject("isFirstLogin", 0);
+			loginLog.put("offlineTime", DateUtil.currentTimeSeconds());
+			values.put("loginLog", loginLog);
+			dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
+					true, false);
+		} else {
+			values.put("loginLog.offlineTime", DateUtil.currentTimeSeconds());
+			dfds.getCollection(UserLoginLog.class).update(query, new BasicDBObject(MongoOperator.SET, values),
+					true, false);
+
 		}
 
 	}
+	@Override
+	public void saveLoginToken(Integer userId, DeviceInfo info) {
+		ThreadUtil.executeInThread(new Callback() {
+			@Override
+			public void execute(Object obj) {
+				Query<UserLoginLog> query = dfds.createQuery(UserLoginLog.class);
+				query.filter("_id", userId);
+				UpdateOperations<UserLoginLog> ops =dfds.createUpdateOperations(UserLoginLog.class);
+				try {
+					if (!StringUtil.isEmpty(info.getDeviceKey())) {
+						ops.set("deviceMap." + info.getDeviceKey(), info);
+					}
+					LoginLog login = getLogin(userId);
+					login.setIsFirstLogin(0);
+					login.setLoginTime(DateUtil.currentTimeSeconds());
+					ops.set("loginLog", login);
+					dfds.update(query, ops);
+					
+					updateLoginLogTime(userId);
+					/**
+					 * 更新用户最后出现时间
+					 */
+					User user = new User();
+					user.setId(userId);
+					updateUserByEle(user);
+					KSessionUtil.removeAndroidToken(userId);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+
+	}
+	@Override
+	public void report(Integer userId, Integer toUserId, int reason, Long roomId, String webUrl) {
+
+		if (toUserId == null && roomId>0 && StringUtil.isEmpty(webUrl)) {
+			throw new ServiceException(KConstants.ResultCode.ParamsAuthFail);
+		}
+		Report report = new Report();
+		report.setUserId(userId);
+		report.setToUserId(toUserId);
+		report.setReason(reason);
+		report.setRoomId(roomId);
+		if (!StringUtil.isEmpty(webUrl))
+			report.setWebUrl(webUrl);
+		report.setWebStatus(1);
+		report.setTime(DateUtil.currentTimeSeconds());
+		dfds.save(report);
+
+	}
+	@Override
+	public boolean checkReportUrlImpl(String webUrl) {
+		try {
+			URL requestUrl = new URL(webUrl);
+			webUrl = requestUrl.getHost();
+		} catch (Exception e) {
+			throw new ServiceException("参数对应的URL格式错误");
+		}
+		log.debug("URL HOST :" + webUrl);
+		List<Report> reportList = dfds.createQuery(Report.class).field("webUrl").contains(webUrl).asList();
+		if (null != reportList && reportList.size() > 0) {
+			reportList.forEach(report -> {
+				if (null != report && -1 == report.getWebStatus())
+					throw new ServiceException("该网页地址已被举报");
+			});
+		}
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> getReport(int type, int sender, String receiver, int pageIndex, int pageSize) {
+		Map<String, Object> dataMap = Maps.newConcurrentMap();
+		List<Report> data = null;
+		try {
+			if (type == 0) {
+				Query<Report> q = dfds.createQuery(Report.class);
+				if (0 != sender)
+					q.field("userId").equal(sender);
+				if (!StringUtil.isEmpty(receiver)) {
+					q.field("toUserId").equal(Long.valueOf(receiver));
+				} else {
+					q.field("toUserId").notEqual(0);
+				}
+				q.field("roomId").equal(0);
+				q.order("-time");
+				q.offset(pageSize * pageIndex);
+				data = q.limit(pageSize).asList();
+				for (Report report : data) {
+					report.setUserName(getUserName((int) report.getUserId()));
+					report.setToUserName(getUserName((int) report.getToUserId()));
+					if (KConstants.ReportReason.reasonMap.containsKey(report.getReason()))
+						report.setInfo(KConstants.ReportReason.reasonMap.get(report.getReason()));
+					if (null == getUser(Integer.valueOf(String.valueOf(report.getToUserId()))))
+						report.setToUserStatus(-1);
+					else {
+						Integer disableUser = getUser(Integer.valueOf(String.valueOf(report.getToUserId()))).getDisableUser();
+						report.setToUserStatus(disableUser);
+					}
+				}
+				dataMap.put("count", q.count());
+			} else if (type == 1) {
+				Query<Report> q =dfds.createQuery(Report.class);
+				if (0 != sender)
+					q.field("userId").equal(sender);
+				if (!StringUtil.isEmpty(receiver))
+					q.field("roomId").equal(receiver);
+				q.field("roomId").notEqual(0);
+				q.order("-time");
+				q.offset(pageSize * pageIndex);
+				for (Report report : q.asList()) {
+					report.setUserName(getUserName((int) report.getUserId()));
+					QueryDetail roomquery=new QueryDetail();
+					roomquery.setTid(report.getRoomId());
+					JSONObject teamQueryDetail = SDKService.teamQueryDetail(roomquery);
+					String tname = teamQueryDetail.getJSONObject("tinfo").getString("tname");
+					report.setRoomName(tname);
+					//创建者与管理员是否被禁言
+					String mute = teamQueryDetail.getJSONObject("tinfo").getString("mute");
+					Integer muteType = teamQueryDetail.getJSONObject("tinfo").getInteger("muteType");
+//					String adminMute = teamQueryDetail.getJSONObject("tinfo").getJSONObject("admins").getString("mute");
+					if(mute.equals("true")&&muteType==3) {
+						report.setRoomStatus(-1);
+					}else {
+						report.setRoomStatus(1);
+					}
+					if (KConstants.ReportReason.reasonMap.containsKey(report.getReason()))
+						report.setInfo(KConstants.ReportReason.reasonMap.get(report.getReason()));
+				}
+				data = q.limit(pageSize).asList();
+				dataMap.put("count", q.count());
+			} else if (type == 2) {
+				Query<Report> q = dfds.createQuery(Report.class);
+				if (0 != sender)
+					q.field("userId").equal(sender);
+				if (!StringUtil.isEmpty(receiver))
+					q.field("webUrl").equal(receiver);
+				q.field("webUrl").notEqual(null);
+				q.field("toUserId").equal(0);
+				q.order("-time");
+				for (Report report : q.asList()) {
+					report.setUserName(getUserName((int) report.getUserId()));
+					if (KConstants.ReportReason.reasonMap.containsKey(report.getReason()))
+						report.setInfo(KConstants.ReportReason.reasonMap.get(report.getReason()));
+				}
+				q.offset(pageSize * pageIndex);
+				data = q.limit(pageSize).asList();
+				dataMap.put("count", q.count());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		dataMap.put("data", data);
+		return dataMap;
+	}
+
+	@Override
+	public void delReport(Integer userId, String roomId) {
+		Query<Report> query = dfds.createQuery(Report.class);
+		if (null != userId)
+			query.or(query.criteria("userId").equal(userId), query.criteria("toUserId").equal(userId));
+		else if (null != roomId)
+			query.field("roomId").equal(roomId);
+		dfds.delete(query);
+	}
+
+
+	@Override
+	public List<User> nearbyUser(NearbyUser poi) {
+		List<User> data = null;
+		try {
+			// 过滤隐私设置中关闭手机号和昵称搜索的用户
+//			Query<User> q = getDatastore().createQuery(User.class).field("settings.phoneSearch").notEqual(0)
+//					.field("settings.nameSearch").notEqual(0);
+			Query<User> q = dfds.createQuery(User.class);
+			q.or(q.criteria("settings.searchByMobile").notEqual(0),q.criteria("disableUser").notEqual(-1));
+			
+			if (null != poi.getSex())
+				q.field("gender").equal(poi.getSex());
+			q.disableValidation();
+			int distance = poi.getDistance();
+			Double d = 0d;
+			if (0 == distance)
+				distance = KConstants.LBS_DISTANCE;
+			d = distance / KConstants.LBS_KM;// 0.180180180.....
+
+			if (0 != poi.getLatitude() && 0 != poi.getLongitude())
+				q.field("loc").near(poi.getLongitude(), poi.getLatitude(), d);
+			/*if (!StringUtil.isEmpty(poi.getNickname())) {
+				Config config = configService.getConfig();
+				if (0 == config.getTelephoneSearchUser()) { // 手机号搜索关闭
+
+					if (0 == config.getNicknameSearchUser()) { // 昵称搜索关闭
+						return null;
+					} else if (1 == config.getNicknameSearchUser()) { // 昵称精准搜索
+						// q.field("nickname").equal(poi.getNickname());
+						q.criteria("nickname").equal(poi.getNickname());
+					} else if (2 == config.getNicknameSearchUser()) { // 昵称模糊搜索
+						q.criteria("nickname").containsIgnoreCase(poi.getNickname());
+					}
+
+				} else if (1 == config.getTelephoneSearchUser()) { // 手机号精确搜索
+
+					if (0 == config.getNicknameSearchUser()) { // 昵称搜索关闭
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").equal(poi.getNickname()));
+
+					} else if (1 == config.getNicknameSearchUser()) { // 昵称精准搜索
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").equal(poi.getNickname()),
+								q.criteria("nickname").equal(poi.getNickname()));
+					} else if (2 == config.getNicknameSearchUser()) { // 昵称模糊搜索
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").equal(poi.getNickname()),
+								q.criteria("nickname").containsIgnoreCase(poi.getNickname()));
+					}
+
+				} else if (2 == config.getTelephoneSearchUser()) { // 手机号模糊搜索
+
+					if (0 == config.getNicknameSearchUser()) { // 昵称搜索关闭
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").containsIgnoreCase(poi.getNickname()));
+					} else if (1 == config.getNicknameSearchUser()) { // 昵称精准搜索
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").containsIgnoreCase(poi.getNickname()),
+								q.criteria("nickname").equal(poi.getNickname()));
+					} else if (2 == config.getNicknameSearchUser()) { // 昵称模糊搜索
+						q.or(q.criteria("account").equal(poi.getNickname()),
+								q.criteria("phone").containsIgnoreCase(poi.getNickname()),
+								q.criteria("nickname").containsIgnoreCase(poi.getNickname()));
+					}
+
+				}
+
+			} else if (0 == poi.getLatitude() && 0 == poi.getLongitude()) { // 搜索关键字为空，且坐标没传的情况下不返回数据
+				return null;
+			}
+*/
+			if (null != poi.getUserId()) {
+				q.field("_id").equal(poi.getUserId());
+			}
+		
+			if (null != poi.getActive() && 0 != poi.getActive()) {
+				q.field("updateTime").greaterThanOrEq(DateUtil.currentTimeSeconds() - poi.getActive() * 86400000);
+				q.field("updateTime").lessThanOrEq(DateUtil.currentTimeSeconds());
+
+			}
+			// 排除系统号
+			q.field("_id").greaterThan(100050);
+			q.offset(poi.getPageIndex() * (poi.getPageSize())).limit(poi.getPageSize());
+			data = q.asList();
+			return data;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return data;
+
+	}
+	
 
 }

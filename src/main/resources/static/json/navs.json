@@ -34,6 +34,12 @@
 			"icon": "&#xe65e;",
 			"href": "/templates/console/redEnvelope.html",
 			"spread": false
+		},{
+			"title": "举报管理",
+			"icon": "&#xe6b2;",
+			"href": "/templates/console/complaint.html",
+			"spread": false,
+			"complaint": true
 		}
 
 	]

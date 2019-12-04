@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.NearbyUser;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
+import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.utils.PageResult;
@@ -39,7 +41,7 @@ public interface UserService {
 	 * @param toaccid
 	 * @return
 	 */
-	User getUser(String accid,String toaccid);
+//	User getUser(String accid,String toaccid);
 	
 	/**
 	 * 获取用户信息
@@ -139,11 +141,38 @@ public interface UserService {
 	 * @param bean
 	 */
 	void updateUserByEle(User bean);
+	void updateLoginoutLogTime(int userId);
 	/**
 	 * 更新登录状态
 	 * @param userId
 	 * @param info
 	 */
 	void saveLoginToken(Integer userId, DeviceInfo info);
+	LoginLog getLogin(int userId);
+	/**
+	 * @Description: 获取举报列表
+	 * @param type      0：用户相关，1：群组相关 2：web网页
+	 * @param sender
+	 * @param receiver
+	 * @param pageIndex
+	 * @param pageSize
+	 * @return
+	 **/
+	Map<String, Object> getReport(int type, int sender, String receiver, int pageIndex, int pageSize);
+	/**
+	 * @Description: 删除相关的举报信息
+	 * @param userId
+	 * @param roomId
+	 **/
+	void delReport(Integer userId, String roomId);
+	boolean checkReportUrlImpl(String webUrl);
+	void report(Integer userId, Integer toUserId, int reason, Long roomId, String webUrl);
+	/**
+	 * @Description:（附近的用户）
+	 * @param poi
+	 * @return
+	 **/
+	List<User> nearbyUser(NearbyUser poi);
+
 
 }

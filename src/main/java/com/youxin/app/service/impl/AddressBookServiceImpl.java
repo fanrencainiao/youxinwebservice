@@ -133,38 +133,38 @@ public class AddressBookServiceImpl {
 		book.setToRemarkName(toRemark);
 		Config config = cs.getConfig();
 		if(null != user){
-			JSONObject friends = SDKService.friendGet(accid, 0l, 0l);
-			log.info("好友列表："+friends);
-			JSONArray jsonArray = friends.getJSONArray("friends");
-			List<Friends> listFrieds = JSONArray.parseArray(jsonArray.toJSONString(), Friends.class);
-			boolean isFriends=false;
-			
-			for(Friends f:listFrieds) {
-				//查询朋友的手机号
-				User fUser = uservice.getUserFromDB(f.getFaccid());
-				if(fUser!=null&&fUser.getMobile().equals(str))
-					isFriends=true;
-			}
-			if(!isFriends && 0 == config.getIsAutoAddressBook())
-				book.setStatus(0);
-			else if(isFriends)
-				book.setStatus(2);
-			else if(0 == config.getIsAutoAddressBook()){// 不自动添加
-				book.setStatus(0);
-			}else if (1 == config.getIsAutoAddressBook()) {
-				book.setStatus(1);
-			}
+//			JSONObject friends = SDKService.friendGet(accid, 0l, 0l);
+//			log.info("好友列表："+friends);
+//			JSONArray jsonArray = friends.getJSONArray("friends");
+//			List<Friends> listFrieds = JSONArray.parseArray(jsonArray.toJSONString(), Friends.class);
+//			boolean isFriends=false;
+//			
+//			for(Friends f:listFrieds) {
+//				//查询朋友的手机号
+//				User fUser = uservice.getUserFromDB(f.getFaccid());
+//				if(fUser!=null&&fUser.getMobile().equals(str))
+//					isFriends=true;
+//			}
+//			if(!isFriends && 0 == config.getIsAutoAddressBook())
+//				book.setStatus(0);
+//			else if(isFriends)
+//				book.setStatus(2);
+//			else if(0 == config.getIsAutoAddressBook()){// 不自动添加
+//				book.setStatus(0);
+//			}else if (1 == config.getIsAutoAddressBook()) {
+//				book.setStatus(1);
+//			}
 		}else {// 没有注册im
 			book.setStatus(0);
 		}
 		abr.save(book);
-		if(null != user && config.getIsAutoAddressBook()==1){
-			Map<String, String> bookMap = Maps.newConcurrentMap();
-			bookMap.put("faccid", user.getAccid());
-			bookMap.put("toRemark", toRemark);
-			log.info("===》       自动添加好友：     "+JSONObject.toJSONString(bookMap));
-			autofollowUser(accid, bookMap);
-		}
+//		if(null != user && config.getIsAutoAddressBook()==1){
+//			Map<String, String> bookMap = Maps.newConcurrentMap();
+//			bookMap.put("faccid", user.getAccid());
+//			bookMap.put("toRemark", toRemark);
+//			log.info("===》       自动添加好友：     "+JSONObject.toJSONString(bookMap));
+//			autofollowUser(accid, bookMap);
+//		}
 		return book;
 	}
 

@@ -20,7 +20,7 @@ public class KConstants {
 	public static final int MOENY_ADD = 1; //金钱增加
 	public static final int MOENY_REDUCE = 2; //金钱减少
 	public static final double LBS_KM=111.01;
-	public static final int LBS_DISTANCE=50;
+	public static final int LBS_DISTANCE=50;//默认50公里
 	
 	// 不经过普通接口校验
 	public static final Set<String> filterSet=new HashSet<String>(){{
@@ -100,6 +100,45 @@ public class KConstants {
 //		static final JSONMessage TokenInvalid = new JSONMessage(1030102, "访问令牌过期或无效");
 //		static final JSONMessage AUTH_FAILED = new JSONMessage(1030103, "权限验证失败");
 //	}
+	
+	/**
+	* @Description: TODO(举报原因)
+	* @author lidaye
+	* @date 2018年8月9日
+	 */
+	public interface ReportReason{
+		static final Map<Integer,String> reasonMap=new HashMap<Integer, String>() {
+            {
+                put(100, "发布不适当内容对我造成骚扰");
+                put(101, "发布色情内容对我造成骚扰");
+                put(102, "发布违法违禁内容对我造成骚扰");
+                put(103, "发布赌博内容对我造成骚扰");
+                put(104, "发布政治造谣内容对我造成骚扰");
+                put(105, "发布暴恐血腥内容对我造成骚扰");
+                put(106, "发布其他违规内容对我造成骚扰");
+                
+                put(120, "存在欺诈骗钱行为");
+                put(130, "此账号可能被盗用了");
+                put(140, "存在侵权行为");
+                put(150, "发布仿冒品信息");
+                
+                put(200, "群成员存在赌博行为");
+                put(210, "群成员存在欺诈骗钱行为");
+                put(220, "群成员发布不适当内容对我造成骚扰");
+                put(230, "群成员传播谣言信息");
+                
+                put(300, "网页包含欺诈信息(如：假红包)");
+                put(301, "网页包含色情信息");
+                put(302, "网页包含暴力恐怖信息");
+                put(303, "网页包含政治敏感信息");
+                put(304, "网页在收集个人隐私信息(如：钓鱼链接)");
+                put(305, "网页包含诱导分享/关注性质的内容");
+                put(306, "网页可能包含谣言信息");
+                put(307, "网页包含赌博信息");
+            }
+        };
+		
+	}
 	public interface ResultCode {
 		
 		//接口调用成功

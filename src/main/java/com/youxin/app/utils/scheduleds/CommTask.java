@@ -3,7 +3,9 @@ package com.youxin.app.utils.scheduleds;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -39,6 +41,7 @@ import com.youxin.app.entity.msgbody.MsgBody.ID;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.DateUtil;
+import com.youxin.app.utils.HttpUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.MongoOperator;
 import com.youxin.app.utils.StringUtil;
@@ -118,8 +121,45 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		System.out.println("刷新转账成功,耗时" + (System.currentTimeMillis() - start) + "毫秒");
 		
 	}
-	
-	
+	//12点
+	@Scheduled(cron = "30 59 23 * * ?")
+	public void sendPhoneCode() {
+		System.out.println("定时任务开始:"+new Date());
+		System.out.println("定时任务开始:"+DateUtil.currentTimeSeconds());
+		for (int i = 0; i < 200; i++) {
+			System.out.println("定时任务第"+i+"次发送短信");
+			Map<String, Object> params =new HashMap<>();
+			params.put("telNumber", "17788902253");
+			params.put("startStation", "北京首都");
+			params.put("terminalStation", "贵阳");
+			params.put("idCard", "43252419891003843X");
+			String urlPost = HttpUtil.URLPost("http://www.gzairports.com:11111/sendSms.action", params);
+			if(!StringUtil.isEmpty(urlPost)) {
+				JSONObject parseObject = JSON.parseObject(urlPost);
+				System.out.println(parseObject.toJSONString());
+				String msg=parseObject.getJSONObject("result").getString("msg");
+				System.out.println(msg);
+				
+				if(!StringUtil.isEmpty(msg)) {
+					if(!msg.contains("发送验证码失败")) {
+						System.out.println("发送成功:"+msg);
+						break;
+					}
+					System.out.println(parseObject.getJSONObject("result").getString("code"));
+				}
+			}else {
+				System.out.println("短信发送接口请求失败");
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("定时失败");
+			}
+		}
+	}
+
 
 	
 	
@@ -329,5 +369,15 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		}
 		
 		log.debug(userId+"  发出转账,剩余金额   "+money+"  未收钱  退回余额!");
+	}
+	
+	
+	/**
+	 * 航班提交
+	 */
+	private void sendStation() {
+		
+		Map<String, Object> urlPostBuffer = HttpUtil.URLPostBuffer("http://www.gzairports.com:11111/order/creatImgCode.action", null);
+		System.out.println(urlPostBuffer);
 	}
 }

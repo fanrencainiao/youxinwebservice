@@ -9,6 +9,7 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.NotSaved;
+import org.mongodb.morphia.utils.IndexDirection;
 
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.exam.BaseExample;
@@ -134,12 +135,15 @@ public class User extends BaseExample{
 	@ApiModelProperty(value = "友讯号")
 	@Indexed(unique = true)
 	private String account;
-	@ApiModelProperty(value = "禁用用户（1禁用 0解禁）")
-	private int disableUser = 0;
+	@ApiModelProperty(value = "禁用用户（-1禁用 1解禁）")
+	private int disableUser = 1;
 	@ApiModelProperty(value = "用户类型 0普通用户(默认)，2公众号")
 	private int userType = 0;
 	@ApiModelProperty(value = "身份二维码标识，用于刷新二维码")
 	private String codeSign = "code";
+	@ApiModelProperty(value = "地理位置")
+	@Indexed(value = IndexDirection.GEO2D)
+	private Loc loc;
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();
@@ -154,6 +158,7 @@ public class User extends BaseExample{
 		exs.put("disableUser", this.disableUser);
 		exs.put("createTime", this.createTime);
 		exs.put("updateTime", this.updateTime);
+		exs.put("id", this.id);
 		this.ex = exs.toJSONString();
 		return ex;
 	}
@@ -168,7 +173,7 @@ public class User extends BaseExample{
 	 * 用户登录日志
 	 */
 	@ApiModelProperty(value = "用户登录日志")
-	private @NotSaved LoginLog loginLog;// 登录日志
+	private @NotSaved LoginLog loginLog=new LoginLog();// 登录日志
 
 	@Data
 	public static class UserSettings {
@@ -190,43 +195,18 @@ public class User extends BaseExample{
 
 	@Data
 	public static class DeviceInfo {
-
+		@ApiModelProperty(value = "登录时间")
 		private long loginTime;
 		/**
 		 * 设备号 android ios web
 		 */
+		@ApiModelProperty(value = "设备号 android ios web")
 		private String deviceKey;
-
+		@ApiModelProperty(value = "地区标识 例 CN HK")
 		private String adress;// 地区标识 例 CN HK
-
+		@ApiModelProperty(value = "在线状态 1在线")
 		private int online;// 在线状态
-
-		// ios 推送 用到的 appId
-		private String appId;
-
-		/**
-		 * 推送平台厂商 华为 huawei 小米 xiaomi 百度 baidu apns ios
-		 */
-		private String pushServer;
-
-		/**
-		 * 推送平台的 token
-		 */
-		private String pushToken;
-
-		/**
-		 * VOip 推送 token
-		 */
-		private String voipToken;
-
-		/**
-		 * 同时使用多个推送平台的
-		 */
-		// private Map<String,String> pushMap;
-
-		/**
-		 * 下线时间
-		 */
+		@ApiModelProperty(value = "下线时间") 
 		private long offlineTime;
 
 	}
@@ -321,6 +301,41 @@ public class User extends BaseExample{
 		private Long createTime;
 		private Long updateTime;
 	}
+	/**
+	 * 坐标
+	 *
+	 */
+	public static class Loc {
+		public Loc() {
+			super();
+		}
 
+		public Loc(double lng, double lat) {
+			super();
+			this.lng = lng;
+			this.lat = lat;
+		}
+		@ApiModelProperty(value = "经度")
+		private double lng;// longitude 
+		@ApiModelProperty(value = "纬度")
+		private double lat;// latitude 
+
+		public double getLng() {
+			return lng;
+		}
+
+		public void setLng(double lng) {
+			this.lng = lng;
+		}
+
+		public double getLat() {
+			return lat;
+		}
+
+		public void setLat(double lat) {
+			this.lat = lat;
+		}
+
+	}
 
 }

@@ -1,8 +1,11 @@
 package com.youxin.app.controller;
 
+import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,11 +27,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.NearbyUser;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
+import com.youxin.app.entity.User.LoginLog;
+import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
+import com.youxin.app.entity.exam.BaseExample;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
@@ -101,7 +108,7 @@ public class UserController extends AbstractController{
 					sdkLoginInfo.setUserId(ubm.getId());
 					sdkLoginInfo.setAccid(ubm.getAccid());
 					dfds.save(sdkLoginInfo);
-					
+					ubm.setLoginLog(user.getLoginLog());
 					return Result.success(userService.saveLoginInfo(ubm));
 				}else {
 					throw new ServiceException(0, "微信已绑定");
@@ -121,11 +128,12 @@ public class UserController extends AbstractController{
 		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信", required = true, paramType = "query")})
 	@PostMapping("sdkLogin")
 	public Object sdkLogin(@RequestParam int sdkType,
-			@RequestParam String loginInfo) {
+			@RequestParam String loginInfo,@RequestBody LoginLog loginlog) {
 		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
 		if (sdkLoginInfo != null) {
 			User user = userService.getUserFromDB(sdkLoginInfo.getUserId());
 			user.setLoginType(3);
+			user.setLoginLog(loginlog);
 			Object data = userService.login(user);
 			return Result.success(data);
 		} else {
@@ -224,14 +232,14 @@ public class UserController extends AbstractController{
 		User u=userService.getUser(userId);
 		return Result.success(u);
 	}
-	@ApiOperation(value = "获取用户信息根据accid",response=Result.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "toAccid", value = "toAccid", required = true, paramType = "query") })
-	@GetMapping("getByAccid")
-	public Object getByAccid(@RequestParam String toAccid){
-		
-		User u=userService.getUser(toAccid,toAccid);
-		return Result.success(u);
-	}
+//	@ApiOperation(value = "获取用户信息根据accid",response=Result.class)
+//	@ApiImplicitParams({ @ApiImplicitParam(name = "toAccid", value = "toAccid", required = true, paramType = "query") })
+//	@GetMapping("getByAccid")
+//	public Object getByAccid(@RequestParam String toAccid){
+//		
+//		User u=userService.getUser(toAccid,toAccid);
+//		return Result.success(u);
+//	}
 	@ApiOperation(value = "登录",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "account", value = "友讯号", paramType = "query"),
@@ -240,17 +248,18 @@ public class UserController extends AbstractController{
 	@ApiImplicitParam(name = "smsCode", value = "短信验证码", paramType = "query"),
 	})
 	@PostMapping("login")
-	public Object login(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String account,@RequestParam(defaultValue="") String password,@RequestParam(defaultValue="") String smsCode,@RequestParam(defaultValue="-1") int loginType){
+	public Object login(@RequestParam(defaultValue="") String mobile,@RequestParam(defaultValue="") String account,@RequestParam(defaultValue="") String password,@RequestParam(defaultValue="") String smsCode,@RequestParam(defaultValue="-1") int loginType,@RequestBody LoginLog loginInfo){
 		User user=new User();
 		user.setMobile(mobile);
 		user.setAccount(account);
 		user.setPassword(password);
 		user.setLoginType(loginType);
 		user.setSmsCode(smsCode);
+		user.setLoginLog(loginInfo);
 		Map<String, Object> u=userService.login(user);
 		return Result.success(u);
 	}
-	@ApiOperation(value = "密码验证",response=Result.class)
+	@ApiOperation(value = "修改登录信息",response=Result.class)
 	@PostMapping("login/upd")
 	public Object loginUpd(@RequestBody DeviceInfo info) {
 
@@ -285,6 +294,7 @@ public class UserController extends AbstractController{
 	@DeleteMapping("logout")
 	public Object logout(){
 		Integer userId = ReqUtil.getUserId();
+		userService.updateLoginoutLogTime(userId);
 		// 维护redis中的数据
 		KSessionUtil.removeAccessToken(userId);
 		KSessionUtil.deleteUserByUserId(userId);
@@ -418,7 +428,7 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "更新用户基本信息",response=Result.class)
 	@PostMapping("updateUinfo")
-	public Object updateUinfo(@RequestBody(required=true) com.youxin.app.yx.request.User.User user){
+	public Object updateUinfo( com.youxin.app.yx.request.User.User user, BaseExample be){
 		if(StringUtils.isBlank(user.getAccid())) {
 			return Result.errorMsg("accid不能为空");
 		}
@@ -426,18 +436,30 @@ public class UserController extends AbstractController{
 		if(u!=null&&StringUtils.isNotBlank(u.getAccid())) {
 			JSONObject json = SDKService.updateUinfo(user);
 			if(json.getIntValue("code")==200) {
-				BeanUtils.copyProperties(user, u,"id","mobile","token");
+				BeanUtils.copyProperties(user, u,"id","mobile","token","ex");
 				//更新本地数据库
 				repository.save(u);
-				//更新redis
-				u.setPassword("");
-				KSessionUtil.saveUserByUserId(u.getId(), u);
+				User u1=new  User();
+				u1.setId(ReqUtil.getUserId());
+				BeanUtils.copyProperties(be, u1);
+				userService.updateUserByEle(u1);
 				return Result.success();
 			}else
 				return Result.errorMsg(json.toJSONString());
 		}
-		return Result.error();
+		
+		return Result.success();
+
 	}
+//	@ApiOperation(value = "更新用户地址",response=Result.class)
+//	@PostMapping("updateAddr")
+//	public Object updateAddr(@RequestBody(required=true) BaseExample be){
+//		User u=new  User();
+//		u.setId(ReqUtil.getUserId());
+//		BeanUtils.copyProperties(be, u);
+//		userService.updateUserByEle(u);
+//		return Result.success();
+//	}
 	@ApiOperation(value = "设置黑名单/静音 拉黑/取消拉黑；设置静音/取消静音",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "accid", value = "用户帐号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "targetAcc", value = "被加黑或加静音的帐号", required = true, paramType = "query"),
@@ -548,6 +570,60 @@ public class UserController extends AbstractController{
 		userService.updateUserByEle(user);
 		return Result.success(codeSign);
 	}
+
+	@ApiOperation(value = "用户举报",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "toUserId", value = "举报人",  paramType = "query"),
+		 @ApiImplicitParam(name = "webUrl", value = "举报网址",  paramType = "query"),
+		 @ApiImplicitParam(name = "roomId", value = "举报群组",  paramType = "query"),
+	@ApiImplicitParam(name = "reason", value = "原因id",  paramType = "query")
+	})
+	@PostMapping("report")
+	public Result report(@RequestParam(defaultValue = "0") Integer toUserId,
+			@RequestParam(defaultValue = "0") Long roomId, @RequestParam(defaultValue = "") String webUrl,
+			@RequestParam(defaultValue = "0") int reason) {
+		userService.report(ReqUtil.getUserId(), toUserId, reason, roomId, webUrl);
+		return Result.success();
+	}
+
+	@ApiOperation(value = "检测举报网址",response=Result.class)
+	@ApiImplicitParams({ 
+		 @ApiImplicitParam(name = "webUrl", value = "举报群组",  paramType = "query")
+	})
+	@GetMapping("checkReportUrl")
+	public Result checkReportUrl(@RequestParam(defaultValue = "") String webUrl, HttpServletResponse response)
+			throws IOException {
+		boolean flag;
+		if (StringUtil.isEmpty(webUrl)) {
+			return Result.error("webUrl is null");
+		} else {
+			try {
+				// urlEncode 解码
+				webUrl = URLDecoder.decode(webUrl);
+				flag = userService.checkReportUrlImpl(webUrl);
+				return Result.success(flag);
+			} catch (ServiceException e) {
+//				response.sendRedirect("/pages/report/prohibit.html");
+				return Result.error(e.getMessage());
+			}
+		}
+
+	}
 	
+	@ApiOperation(value = "附近的人",response=Result.class)
+	@GetMapping(value = "/near")
+	public Object nearbyUser(@ModelAttribute NearbyUser poi) {
+		try {
+			List<User> nearbyUser =null;
+			nearbyUser=userService.nearbyUser(poi);
+			if(null != nearbyUser && nearbyUser.size()>0)
+				return Result.success(nearbyUser);
+			else
+				return Result.error("暂无该用户");
+			
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+		
+	}
 
 }

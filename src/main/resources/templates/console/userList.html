@@ -48,7 +48,7 @@
 			<script type="text/html" id="baseListBar">
 								
 				
-			{{#  if(d.disableUser == 1){ }}
+			{{#  if(d.disableUser == -1){ }}
 				<a class="layui-btn layui-btn-disabled layui-btn-xs undelete" lay-event="undelete">解禁</a>
 			{{#  }else{  }}
 				<a class="layui-btn layui-btn-danger layui-btn-xs delete" lay-event="delete">禁用</a>

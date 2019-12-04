@@ -257,6 +257,43 @@ public final class HttpUtil {
 		
 		return response;
 	}
+	public static String URLPostJson(String url, Map<String, Object> params){
+		String enc = URL_PARAM_DECODECHARSET_UTF8;
+		String response = EMPTY;		
+		PostMethod postMethod = null;
+		try {
+			postMethod = new PostMethod(url);
+			postMethod.setRequestHeader("Content-Type", "application/json;charset=" + enc); //设置请求头
+			if(null!=params){
+				Set<String> keySet = params.keySet();
+				for(String key : keySet){
+					Object value = params.get(key);
+					postMethod.addParameter(key, value.toString());
+				}	
+			}
+			
+			int statusCode = client.executeMethod(postMethod);
+			if(statusCode == HttpStatus.SC_OK) {
+				response = postMethod.getResponseBodyAsString();
+				System.out.println("result:"+response);
+			}else{
+				log.error("请求失败 = " + postMethod.getStatusCode());
+			}
+		}catch(HttpException e){
+			log.error("HttpException", e);
+			e.printStackTrace();
+		}catch(IOException e){
+			log.error("IOException", e);
+			e.printStackTrace();
+		}finally{
+			if(postMethod != null){
+				postMethod.releaseConnection();
+				postMethod = null;
+			}
+		}
+		
+		return response;
+	}
 	
 	public static Map<String, Object> URLPostBuffer(String url, Map<String, Object> params){
 		String enc = URL_PARAM_DECODECHARSET_UTF8;

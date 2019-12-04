@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
+import com.youxin.app.service.UserService;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.StringUtil;
@@ -24,7 +26,8 @@ import com.youxin.app.utils.StringUtil;
 public class AdminConsoleServiceImpl implements AdminConsoleService {
 	@Autowired
 	private UserRepository repository;
-	
+	@Autowired
+	private UserService userService;
 	@Autowired
 	@Qualifier("get")
 	private Datastore dfds;
@@ -35,6 +38,8 @@ public class AdminConsoleServiceImpl implements AdminConsoleService {
 		User user = repository.findOne("_id", Integer.valueOf(userId));
 		if(user!=null&&pwd.equals(user.getPassword())) {
 			user.setPassword("");
+			user.setPayPassword("");
+			user.setLoginLog(userService.getLogin(user.getId()));
 			Role role = dfds.createQuery(Role.class).field("userId").equal(user.getId())
 					.field("role").equal(6).get();
 			if(role!=null) 

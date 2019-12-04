@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+  <title> 线路1 </title>
+  <meta name="Generator" content="vsCode">
+  <meta charset="utf-8">
+  <meta name="Author" content="x">
+  <meta name="Keywords" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge chrome=1">
+  <!--IE8浏览器的显示方式：IE=edge以IE最高版本显示 Chrome=1以谷歌浏览器模式渲染-->
+  <meta name="referrer" content="never">
+  <!--告诉浏览器链接的来源（可以计算链接的访问量）-->
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <!--格式检测（数字，邮箱，地址）no 不识别为电话号码，邮箱，地址-->
+  <meta name="renderer" content="webkit">
+  <meta name="Description" content="">
+<script src="js/mui.min.js"></script>
+		<script src="js/jquery.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+  <style type="text/css">
+	*{
+		margin: 0;
+		padding: 0;
+		}
+	ul,li{
+		list-style:none;
+		}
+	a{
+		text-decoration:none;
+		}
+	input{
+		outline-style:none;
+		border: 0px;
+	}
+	#form1{
+		
+		margin-top:20px;
+		
+		width:80%;
+		margin:2px auto;
+	}
+	#form1 form span{
+		color:#999;
+	}
+	.row { 
+		margin-top: 25px;
+		height: 50px;
+		line-height: 26px;
+		border-bottom: 1px solid #c7c6c6;
+		width:100%; 
+	}
+	.input { 
+		position: relative;
+		width: 100%;
+		height: 26px; 
+	}
+	.input input { 
+		display: block;
+		width: 100%;
+		height: 26px;
+		border:none;
+		background: none;
+		outline:none; 
+	}
+	.input label { 
+		position: absolute;
+		top:0;
+		left:0;
+		height: 26px;
+		line-height: 26px;
+		font-size: 14px;
+		color: #999; 
+	}
+	.select select{
+		display:block;
+		width:100%;
+		border:none;
+		outline:none;
+	}
+	input[type=date]::-webkit-inner-spin-button { visibility: hidden; }
+	.button{
+		width:100%;
+		height:40px;
+		background: #ff961e;
+		outline: none;
+		margin:20px 0 30px 0;
+	}
+	.button button{
+		border:0px;
+		background-color:transparent;
+		color:white;
+		width: 100%;
+		height:40px;
+		margin:0 auto;
+		font-size:17px;
+}
+
+  </style>
+ </head>
+
+ <body>
+    <div id="form1">
+        <form action="" method="post" onsubmit="return checkForm(this)">
+            <br>
+           
+            
+            <div class="row">
+                <div class="input">
+                    <span>手机</span><br>
+                    <input  id="p_tel" type="text" name="p_tel"/><br>
+                    <i class="Phone"><b></b></i>
+                </div>
+            </div>
+          
+            <div class="row">
+                <div class="input">
+                    <span>pwd</span><br>
+                    <input  id="pwd" type="text" name="pwd"/><br>
+                    <i class="Pwd"><b></b></i>
+                </div>
+            </div>
+           
+            <div class="button">
+                <button type="button" onclick="checkForm(this)">提交信息</button>
+            </div>
+           
+         </form>
+    </div>
+	<script type="text/javascript">
+	/* getInfo();
+	function getInfo(){ 
+
+		$.ajax({
+			type:'get',
+			url:'/info/getTotal',
+			data:{
+			
+			},
+			dataType:'json',
+			async:false,
+			success: function(data){
+//				
+				if(data.code==1){
+					mui.toast('成功')
+					if(data.data){
+						$('#totalNumber').val(data.data.totalNumber);
+						$('#totalMoney').val(data.data.totalMoney);
+						$('#totalOverNumber').val(data.data.totalOverNumber);
+						$('#totalNothingNumber').val(data.data.totalNothingNumber);
+						$('#totalOverMoney').val(data.data.totalOverMoney);
+						$('#totalNothingMoney').val(data.data.totalNothingMoney);
+					}
+				}else{
+					if(data.msg){
+						mui.toast(data.msg)
+					}else{mui.toast('失败')}
+				}
+			
+				
+				
+			},
+			error:function(data){
+				if(data.status==200){
+					mui.toast('成功')
+				}else{
+					mui.toast('失败')
+				}
+				
+			}
+			});
+	} */
+
+		function checkForm(){ 
+		
+		var phone = document.getElementById('p_tel').value.replace(/\s*/g,"");
+		
+		if(phone==""){
+			mui.toast("请输入手机号！");return false; 
+			}else{
+				if(phone.length!=11){ 
+				mui.toast("手机号码有误，请重新输入"); 
+				return false; 
+				} 
+		}
+		
+		
+		if($('#pwd').val()==""){
+			mui.toast("验证码");return false; 
+		}
+		
+		  //请求参数、url、创建XMLHttpRequest
+//    　　let data = 'phone='+phone+'&money='+money,
+//    　　　　url = 'http://localhost:8011/info/saveInfo',
+//    　　　　xhr = new XMLHttpRequest();
+//
+//    　　xhr.open('post', url);
+//        //设置header
+//    　　xhr.setRequestHeader('Content-type', 'application/json');
+//    　　xhr.send(data);
+//    　　xhr.onreadystatechange = function () {
+//    　　　　if (xhr.readyState === 4 && ( xhr.status === 200 || xhr.status === 304 )){
+//    	alert("成功")
+//    　　　　　　console.log(xhr.responseText);
+//    　　　　}
+//    　　}
+//			$.ajax("/info/saveInfo",{
+				/* 		dataType:'jsonp',
+		  				type:'get',
+					  	timeout:10000,
+					  	xhrFields:{
+					        withCredentials:true
+					    },
+					  	data: {
+							phone: phone,
+							money: money
+						},
+						jsonp: "jsoncallback", */
+					$.ajax({
+						type:'post',
+						url:'/info/saveInfo',
+						data:{
+							phone: phone,
+							code: $('#pwd').val()
+						},
+						dataType:'json',
+						async:false,
+						success: function(data){
+//							
+							if(data.code==1){
+								mui.toast('成功')
+							
+							}else{
+								if(data.msg){
+									mui.toast(data.msg)
+								}else{mui.toast('失败')}
+							}
+						
+							
+							
+						},
+						error:function(data){
+							if(data.status==200){
+								mui.toast('成功')
+							}else{
+								mui.toast('失败')
+							}
+							
+						}
+						});
+		
+	}
+
+	
+	</script>
+ </body>
+</html>
+

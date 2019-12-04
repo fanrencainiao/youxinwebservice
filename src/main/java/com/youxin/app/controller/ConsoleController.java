@@ -30,11 +30,13 @@ import org.springframework.web.servlet.ModelAndView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.mongodb.BasicDBObject;
 import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
+import com.youxin.app.entity.Report;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.MyCard;
@@ -54,12 +56,16 @@ import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
+import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.MsgRequest;
+import com.youxin.app.yx.request.team.MuteTeam;
+import com.youxin.app.yx.request.team.MuteTlistAll;
+import com.youxin.app.yx.request.team.QueryDetail;
 
 
 
@@ -99,6 +105,8 @@ public class ConsoleController extends AbstractController{
 			String s=JSONObject.toJSONString(login);
 			JSONObject json=JSONObject.parseObject(s);
 			json.put("role", 6);
+			json.put("loginTime", login.getLoginLog().getLoginTime());
+			json.put("createTime", login.getCreateTime());
 			return Result.success(json);
 		}
 		return Result.failure(ResultCode.USER_LOGIN_ERROR);
@@ -146,12 +154,15 @@ public class ConsoleController extends AbstractController{
 	}
 	
 	@PostMapping("blockUser")
-	public Object blockUser(@RequestParam(required=true) int id,@RequestParam(required=true) String accid,@RequestParam(required=true) int disableUser){
+	public Object blockUser(@RequestParam(required=true) int id,@RequestParam(defaultValue="") String accid,@RequestParam(required=true) int disableUser){
 		JSONObject block = null;
+		if(StringUtil.isEmpty(accid)) {
+			accid=Md5Util.md5HexToAccid(id+"");
+		}
 		User user=new User();
-		if(disableUser==1)
+		if(disableUser==-1)
 			block=SDKService.block(accid, "false");
-		else if(disableUser==0)
+		else if(disableUser==1)
 			block=SDKService.unblock(accid);
 		else
 			return Result.error();
@@ -445,6 +456,99 @@ public class ConsoleController extends AbstractController{
 		} catch (ServiceException e) {
 			return Result.error(e.getErrMessage());
 		}
+	}
+	
+	/**
+	 * @Description:（被举报的用户和群组列表）
+	 * @param type     (type = 0查询被举报的用户,type=1查询被举报的群主,type=2查询被举报的网页)
+	 * @param pageSize
+	 * @return
+	 **/
+	@SuppressWarnings("static-access")
+	@RequestMapping(value = "/beReport")
+	public Object beReport(@RequestParam(defaultValue = "0") int type,
+			@RequestParam(defaultValue = "0") int sender, @RequestParam(defaultValue = "") String receiver,
+			@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize) {
+		Map<String, Object> dataMap = Maps.newConcurrentMap();
+		Result Result = new Result();
+		try {
+			dataMap = userService.getReport(type, sender, receiver, pageIndex, pageSize);
+			log.debug("举报详情：" + JSONObject.toJSONString(dataMap.get("data")));
+			if (!dataMap.isEmpty()) {
+				List<Report> reportList = (List<Report>) dataMap.get("data");
+				long total = (long) dataMap.get("count");
+				return Result.success(new PageVO(reportList, total, pageIndex, pageSize, total));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Result.error(e.getMessage());
+		}
+		return Result;
+
+	}
+	
+	@RequestMapping("/isLockRoom")
+	public Result isLockRoom(@RequestParam(defaultValue = "") String roomId,
+			@RequestParam(defaultValue = "-1") int roomStatus) {
+		if (StringUtil.isEmpty(roomId))
+			return Result.error("room is null");
+		Query<Report> query = dfds.createQuery(Report.class).field("roomId")
+				.equal(Long.valueOf(roomId));
+		if (null == query.get())
+			return Result.error("暂无该链接的举报数据");
+		//禁言所有群成员
+		//查询群详细信息
+		QueryDetail roomquery=new QueryDetail();
+		roomquery.setTid(Long.valueOf(roomId));
+		JSONObject eqd = SDKService.teamQueryDetail(roomquery);
+		String oaccid = eqd.getJSONObject("tinfo").getJSONObject("owner").getString("accid");
+		//禁言
+		MuteTlistAll ma=new MuteTlistAll();
+		ma.setOwner(oaccid);
+		ma.setTid(roomId);
+		if(roomStatus==1)
+			ma.setMuteType(0);
+		else
+			ma.setMuteType(3);
+		JSONObject json = SDKService.teamMuteTlistAll(ma);
+		if(json.getIntValue("code")==200) {
+//			UpdateOperations<Report> ops = dfds.createUpdateOperations(Report.class);
+//			ops.set("roomStatus", roomStatus);
+//			dfds.update(query, ops);
+			return Result.success();
+		}
+		
+		return Result.error("失败");
+	}
+
+	@RequestMapping("/isLockWebUrl")
+	public Result isLockWebUrl(@RequestParam(defaultValue = "") String webUrlId,
+			@RequestParam(defaultValue = "-1") int webStatus) {
+		if (StringUtil.isEmpty(webUrlId))
+			return Result.error("webUrl is null");
+		Query<Report> query = dfds.createQuery(Report.class).field("_id")
+				.equal(new ObjectId(webUrlId));
+		if (null == query.get())
+			return Result.error("暂无该链接的举报数据");
+		UpdateOperations<Report> ops = dfds.createUpdateOperations(Report.class);
+		ops.set("webStatus", webStatus);
+		dfds.update(query, ops);
+		return Result.success();
+	}
+
+	/**
+	 * 删除举报
+	 * 
+	 * @param response
+	 * @param id
+	 * @return
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "/deleteReport")
+	public Result deleteReport(HttpServletResponse response, @RequestParam String id) throws IOException {
+		BasicDBObject query = new BasicDBObject("_id", parse(id));
+		dfds.getDB().getCollection("Report").remove(query);
+		return Result.success();
 	}
 
 

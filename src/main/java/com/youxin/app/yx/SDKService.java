@@ -284,15 +284,24 @@ public class SDKService {
 			JSONObject json = null;
 			String url = "https://api.netease.im/nimserver/user/updateUinfo.action";
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("accid", user.getAccid()));
-			params.add(new BasicNameValuePair("name", user.getName()));
-			params.add(new BasicNameValuePair("icon", user.getIcon()));
-			params.add(new BasicNameValuePair("sign", user.getSign()));
-			params.add(new BasicNameValuePair("email", user.getEmail()));
-			params.add(new BasicNameValuePair("birth", user.getBirth()));
-			params.add(new BasicNameValuePair("mobile", user.getMobile()));
-			params.add(new BasicNameValuePair("gender", user.getGender() + ""));
-			params.add(new BasicNameValuePair("ex", user.getEx()));
+			if (!StringUtil.isEmpty(user.getAccid()))
+				params.add(new BasicNameValuePair("accid", user.getAccid()));
+			if (!StringUtil.isEmpty(user.getName()))
+				params.add(new BasicNameValuePair("name", user.getName()));
+			if (!StringUtil.isEmpty(user.getIcon()))
+				params.add(new BasicNameValuePair("icon", user.getIcon()));
+			if (!StringUtil.isEmpty(user.getSign()))
+				params.add(new BasicNameValuePair("sign", user.getSign()));
+			if (!StringUtil.isEmpty(user.getEmail()))
+				params.add(new BasicNameValuePair("email", user.getEmail()));
+			if (!StringUtil.isEmpty(user.getBirth()))
+				params.add(new BasicNameValuePair("birth", user.getBirth()));
+			if (!StringUtil.isEmpty(user.getMobile()))
+				params.add(new BasicNameValuePair("mobile", user.getMobile()));
+			if (!StringUtil.isEmpty(user.getGender() + ""))
+				params.add(new BasicNameValuePair("gender", user.getGender() + ""));
+			if (!StringUtil.isEmpty(user.getEx()))
+				params.add(new BasicNameValuePair("ex", user.getEx()));
 			// UTF-8编码,解决中文问题
 			HttpEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 
@@ -566,7 +575,7 @@ public class SDKService {
 
 			String res = NIMPost.postNIMServer(url, entity, APPKEY, SECRET);
 			json = getJson(json, res);
-			
+
 			logger.debug("httpRes:" + res);
 			return json;
 		} catch (UnsupportedEncodingException e) {
@@ -1379,10 +1388,12 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/query.action";
 		return postServer(request, url);
 	}
+
 	/**
 	 * 获取群组详细信息
 	 * 
 	 * 查询指定群的详细信息（群信息+成员详细信息）
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1390,8 +1401,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/queryDetail.action";
 		return postServer(request, url);
 	}
+
 	/**
 	 * 获取群组已读消息的已读详情信息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1399,9 +1412,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/getMarkReadInfo.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 获取群组已读消息的已读详情信息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1410,10 +1424,9 @@ public class SDKService {
 		return postServer(request, url);
 	}
 
-	
 	/**
-	 * 任命管理员
-	 * 提升普通成员为群管理员，可以批量，但是一次添加最多不超过10个人。
+	 * 任命管理员 提升普通成员为群管理员，可以批量，但是一次添加最多不超过10个人。
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1421,11 +1434,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/addManager.action";
 		return postServer(request, url);
 	}
-	
-	
+
 	/**
-	 * 移除管理员
-	 * 解除管理员身份，可以批量，但是一次解除最多不超过10个人
+	 * 移除管理员 解除管理员身份，可以批量，但是一次解除最多不超过10个人
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1433,10 +1445,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/removeManager.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 获取某用户所加入的群信息
-	 * 获取某个用户所加入高级群的群信息
+	 * 获取某用户所加入的群信息 获取某个用户所加入高级群的群信息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1444,10 +1456,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/joinTeams.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 修改群昵称
-	 * 修改指定账号在群内的昵称
+	 * 修改群昵称 修改指定账号在群内的昵称
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1455,11 +1467,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/updateTeamNick.action";
 		return postServer(request, url);
 	}
-	
 
 	/**
-	 * 修改消息提醒开关
-	 * 修改消息提醒开关
+	 * 修改消息提醒开关 修改消息提醒开关
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1467,9 +1478,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/muteTeam.action";
 		return postServer(request, url);
 	}
+
 	/**
-	 * 禁言群成员
-	 * 高级群禁言群成员
+	 * 禁言群成员 高级群禁言群成员
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1477,10 +1489,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/muteTlist.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
-	 * 主动退群
-	 * 高级群主动退群
+	 * 主动退群 高级群主动退群
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1488,9 +1500,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/leave.action";
 		return postServer(request, url);
 	}
+
 	/**
-	 * 将群组整体禁言
-	 * 禁言群组，普通成员不能发送消息，创建者和管理员可以发送消息
+	 * 将群组整体禁言 禁言群组，普通成员不能发送消息，创建者和管理员可以发送消息
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1498,9 +1511,10 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/muteTlistAll.action";
 		return postServer(request, url);
 	}
-	
+
 	/**
 	 * 获取群组禁言列表
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -1508,9 +1522,6 @@ public class SDKService {
 		String url = "https://api.netease.im/nimserver/team/listTeamMute.action";
 		return postServer(request, url);
 	}
-	
-	
-	
 
 	private static <T> JSONObject postServer(T request, String url) {
 		try {
@@ -1543,7 +1554,7 @@ public class SDKService {
 	private static JSONObject getJson(JSONObject json, String res) {
 		if (!StringUtil.isEmpty(res)) {
 			json = JSONObject.parseObject(res);
-			System.out.println("json"+json);
+			System.out.println("json" + json);
 			if (json.getIntValue("code") != 200)
 				throw new ServiceException(-1, json.getString("desc"));
 		} else
@@ -1568,7 +1579,7 @@ public class SDKService {
 		for (int i = 0; i < fields.length; i++) {
 			Field f = fields[i];
 			f.setAccessible(true);
-			if(f.get(e)!=null)
+			if (f.get(e) != null)
 				params.add(new BasicNameValuePair(f.getName(), f.get(e) + ""));
 			System.out.println("属性名:" + f.getName() + " 属性值:" + f.get(e));
 		}

@@ -70,9 +70,9 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             data = obj.data;
              
       if(layEvent === 'delete'){//禁用    
-    	  Base.disableUser(data.id,data.accid,1);
+    	  Base.disableUser(data.id,data.accid,-1);
       }else if(layEvent === 'undelete'){// 解禁    
-    	  Base.disableUser(data.id,data.accid,0);
+    	  Base.disableUser(data.id,data.accid,1);
       }else if(layEvent === 'update'){// 修改用户    
     	  Base.update(obj.data,obj.data.id);
       }else if(layEvent==='recharge'){ //后台充值

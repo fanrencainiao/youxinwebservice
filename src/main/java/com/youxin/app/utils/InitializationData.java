@@ -156,8 +156,9 @@ public class InitializationData  implements CommandLineRunner {
 
 
 	private User createAccid(User user, String userId) {
-		String accid=Md5Util.md5Hex(userId);
+		String accid=Md5Util.md5HexToAccid(userId);
 		user.setAccid(accid);
+		user.setExs();
 		com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
 		//sdk注册
 		BeanUtils.copyProperties(user, u);

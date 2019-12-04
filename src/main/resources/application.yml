@@ -13,7 +13,7 @@ spring:
       host: 127.0.0.1
       username: 
       password: 
-      database: youxinapp
+      database: youxinappa
       port: 28018 
       connect-timeout: 20000
       socket-timeout: 20000
@@ -24,7 +24,7 @@ spring:
     host: 127.0.0.1
     port: 6379
     password: 
-    database: 2
+    database: 0
     isCluster: false
     timeout:
       seconds: 10000
