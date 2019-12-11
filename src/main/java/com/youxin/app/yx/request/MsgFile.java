@@ -20,11 +20,11 @@ public class MsgFile {
 	/**
 	 * 返回的url是否需要为https的url，true或false，默认false
 	 */
-	private String ishttps;
+	private String ishttps="false";
 	/**
 	 * 文件过期时长，单位：秒，必须大于等于86400
 	 */
-	private Integer expireSec;
+	private String expireSec;
 	/**
 	 * 文件的应用场景，不超过32个字符
 	 */

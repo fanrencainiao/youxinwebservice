@@ -62,7 +62,7 @@ public class RedisAutoConfiguration {
            }else {
             	  SingleServerConfig serverConfig = config.useSingleServer()
                   		.setAddress(address)
-                  		.setDatabase(0);
+                  		.setDatabase(3);
             	  serverConfig.setKeepAlive(true);
                   serverConfig.setPingConnectionInterval(500);
                   serverConfig.setPingTimeout(timeout);

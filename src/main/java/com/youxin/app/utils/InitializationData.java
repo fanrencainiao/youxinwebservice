@@ -105,7 +105,7 @@ public class InitializationData  implements CommandLineRunner {
 				user.setPassword(DigestUtils.md5Hex("1000"));
 				user.setCreateTime(DateUtil.currentTimeSeconds());
 				user=createAccid(user,"1000");
-				
+				user.setUserType(6);//后台管理员
 				dfds.save(user);
 //				KXMPPServiceImpl.getInstance().registerAndXmppVersion(user.getUserId() + "", user.getPassword());
 			} catch (Exception e) {
@@ -122,6 +122,7 @@ public class InitializationData  implements CommandLineRunner {
 				u.setPassword(DigestUtils.md5Hex("10000"));
 				u.setCreateTime(DateUtil.currentTimeSeconds());
 				u=createAccid(u,"10000");
+				u.setUserType(2);//公众号-客服小助手
 				dfds.save(u);
 				Role role1 = new Role(10000, "10000", (byte) 2, (byte) 1, 0);
 				dfds.save(role1);
@@ -143,6 +144,7 @@ public class InitializationData  implements CommandLineRunner {
 				u.setPassword(DigestUtils.md5Hex("1100"));
 				u.setCreateTime(DateUtil.currentTimeSeconds());
 				u=createAccid(u,"1100");
+				u.setUserType(2);//公众号-支付通知
 				dfds.save(u);
 //				KXMPPServiceImpl.getInstance().registerSystemNo("1100", DigestUtils.md5Hex("1100"));
 			} catch (Exception e) {

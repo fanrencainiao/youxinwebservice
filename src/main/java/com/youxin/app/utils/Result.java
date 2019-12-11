@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value="response返回对象")
@@ -85,6 +87,23 @@ public class Result implements Serializable{
         if(!StringUtil.isEmpty(msg)) {
         	result.setMsg(msg);
         }
+        return result;
+    }
+    /**
+     * layuiEdit返回方法
+     * @param code 0成功其他失败 
+     * @param src 图片路径
+     * @param title 图片名称 可选
+     * @return
+     */
+    public static Result layuieditimg(int code,String msg,String src,String title) {
+        Result result = new Result();
+        result.setCode(code);
+        result.setMsg(msg);
+        JSONObject data=new JSONObject();
+        data.put("src", src);
+        data.put("title", title);
+        result.setData(data);
         return result;
     }
     public static Result error(String msg,Object data) {

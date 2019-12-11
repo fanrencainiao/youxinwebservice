@@ -6796,7 +6796,7 @@ layui.define(["layer", "form"], function (t) {
         if (i[0]) return e(i[0].document.body).text()
     }, c.prototype.setContent = function (t, i, a) {
         var l = u(t);
-        l[0] && (a ? e(l[0].document.body).append(i) : e(l[0].document.body).html(i), layedit.sync(t))
+        l[0] && (a ? e(l[0].document.body).append(i) : e(l[0].document.body).html(i), this.sync(t))
     }, c.prototype.sync = function (t) {
         var i = u(t);
         if (i[0]) {

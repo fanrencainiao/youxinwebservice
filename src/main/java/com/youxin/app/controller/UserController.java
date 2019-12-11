@@ -28,6 +28,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.NearbyUser;
+import com.youxin.app.entity.Opinion;
 import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
@@ -261,10 +262,10 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "修改登录信息",response=Result.class)
 	@PostMapping("login/upd")
-	public Object loginUpd(@RequestBody DeviceInfo info) {
+	public Object loginUpd(DeviceInfo info,LoginLog log) {
 
 		Integer userId = ReqUtil.getUserId();
-		userService.saveLoginToken(userId, info);
+		userService.saveLoginToken(userId, info,log);
 		KSessionUtil.saveAndroidToken(userId, info);
 
 		return Result.success();
@@ -622,6 +623,21 @@ public class UserController extends AbstractController{
 			
 		} catch (Exception e) {
 			return Result.error(e.getMessage());
+		}
+		
+	}
+	@ApiOperation(value = "意见提交",response=Result.class)
+	@PostMapping(value = "/putOpinion")
+	public Object putOpinion(@RequestParam(defaultValue="") String opinion) {
+		try {
+			Opinion o=new Opinion();
+			o.setUserId(ReqUtil.getUserId());
+			o.setOpinion(opinion);
+			o.setCreateTime(DateUtil.currentTimeSeconds());
+			dfds.save(o);
+			return Result.success();
+		} catch (Exception e) {
+			return Result.error("提交失败");
 		}
 		
 	}

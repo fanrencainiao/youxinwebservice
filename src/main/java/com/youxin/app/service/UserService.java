@@ -147,7 +147,7 @@ public interface UserService {
 	 * @param userId
 	 * @param info
 	 */
-	void saveLoginToken(Integer userId, DeviceInfo info);
+	void saveLoginToken(Integer userId, DeviceInfo info,LoginLog log);
 	LoginLog getLogin(int userId);
 	/**
 	 * @Description: 获取举报列表

@@ -40,6 +40,27 @@
 			"href": "/templates/console/complaint.html",
 			"spread": false,
 			"complaint": true
+		},{
+			"title": "反馈与帮助",
+			"icon": "&#xe607;",
+			"href": "",
+			"spread": false,
+			"systemConfig": true,
+			"children": [
+				{
+					"title": "意见反馈",
+					"icon": "&#xe6b2;",
+					"href": "/templates/console/opinion.html",
+					"spread": false
+				},
+				{
+					"title": "帮助中心",
+					"icon": "&#xe6b2;",
+					"href": "/templates/console/helpCenter.html",
+					"spread": false
+				}
+			]
+			
 		}
 
 	]

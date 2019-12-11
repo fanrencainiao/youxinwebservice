@@ -3,6 +3,8 @@ package com.youxin.app.yx.request.User;
 
 
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 /**
@@ -18,7 +20,7 @@ public class User {
 	/**
 	 * 用户帐号，最大长度32字符，必须保证一个APP内唯一
 	 */
-
+	@JSONField(serialize=false)
 	private String accid;
 	/**
 	 * 用户昵称，最大长度64字符，可设置为空字符串

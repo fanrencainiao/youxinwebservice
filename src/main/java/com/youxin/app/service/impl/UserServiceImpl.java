@@ -286,7 +286,10 @@ public class UserServiceImpl implements UserService {
 
 //		System.out.println(SDKService.getUinfos("['2dd0c6c424d1afbf925b8be4fbe85981']"));
 
-
+		User u=new User();
+		u.setAccid("assa");;
+		u.setName("123");
+		System.out.println(JSONObject.toJSON(u));
 	}
 
 	
@@ -372,6 +375,7 @@ public class UserServiceImpl implements UserService {
 //			ref.put("birthday", new BasicDBObject("$lte", example.getEndTime()));
 		DBObject fields = new BasicDBObject();
 		fields.put("password", 0);
+		fields.put("accid", 0);
 		fields.put("payPassword", 0);
 		fields.put("token", 0);
 		fields.put("loginType", 0);
@@ -382,7 +386,7 @@ public class UserServiceImpl implements UserService {
 				.sort(new BasicDBObject("_id", -1)).limit(10);
 		while (cursor.hasNext()) {
 			DBObject obj = cursor.next();
-			obj.put("userId", obj.get("_id"));
+			obj.put("id", obj.get("_id"));
 			obj.removeField("_id");
 			obj.put("mobile", StringUtil.phoneEncryption(obj.get("mobile").toString()));
 			
@@ -562,7 +566,7 @@ public class UserServiceImpl implements UserService {
 //		Object token = data.get("access_token");
 		data.put("serialStatus", serialStatus);
 		data.put("id", user.getId());
-		data.put("accid", user.getAccid());
+//		data.put("accid", user.getAccid());
 		data.put("account", user.getAccount());
 		data.put("name", user.getName());
 		data.put("birth", user.getBirth());
@@ -570,6 +574,8 @@ public class UserServiceImpl implements UserService {
 		data.put("token", user.getToken());
 		data.put("mobile", StringUtil.phoneEncryption(user.getMobile()));
 		data.put("codeSign", user.getCodeSign());
+		data.put("latitude", user.getLatitude());
+		data.put("longitude", user.getLongitude());
 		data.put("login", login);
 		System.out.println(data);
 		return data;
@@ -602,6 +608,12 @@ public class UserServiceImpl implements UserService {
 		}
 		if(!StringUtil.isEmpty(bean.getCityName())) {
 			ops.set("cityName", bean.getCityName());
+		}
+		if(bean.getLatitude()>0) {
+			ops.set("latitude", bean.getLatitude());
+		}
+		if(bean.getLongitude()>0) {
+			ops.set("longitude", bean.getLongitude());
 		}
 		ops.set("updateTime",DateUtil.currentTimeSeconds());
 		repository.update(q, ops);
@@ -695,7 +707,7 @@ public class UserServiceImpl implements UserService {
 
 	}
 	@Override
-	public void saveLoginToken(Integer userId, DeviceInfo info) {
+	public void saveLoginToken(Integer userId, DeviceInfo info,LoginLog log) {
 		ThreadUtil.executeInThread(new Callback() {
 			@Override
 			public void execute(Object obj) {
@@ -709,6 +721,9 @@ public class UserServiceImpl implements UserService {
 					LoginLog login = getLogin(userId);
 					login.setIsFirstLogin(0);
 					login.setLoginTime(DateUtil.currentTimeSeconds());
+					login.setAddress(log.getAddress());
+					login.setLatitude(log.getLatitude());
+					login.setLongitude(log.getLongitude());
 					ops.set("loginLog", login);
 					dfds.update(query, ops);
 					
@@ -718,6 +733,8 @@ public class UserServiceImpl implements UserService {
 					 */
 					User user = new User();
 					user.setId(userId);
+					user.setLatitude(log.getLatitude());
+					user.setLongitude(log.getLongitude());
 					updateUserByEle(user);
 					KSessionUtil.removeAndroidToken(userId);
 				} catch (Exception e) {

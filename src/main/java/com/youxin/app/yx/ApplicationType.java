@@ -5,7 +5,7 @@ package com.youxin.app.yx;
  */
 public enum ApplicationType {
 
-    JSON("application/json"), XML("application/xml"), TEXT("text/xml"), FORM("application/x-www-form-urlencoded");
+    JSON("application/json"), XML("application/xml"), TEXT("text/xml"), FORM("application/x-www-form-urlencoded"), MULTIPART("multipart/form-data");
 
     private String type;
 

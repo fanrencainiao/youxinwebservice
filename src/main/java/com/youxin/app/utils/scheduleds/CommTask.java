@@ -122,7 +122,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		
 	}
 	//12点
-	@Scheduled(cron = "30 59 23 * * ?")
+//	@Scheduled(cron = "30 59 23 * * ?")
 	public void sendPhoneCode() {
 		System.out.println("定时任务开始:"+new Date());
 		System.out.println("定时任务开始:"+DateUtil.currentTimeSeconds());

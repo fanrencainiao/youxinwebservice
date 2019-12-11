@@ -1,6 +1,13 @@
 package com.youxin.app.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,8 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +34,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
@@ -34,6 +43,8 @@ import com.mongodb.BasicDBObject;
 import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
+import com.youxin.app.entity.HelpCenter;
+import com.youxin.app.entity.Opinion;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Report;
@@ -52,20 +63,26 @@ import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.BeanUtils;
 import com.youxin.app.utils.DateUtil;
+import com.youxin.app.utils.FileUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.PageVO;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.team.MuteTeam;
 import com.youxin.app.yx.request.team.MuteTlistAll;
 import com.youxin.app.yx.request.team.QueryDetail;
+
+import io.netty.handler.codec.base64.Base64Encoder;
+import io.swagger.annotations.ApiOperation;
 
 
 
@@ -550,6 +567,128 @@ public class ConsoleController extends AbstractController{
 		dfds.getDB().getCollection("Report").remove(query);
 		return Result.success();
 	}
+	
+	/**
+	 * 意见查询
+	 * @param opinion
+	 * @return
+	 */
+	@RequestMapping(value = "/opinionList")
+	public Object opinionList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize) {
+			PageResult<Opinion> result=new PageResult<>();
+			 Query<Opinion> createQuery = dfds.createQuery(Opinion.class);
+			 createQuery.order("state,-createTime");
+			result.setCount(createQuery.count());
+			result.setData(createQuery.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+			return Result.success(result);
+		
+		
+	}
+	/**
+	 * 意见状态修改
+	 * @param opinion
+	 * @return
+	 */
+	@RequestMapping(value = "/overOpinion")
+	public Object overOpinion(@RequestParam(defaultValue = "0") int state,@RequestParam(defaultValue = "") String id) {
+			if(StringUtil.isEmpty(id))
+				return Result.error("id不能为空");
+			UpdateOperations<Opinion> uo=dfds.createUpdateOperations(Opinion.class);
+			uo.set("state", state);
+			uo.set("updateTime", DateUtil.currentTimeSeconds());
+			UpdateResults update = dfds.update(dfds.createQuery(Opinion.class).field("_id").equal(parse(id)), uo);
+			return Result.success(update);
+	}
+	
+	/**
+	 * sdk图片上传
+	 * @param 
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/uploadSdkImage")
+	public Object uploadSdkImage(@RequestParam(value="file",required=false)MultipartFile file) throws Exception {
+		 String fileName=file.getOriginalFilename();//获取文件名加后缀	
+		if(StringUtil.isEmpty(fileName))
+				return Result.layuieditimg(-1, "图片为空", "", "");
+		File multipartFileToFile =FileUtil.multipartFileToFile(file);
+		if(multipartFileToFile==null) {
+			return Result.layuieditimg(-1, "转file失败", "", "");
+		}
+		String base64 = FileUtil.base64(multipartFileToFile);
+		if(base64==null) {
+			return Result.layuieditimg(-1, "转base64失败", "", "");
+		}
+		
+		MsgFile mf=new MsgFile();
+		System.out.println(base64);
+		mf.setContent(base64);
+//		SDKService.fileUpload(mf);
+		mf.setType("1");
+		//50年
+		mf.setExpireSec(3600*24*30*12*50+"");
+		mf.setTag("图文");
+		JSONObject upload = SDKService.upload(mf);
+		System.out.println(upload);
+		String url = upload.getString("url");
+		return Result.layuieditimg(0, "成功", url, url);
+			
+	}
 
+	@RequestMapping(value = "/helpCenterList")
+	public Object helpCenterList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "-2") int state
+			,@RequestParam(defaultValue = "") String nickName ) {
+		PageResult<HelpCenter> result=new PageResult<>();
+		 Query<HelpCenter> q = dfds.createQuery(HelpCenter.class);
+		 if(type>0) 
+				q.field("type").equal(type);
+	
+			if(state==0) 
+				q.field("state").equal(state);
+			else if(state==1)
+				q.filter("state in", new Integer[] {-1,1});
+			if(!StringUtil.isEmpty(nickName))
+				q.field("title").contains(nickName);
+		 q.order("-createTime,-updateTime");
+		result.setCount(q.count());
+		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+		return Result.success(result);
+	}
+	@RequestMapping(value = "/getCenterList")
+	public Object getCenterList(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		Query<HelpCenter> q = dfds.createQuery(HelpCenter.class).field("_id").equal(parse(id));
+		
+		return Result.success(q.get());
+	}
+	@RequestMapping(value = "/saveCenterList")
+	public Object saveCenterList(@RequestParam(defaultValue = "") String hcid,@ModelAttribute HelpCenter hc) {
+		if(StringUtil.isEmpty(hcid)) {
+			hc.setCreateTime(DateUtil.currentTimeSeconds());
+			hc.setState(0);
+		}else {
+			hc.setId(parse(hcid));
+			hc.setUpdateTime(DateUtil.currentTimeSeconds());
+		}
+		Key<HelpCenter> save = dfds.save(hc);
+		return Result.success(save);
+	}
+	@RequestMapping(value = "/delCenterList")
+	public Object delCenterList(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		String[] ids = StringUtil.getStringList(id, ",");
+		for(String idd:ids) {
+			Query<HelpCenter> q = dfds.createQuery(HelpCenter.class).field("_id").equal(parse(idd));
+			dfds.delete(q);
+		}
+		
+		return Result.success();
+	}
+	
 
 }

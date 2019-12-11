@@ -1,10 +1,13 @@
 package com.youxin.app.entity;
 
+import org.mongodb.morphia.annotations.Entity;
+
 import com.youxin.app.entity.exam.BasePoi;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "附近的人")
+@Entity(value = "nearby_user", noClassnameStored = true)
 public class NearbyUser extends BasePoi {
 	
 	@ApiModelProperty("最后出现时间")

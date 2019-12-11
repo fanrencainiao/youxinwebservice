@@ -12,6 +12,7 @@ import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.utils.IndexDirection;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.youxin.app.entity.exam.BaseExample;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.utils.CollectionUtil;
@@ -44,6 +45,7 @@ public class User extends BaseExample{
 	 */
 	@Indexed(unique = true)
 	@ApiModelProperty(hidden = true)
+	@JSONField(serialize=false)
 	private String accid;
 	/**
 	 * 用户昵称，最大长度64字符，可设置为空字符串

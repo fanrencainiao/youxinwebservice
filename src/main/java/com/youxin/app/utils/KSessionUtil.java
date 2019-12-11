@@ -186,6 +186,7 @@ public final class KSessionUtil {
 	public static void saveUserByUserId(Integer userId, User user) {
 		String key = String.format(GET_USER_BY_USERID, userId);
 		user.setEx("");
+		user.setAccid("");
 		user.setPassword("");
 		if(StringUtil.isEmpty(user.getPayPassword())||"0".equals(user.getPayPassword())) 
 			user.setPayPassword("0");
