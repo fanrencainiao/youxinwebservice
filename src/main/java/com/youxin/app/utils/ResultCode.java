@@ -26,7 +26,7 @@ public enum ResultCode {
     USER_ERR_TOKEN(20006, "没有请求令牌"),
     USER_OUT_TOKEN(20007, "请求令牌过期"),
     UNBindingTelephone(20008, "未绑定手机"),
-    BINGDINGWXED(20009, "微信已经被绑定，请先解绑"),
+    BINGDINGWXED(20009, "账户已经被绑定，请先解绑"),
     BINGDINGMOBILED(20010, "手机号已存在"),
     USER_DIS_TOKEN(20011, "授权认证失败"),
     /* 业务错误：30001-39999 */

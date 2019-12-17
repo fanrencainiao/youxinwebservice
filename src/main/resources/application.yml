@@ -61,6 +61,10 @@ youxin:
   accountTitle: yx
   #是否开启定时任务
   openTask: 0
+  #yunxinappkey
+  yunxinappkey: faeb0ec0ce3871b699119420790c8789
+  #yunxinappaecret
+  yunxinappaecret: d53d9d0cd80b
 ## 阿里云短信服务
 smsconfig:
   product: Dysmsapi

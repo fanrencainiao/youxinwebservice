@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 				SdkLoginInfo sdkLoginInfo=new SdkLoginInfo();
 				sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
 				sdkLoginInfo.setLoginInfo(bean.getLoginInfo());
-				sdkLoginInfo.setType(2);
+				sdkLoginInfo.setType(bean.getSdkType());
 				sdkLoginInfo.setUserId(bean.getId());
 				sdkLoginInfo.setAccid(accid);
 				dfds.save(sdkLoginInfo);
@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
 				String password = bean.getPassword();
 				if (!password.equals(user.getPassword()))
 					throw new ServiceException(20002, "密码错误");
-			} else if (3 == bean.getLoginType()) {
+			} else if (bean.getLoginType()==3) {
 				// sdk登录
 				
 			}else {
@@ -591,16 +591,16 @@ public class UserServiceImpl implements UserService {
 		if(!StringUtil.isEmpty(bean.getCodeSign())) {
 			ops.set("codeSign", bean.getCodeSign());
 		}
-		if(bean.getCityId()>0) {
+		if(bean.getCityId()!=null&&bean.getCityId()>0) {
 			ops.set("cityId", bean.getCityId());
 		}
-		if(bean.getAreaId()>0) {
+		if(bean.getAreaId()!=null&&bean.getAreaId()>0) {
 			ops.set("areaId", bean.getAreaId());
 		}
-		if(bean.getCountryId()>0) {
+		if(bean.getCountryId()!=null&&bean.getCountryId()>0) {
 			ops.set("countryId", bean.getCountryId());
 		}
-		if(bean.getProvinceId()>0) {
+		if(bean.getProvinceId()!=null&&bean.getProvinceId()>0) {
 			ops.set("provinceId", bean.getProvinceId());
 		}
 		if(!StringUtil.isEmpty(bean.getAddress())) {

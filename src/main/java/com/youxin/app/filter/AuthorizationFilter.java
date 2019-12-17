@@ -89,16 +89,13 @@ public class AuthorizationFilter implements Filter {
 		// DEBUG**************************************************DEBUG
 		
 		// 如果访问的是控制台或资源目录
-		if (requestUri.startsWith("/mobileMoney")) {
-			arg2.doFilter(arg0, arg1);
-			return;
-		}else if (requestUri.startsWith("/console")||requestUri.startsWith("/static")||requestUri.startsWith("/templates")||requestUri.startsWith("/v2") ||requestUri.startsWith("/swagger-resources")|| requestUri.startsWith("/toPage") || requestUri.endsWith(".js") || requestUri.endsWith(".html")
+		if (requestUri.startsWith("/console")||requestUri.startsWith("/static")||requestUri.startsWith("/templates")||requestUri.startsWith("/v2") ||requestUri.startsWith("/swagger-resources")|| requestUri.startsWith("/toPage") || requestUri.endsWith(".js") || requestUri.endsWith(".html")
 				|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")|| requestUri.endsWith(".gif")||requestUri.endsWith(".json")||requestUri.endsWith(".woff")||requestUri.endsWith(".ttf")|| requestUri.startsWith("/test")) {
 			User obj =(User) request.getSession().getAttribute(LoginSign.LOGIN_USER_KEY);
 			// 用户已登录或访问资源目录或访问登录页面
 //			System.out.println(obj);
-//			(null != obj&&obj.getId()!=null)||
-			if (requestUri.startsWith("/console")||requestUri.startsWith("/console/logout")||requestUri.startsWith("/console/login")||requestUri.startsWith("/templates/console/login.html")||requestUri.startsWith("/static")||requestUri.startsWith("/webjars")||requestUri.startsWith("/v2")|| requestUri.endsWith(".js")|| requestUri.endsWith(".html")|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")||requestUri.startsWith("/swagger-resources")||requestUri.endsWith(".woff")||requestUri.endsWith(".ttf") ||requestUri.startsWith("/swagger-ui")) {
+//			
+			if ((null != obj&&obj.getId()!=null)||requestUri.startsWith("/console/logout")||requestUri.startsWith("/console/login")||requestUri.startsWith("/templates/console/login.html")||requestUri.startsWith("/static")||requestUri.startsWith("/webjars")||requestUri.startsWith("/v2")|| requestUri.endsWith(".js")|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")||requestUri.startsWith("/swagger-resources")||requestUri.endsWith(".woff")||requestUri.endsWith(".ttf") ||requestUri.startsWith("/swagger-ui")) {
 				arg2.doFilter(arg0, arg1);
 				return;
 			} else

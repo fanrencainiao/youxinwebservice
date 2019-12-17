@@ -91,10 +91,7 @@ public class UserController extends AbstractController{
 				throw new ServiceException(0, "手机号已被注册");
 			}else {
 				// 第三方绑定
-				
 				SdkLoginInfo findSdkLoginInfo = userService.findSdkLoginInfo(user.getSdkType(), user.getLoginInfo());
-				
-				
 //				return q.asList();
 				if(findSdkLoginInfo==null) {
 					User ubm = userService.getUserByMobile(user.getMobile());
@@ -105,14 +102,14 @@ public class UserController extends AbstractController{
 					SdkLoginInfo sdkLoginInfo=new SdkLoginInfo();
 					sdkLoginInfo.setCreateTime(DateUtil.currentTimeSeconds());
 					sdkLoginInfo.setLoginInfo(user.getLoginInfo());
-					sdkLoginInfo.setType(2);
+					sdkLoginInfo.setType(user.getSdkType());
 					sdkLoginInfo.setUserId(ubm.getId());
 					sdkLoginInfo.setAccid(ubm.getAccid());
 					dfds.save(sdkLoginInfo);
 					ubm.setLoginLog(user.getLoginLog());
 					return Result.success(userService.saveLoginInfo(ubm));
 				}else {
-					throw new ServiceException(0, "微信已绑定");
+					throw new ServiceException(0, "账户已绑定");
 				}
 				
 				

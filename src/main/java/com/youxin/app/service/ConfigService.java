@@ -13,4 +13,6 @@ public interface ConfigService {
 
     void setConfig(Config config);
 
+	Config initConfig();
+
 }

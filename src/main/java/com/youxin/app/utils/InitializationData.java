@@ -22,6 +22,7 @@ import com.mongodb.DBCollection;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.User;
 import com.youxin.app.ex.ServiceException;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.yx.SDKService;
 
@@ -43,8 +44,10 @@ public class InitializationData  implements CommandLineRunner {
 	@Qualifier("get")
 	private Datastore dfds;
 	
+//	@Autowired
+//	private UserService userService;
 	@Autowired
-	private UserService userService;
+	private ConfigService cs;
 
 	
 	
@@ -95,7 +98,7 @@ public class InitializationData  implements CommandLineRunner {
         * 初始化默认超级管理员数据
 	*/
 	private void initSuperAdminData() {
-
+		
 		DBCollection adminCollection = dfds.getCollection(Role.class);
 		if (adminCollection == null || adminCollection.count() == 0) {
 			try {
@@ -146,6 +149,8 @@ public class InitializationData  implements CommandLineRunner {
 				u=createAccid(u,"1100");
 				u.setUserType(2);//公众号-支付通知
 				dfds.save(u);
+				//初始化config配置
+				cs.initConfig();
 //				KXMPPServiceImpl.getInstance().registerSystemNo("1100", DigestUtils.md5Hex("1100"));
 			} catch (Exception e) {
 				e.printStackTrace();

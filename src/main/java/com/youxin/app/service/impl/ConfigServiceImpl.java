@@ -47,7 +47,7 @@ public class ConfigServiceImpl implements ConfigService {
 		KSessionUtil.setConfig(dest);
 		
 	}
-	
+	@Override
 	public Config initConfig() {
 		Config config=new Config();
 		config.setId(10000);

@@ -12,6 +12,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.ex.ServiceException;
@@ -69,11 +73,24 @@ import com.youxin.app.yx.request.team.QueryDetail;
 import com.youxin.app.yx.request.team.Remove;
 import com.youxin.app.yx.request.team.Update;
 import com.youxin.app.yx.request.team.UpdateTeamNick;
-
+@Configuration
 public class SDKService {
 	protected static Log logger = LogFactory.getLog("sdk");
-	private static String APPKEY = "faeb0ec0ce3871b699119420790c8789"; // AppKey
-	private static String SECRET = "d53d9d0cd80b"; // AppSecret
+	
+	
+	
+	private static String APPKEY; // AppKey
+	@Value("${youxin.yunxinappkey}")
+	public void setAPPKEY(String yunxinappkey) {
+		SDKService.APPKEY=yunxinappkey;
+	}
+	private static String SECRET; // AppSecret
+	@Value("${youxin.yunxinappaecret}")
+	public void setSECRET(String yunxinappaecret) {
+		SDKService.SECRET=yunxinappaecret;
+	}
+	
+
 
 	/**
 	 * 网易云通信ID创建

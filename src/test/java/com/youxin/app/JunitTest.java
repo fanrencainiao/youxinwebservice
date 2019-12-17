@@ -128,13 +128,23 @@
 //
 //	}
 //	
+//	@Test
+//	public void sdkTest() {
+//		
+//		JSONObject uinfos = SDKService.getUinfos("b170a070802741f667201b54880c925f");
+//		
+//		System.out.println(uinfos);
+//	
+//
+//	}
+//	
 //	  public static void main(String[] args) throws IOException {
 //
 ////	        System.out.println(getPicCode());
 ////	        sendStations();
 ////		  sendPhoneCode();
-//		  String urlPost = HttpUtil.URLPost("https://app.crv.com.cn/app_timelimit/v1/dc-timelimit/presale/presaleLog/addTimeLimit", null);
-//		  System.out.println("返回"+urlPost);
+////		  String urlPost = HttpUtil.URLPost("https://app.crv.com.cn/app_timelimit/v1/dc-timelimit/presale/presaleLog/addTimeLimit", null);
+////		  System.out.println("返回"+urlPost);
 //	  }
 //
 //	private static void sendPhoneCode() {

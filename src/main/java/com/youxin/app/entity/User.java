@@ -45,7 +45,6 @@ public class User extends BaseExample{
 	 */
 	@Indexed(unique = true)
 	@ApiModelProperty(hidden = true)
-	@JSONField(serialize=false)
 	private String accid;
 	/**
 	 * 用户昵称，最大长度64字符，可设置为空字符串
@@ -149,12 +148,12 @@ public class User extends BaseExample{
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();
-		if (!StringUtil.isEmpty(this.password))
-			exs.put("password", this.password);
+//		if (!StringUtil.isEmpty(this.password))
+//			exs.put("password", this.password);
 		if (!StringUtil.isEmpty(this.account))
 			exs.put("account", this.account);
-		if (!StringUtil.isEmpty(this.payPassword))
-			exs.put("payPassword", this.payPassword);
+//		if (!StringUtil.isEmpty(this.payPassword))
+//			exs.put("payPassword", this.payPassword);
 		if (!CollectionUtil.isEmpty(this.role))
 			exs.put("role", this.role);
 		exs.put("disableUser", this.disableUser);
