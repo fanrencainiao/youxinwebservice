@@ -39,6 +39,7 @@ import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.entity.exam.UserExample;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.ConfigService;
@@ -56,6 +57,7 @@ import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
+import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.team.QueryDetail;
 
 
@@ -127,17 +129,43 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
-		// 加系统客服好友
-		try {
-			Friends friends = new Friends();
-			friends.setAccid(accid);
-			friends.setFaccid(Md5Util.md5HexToAccid("10000"));
-			friends.setType(1);
-			friends.setMsg("加客服好友");
-			SDKService.friendAdd(friends);
-		} catch (Exception e) {
-			log.debug("加客服好友失败");
-		}
+	
+		ThreadUtil.executeInThread(new Callback() {
+			@Override
+			public void execute(Object obj) {
+				// 加系统客服好友并发送消息
+				try {
+					Friends friends = new Friends();
+					friends.setAccid(accid);
+					friends.setFaccid(Md5Util.md5HexToAccid("10000"));
+					friends.setType(1);
+					friends.setMsg("加客服好友");
+					SDKService.friendAdd(friends);
+					
+					MsgRequest messageBean = new MsgRequest();
+					messageBean.setFrom(Md5Util.md5HexToAccid("10000"));
+					messageBean.setType(0);// 文本
+				
+					messageBean.setOpe(0);// 个人消息
+					messageBean.setTo(accid);
+					
+//					messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERRECIEVE+",\"data\":"+JSON.toJSONString(transfer)+"}");
+					messageBean.setBody("{\"msg\":\"欢迎来到友信app\"}");
+					try {
+						JSONObject msgjson=SDKService.sendMsg(messageBean);
+						if(msgjson.getInteger("code")!=200) 
+							log.debug("注册成功发送消息失败");
+					} catch (Exception e) {
+						e.printStackTrace();
+						log.debug("注册成功发送消息失败"+e.getMessage());
+					}
+				} catch (Exception e) {
+					log.debug("加客服好友失败");
+				}
+				
+			}
+		});
+		
 
 		// 缓存用户token
 		Map<String, Object> data = saveLoginInfo(bean);

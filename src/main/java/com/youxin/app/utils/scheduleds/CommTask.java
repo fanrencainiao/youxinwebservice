@@ -43,6 +43,7 @@ import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.HttpUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoOperator;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
@@ -263,11 +264,11 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		messageBean.setType(100);// 自定义
 		messageBean.setOpe(0);// 个人消息
 		if (toUser!=null) {
-			messageBean.setFrom(toUser.getAccid());
+			messageBean.setFrom(Md5Util.md5HexToAccid(toUserId+""));
 		}else {
-			messageBean.setFrom(userManager.getUser(1100).getAccid());
+			messageBean.setFrom(Md5Util.md5HexToAccid("1100"));
 		}
-		messageBean.setTo(userManager.getUser(userId).getAccid());
+		messageBean.setTo(Md5Util.md5HexToAccid(userId+""));
 		ID ids=new ID();
 		ids.setId(id.toString());
 		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, ids)));
@@ -345,16 +346,16 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		
 		userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 		
-		User sysUser=userManager.getUser(1100);
+//		User sysUser=userManager.getUser(1100);
 		Transfer transfer=ds.createQuery(Transfer.class).field("_id").equal(transferId).get();
 		transfer.setId(null);
 
 		MsgRequest messageBean = new MsgRequest();
-		messageBean.setFrom(sysUser.getAccid());
+		messageBean.setFrom(Md5Util.md5HexToAccid("1100"));
 		messageBean.setType(100);// 文本
 	
 		messageBean.setOpe(0);// 个人消息
-		messageBean.setTo(userManager.getUser(userId).getAccid());
+		messageBean.setTo(Md5Util.md5HexToAccid(userId+""));
 		transfer.setRid(transferId.toString());
 //		messageBean.setBody("{\"msg\":"+JSON.toJSONString(transfer)+"}");
 //		messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERBACK+",\"data\":"+JSON.toJSONString(transfer)+"}");

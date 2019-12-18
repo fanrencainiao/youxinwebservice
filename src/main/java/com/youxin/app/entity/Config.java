@@ -55,9 +55,20 @@ public class Config {
 	 */
 	private String iosVersion;
 	/**
+	 * ios禁用版本号 多个版本，隔开
+	 */
+	private String iosVersionDisable;
+	/**
 	 * android版本号
 	 */
 	private String androidVersion;
+	
+	/**
+	 * android禁用版本号 多个版本，隔开
+	 */
+	private String androidVersionDisable;
+	
+	
 	
 	/**
 	 * ios更新说明
@@ -67,6 +78,7 @@ public class Config {
 	 * android更新说明
 	 */
 	private String androidExplain;
+	
 	
 	/**
 	 * 请求地址

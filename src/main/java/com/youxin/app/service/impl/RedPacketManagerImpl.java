@@ -34,6 +34,7 @@ import com.youxin.app.repository.WalletFourRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.NumberUtil;
 import com.youxin.app.utils.PageResult;
@@ -294,7 +295,7 @@ public class RedPacketManagerImpl{
 		final Double num = money;
 
 		MsgRequest messageBean = new MsgRequest();
-		messageBean.setFrom(user.getAccid());
+		messageBean.setFrom(Md5Util.md5HexToAccid(userId+""));
 		messageBean.setType(100);// 文本
 		if (StringUtil.isEmpty(packet.getRoomJid())) {
 			messageBean.setOpe(0);// 个人消息

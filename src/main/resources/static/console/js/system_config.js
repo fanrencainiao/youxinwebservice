@@ -38,10 +38,12 @@ function fillParameter(data){
     $(".sendPhone").val(nullData(data.sendPhone));  
     
     $(".androidVersion").val(nullData(data.androidVersion));
+    $(".androidVersionDisable").val(nullData(data.androidVersionDisable));
     $(".androidAppUrl").val(nullData(data.androidAppUrl));
     $(".androidExplain").val(nullData(data.androidExplain));
 
     $(".iosVersion").val(nullData(data.iosVersion));
+    $(".iosVersionDisable").val(nullData(data.iosVersionDisable));
     $(".iosAppUrl").val(nullData(data.iosAppUrl));
     $(".iosExplain").val(nullData(data.iosExplain));
 
@@ -115,6 +117,11 @@ layui.use(['form','jquery',"layer"],function() {
         }else {
             systemConfig.androidVersion = $(".androidVersion").val();
         }
+        if($(".androidVersionDisable").val()=="" || $(".androidVersionDisable").val() == null){
+            systemConfig.androidVersionDisable = 0;
+        }else {
+            systemConfig.androidVersionDisable = $(".androidVersionDisable").val();
+        }
         
         systemConfig.androidAppUrl = $(".androidAppUrl").val();
         systemConfig.androidExplain = $(".androidExplain").val();
@@ -123,6 +130,11 @@ layui.use(['form','jquery',"layer"],function() {
             systemConfig.iosVersion = 0;
         }else {
             systemConfig.iosVersion = $(".iosVersion").val();
+        }
+        if($(".iosVersionDisable").val()=="" || $(".iosVersionDisable").val() == null){
+            systemConfig.iosVersionDisable = 0;
+        }else {
+            systemConfig.iosVersionDisable = $(".iosVersionDisable").val();
         }
         
         systemConfig.iosAppUrl = $(".iosAppUrl").val();

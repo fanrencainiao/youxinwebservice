@@ -236,10 +236,13 @@ var Base={
                  return;
              }
 		}
-		if($("#password").val()==""){
-			layui.layer.alert("请输入密码");
-			return;
+		if($("#userId").val()==""){
+			if($("#password").val()==""){
+				layui.layer.alert("请输入密码");
+				return;
+			}
 		}
+		
 		if($("#birth").val()==""){
 			layui.layer.alert("请输入生日");
 			return;
@@ -286,10 +289,8 @@ var Base={
 					}
 
 				}else{
-					if(result.data == null){
-						layer.alert(result.msg);
-					}
-					layer.alert(result.data);
+					
+					layer.alert(result.msg);
 				}
 
 			},
@@ -384,6 +385,8 @@ var Base={
                             layer.msg("禁用成功",{"icon":1});
                             ids = [];
                             renderTable();
+                        }else{
+                        	layer.msg(result.msg);
                         }
                     }
                 })

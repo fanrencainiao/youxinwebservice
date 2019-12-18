@@ -62,6 +62,7 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.BeanUtils;
+import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.FileUtil;
 import com.youxin.app.utils.KConstants;
@@ -179,8 +180,15 @@ public class ConsoleController extends AbstractController{
 		User user=new User();
 		if(disableUser==-1)
 			block=SDKService.block(accid, "false");
-		else if(disableUser==1)
+		else if(disableUser==1) {
+			User userFromDB = userService.getUserFromDB(accid);
+			Query<User> q = dfds.createQuery(User.class).field("mobile").equal(userFromDB.getMobile())
+					.field("disableUser").equal(1);
+			if(q.asList().size()>0) 
+				return Result.error("该用户注册的手机号在系统已经存在未被禁用的账号，不可解禁");
 			block=SDKService.unblock(accid);
+		}
+			
 		else
 			return Result.error();
 		
@@ -240,14 +248,13 @@ public class ConsoleController extends AbstractController{
 		// 后台注册用户(后台注册传的密码没有加密，这里进行加密)
 		if (!StringUtil.isEmpty(example.getPassword()))
 			example.setPassword(DigestUtils.md5Hex(example.getPassword()));
-
+		long mobileCount = userService.mobileCount(example.getMobile());
 		// 保存到数据库
 		if (StringUtil.isEmpty(accid)&&example.getId()<=0) {
 			//验证
 			if (StringUtil.isEmpty(example.getMobile())) {
 				throw new ServiceException(0, "手机号必填");
 			}
-			long mobileCount = userService.mobileCount(example.getMobile());
 			if (mobileCount >= 1) {
 				throw new ServiceException(0, "手机号已被注册");
 			}
@@ -256,6 +263,13 @@ public class ConsoleController extends AbstractController{
 		} else {
 			com.youxin.app.yx.request.User.User u=new com.youxin.app.yx.request.User.User();
 			User userFromDB = userService.getUserFromDB(example.getId());
+			if(userFromDB.getDisableUser()!=1)
+				throw new ServiceException(0, "禁用的用户不可进行修改");
+			if(StringUtil.isEmpty(example.getPassword()))
+				example.setPassword(null);
+			if (!userFromDB.getMobile().equals(example.getMobile()) && mobileCount >= 1) {
+				throw new ServiceException(0, "手机号已被注册");
+			}
 			BeanUtils.copyProperties(example, userFromDB);
 			BeanUtils.copyProperties(userFromDB, u);
 			JSONObject updateUinfo = SDKService.updateUinfo(u);
@@ -458,7 +472,7 @@ public class ConsoleController extends AbstractController{
 				messageBean.setFrom(admin.getAccid());
 			
 				messageBean.setOpe(0);// 个人消息
-				messageBean.setTo(Md5Util.md5Hex(bankRecord.getUserId()+""));
+				messageBean.setTo(Md5Util.md5HexToAccid(bankRecord.getUserId()+""));
 				messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BANKOVERMONEY, sendReulst)));
 				try {
 					JSONObject json=SDKService.sendMsg(messageBean);

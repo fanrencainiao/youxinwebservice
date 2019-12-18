@@ -23,6 +23,7 @@ import com.youxin.app.repository.TransferRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
@@ -156,7 +157,7 @@ public class TransferManagerImpl{
 		// 发送xmpp消息
 
 		MsgRequest messageBean = new MsgRequest();
-		messageBean.setFrom(user.getAccid());
+		messageBean.setFrom(Md5Util.md5HexToAccid(userId+""));
 		messageBean.setType(100);// 文本
 	
 		messageBean.setOpe(0);// 个人消息
