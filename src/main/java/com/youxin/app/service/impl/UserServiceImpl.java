@@ -44,6 +44,7 @@ import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
+import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
@@ -69,7 +70,8 @@ public class UserServiceImpl implements UserService {
 	protected Log log=LogFactory.getLog(this.getClass());
 	@Autowired
 	private UserRepository repository;
-
+	@Autowired
+	private ConfigService cs;
 	@Autowired
 	@Qualifier("get")
 	private Datastore dfds;
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService {
 					messageBean.setTo(accid);
 					
 //					messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERRECIEVE+",\"data\":"+JSON.toJSONString(transfer)+"}");
-					messageBean.setBody("{\"msg\":\"欢迎来到友信app\"}");
+					messageBean.setBody("{\"msg\":"+cs.getConfig().getRegNotice()+"}");
 					try {
 						JSONObject msgjson=SDKService.sendMsg(messageBean);
 						if(msgjson.getInteger("code")!=200) 
@@ -390,12 +392,16 @@ public class UserServiceImpl implements UserService {
 			ref.put("name", Pattern.compile(example.getName()));
 		if (example.getGender()>0)
 			ref.put("sex", example.getGender());
-		if (!StringUtil.isEmpty(example.getMobile()))
+		if (!StringUtil.isEmpty(example.getMobile())) {
+			ref.put("settings.searchByMobile", 1);
+			//允许手机号搜索
 			ref.put("mobile", example.getMobile());
+		}
+			
 		if (!StringUtil.isEmpty(example.getAccount()))
-			ref.put("account", example.getAccount());
-		//允许手机号搜索
-		ref.put("settings.searchByMobile", 1);
+			ref.put("account", Pattern.compile(example.getAccount(),Pattern.CASE_INSENSITIVE));
+		
+		
 		ref.put("disableUser", 1);
 //		if (null != example.getStartTime())
 //			ref.put("birthday", new BasicDBObject("$gte", example.getStartTime()));
@@ -515,14 +521,14 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	
-	public User getUserByAccount(String account) {
-		User user = repository.findOne("account", account);
-		if (null == user) {
+	public List<User> getUserByAccount(String account) {
+		List<User> users = repository.createQuery().field("account").containsIgnoreCase(account).asList();
+		if (CollectionUtil.isEmpty(users)) {
 			System.out.println("account为" + account + "的用户不存在");
 			return null;
 		}
-
-		return user;
+		
+		return users;
 	}
 	
 	@Override

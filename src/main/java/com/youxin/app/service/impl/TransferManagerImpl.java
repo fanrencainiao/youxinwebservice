@@ -24,6 +24,8 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.MongoUtil;
+import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
@@ -32,6 +34,7 @@ import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgRequest;
+
 
 @Service
 public class TransferManagerImpl{
@@ -218,5 +221,32 @@ public class TransferManagerImpl{
 	public List<TransferReceive> getTransferReceiveList(Integer userId,int pageIndex,int pageSize){
 		Query<TransferReceive> query=dfds.createQuery(TransferReceive.class).field("userId").equal(userId);
 		return query.order("-time").offset(pageIndex*pageSize).limit(pageSize).asList();
+	}
+	/**
+	 * 查询转账记录
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param keyword
+	 * @return
+	 */
+	public PageResult<Transfer> queryTransfer(int pageIndex,int pageSize,String keyword,int toUserId,String startDate,String endDate){
+		PageResult<Transfer> result = new PageResult<>();
+		Query<Transfer> query = dfds.createQuery(Transfer.class);
+		if(!StringUtil.isEmpty(keyword))
+			query.field("userId").equal(Integer.valueOf(keyword));
+		if(toUserId>0)
+			query.field("toUserId").equal(toUserId);
+		if(!StringUtil.isEmpty(startDate) && !StringUtil.isEmpty(endDate)){
+			long startTime = 0; //开始时间（秒）
+			long endTime = 0; //结束时间（秒）,默认为当前时间
+			startTime = StringUtil.isEmpty(startDate) ? 0 :DateUtil.toDate(startDate).getTime()/1000;
+			endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds() : DateUtil.toDate(endDate).getTime()/1000;
+			query.field("createTime").greaterThan(startTime).field("createTime").lessThanOrEq(endTime);
+		}else{
+			query.order("-createTime");
+		}
+		result.setCount(query.count());
+		result.setData(query.asList(MongoUtil.pageFindOption(pageIndex, pageSize)));
+		return result;
 	}
 }

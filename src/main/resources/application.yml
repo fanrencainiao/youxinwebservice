@@ -24,7 +24,7 @@ spring:
     host: 127.0.0.1
     port: 6379
     password: 
-    database: 3
+    database: 0
     isCluster: false
     timeout:
       seconds: 10000

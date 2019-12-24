@@ -5,8 +5,16 @@
 <title></title>
 </head>
 <link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
-
+<style type="text/css">
+     	.layui-table-cell {
+		    height: 60px;
+		    overflow: ;
+		    text-overflow: inherit;
+		    white-space: normal;
+		}
+    </style>
 <body>
+
 	<div class="layui-row">
 		<div class="layui-col-md1">&nbsp;</div>
 		<input id="pageCount" type="" name="" style="display: none">
@@ -37,26 +45,28 @@
 				</div>
 			</div>
 
-			<!-- 多选操作 -->
+			<!-- 多选操作 
 			<script type="text/html" id="toolbarConfigs">
 				<div class="layui-btn-container">
 					<button id="checkDeleteIds" class="layui-btn layui-btn-sm checkDeletes" onclick="Base.checkDeletes()" lay-event="delete">多选删除</button>
 				</div>
-			</script>
+			</script>-->
 	
 			<!--操作-->
 			<script type="text/html" id="baseListBar">
-								
-				
+							
+				<div class="" height="">
 			{{#  if(d.disableUser == -1){ }}
 				<a class="layui-btn layui-btn-disabled layui-btn-xs undelete" lay-event="undelete">解禁</a>
 			{{#  }else{  }}
 				<a class="layui-btn layui-btn-danger layui-btn-xs delete" lay-event="delete">禁用</a>
 			{{#  } }}
-							
-				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update">修改</a>
-				<a class="layui-btn layui-btn-primary layui-btn-xs recharge" lay-event="recharge">充值/扣除</a>
-				<a class="layui-btn layui-btn-primary layui-btn-xs bill" lay-event="bill">账单</a>
+						
+				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update" style="margin-left: 0px;">修改</a>
+				<a class="layui-btn layui-btn-primary layui-btn-xs bill" lay-event="bill" style="margin-left: 0px;">账单</a>
+				<a class="layui-btn layui-btn-primary layui-btn-xs recharge" lay-event="recharge" style="margin-left: 0px;">充值/扣除</a>
+				
+		</div>
 			</script>
 
 		</div>

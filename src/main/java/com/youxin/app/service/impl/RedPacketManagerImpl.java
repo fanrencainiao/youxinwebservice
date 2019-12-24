@@ -109,8 +109,13 @@ public class RedPacketManagerImpl{
 
 	public synchronized Result openRedPacketById(Integer userId, ObjectId id) {
 		RedPacket packet = redPacketRepository.get(id);
+		
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("packet", packet);
+		if(packet.getType()==4&&!packet.getToUserIds().contains(userId)) 
+				return Result.error("抱歉，您不在指定红包领取人中!",map);
+			
+		
 		// 判断红包是否超时
 		if (DateUtil.currentTimeSeconds() > packet.getOutTime()) {
 			map.put("list", getRedReceivesByRedId(packet.getId()));

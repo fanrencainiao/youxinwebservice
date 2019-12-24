@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>提现列表</title>
+</head>
+<link href="/static/common/layui/css/layui.css" rel="stylesheet">
+<body>
+<style>
+p {
+	margin-top:10px;
+	font-size: 15px;
+}
+</style>
+
+<div class="user_btn_div" style="padding-top: 2%;width:70%;margin:0 auto;">
+	<div class="" style="text-align: center;">
+		<input type="text" name="" class="layui-input userId" style="width: 30%;display: inline" placeholder="用户id">
+		<button class="layui-btn search_bill">搜索</button>
+			<div class="layui-form-item timeComponent" style="display: inline">
+				<div class="layui-inline">
+					<label class="layui-form-label" style="padding: 9px 8px;width: 150px">统计时间范围</label>
+					<div class="layui-input-inline">
+						<input class="layui-input" id="totalBillDate" placeholder="请选择时间范围" type="text">
+					</div>
+				</div>
+			</div>
+		
+	</div>
+</div>
+<div class="layui-row appRecharge_btn_div" style="margin-top: 5%;">
+    <div class="layui-col-xs6">
+    	<div class="totalText" style="width:50%;margin:0 auto;">
+   			<p><span>用户总充值：</span><strong id="totalRecharge" style="color:red;"></strong></p>
+			<p><span>用户总提现：</span><strong id="totalCash" style="color:red"></strong></p>
+			<p><span>用户总余额：</span><strong id="totalBalance" style="color:red"></strong></p>
+			<p><span>微信总充值：</span><strong id="wxTotalRecharge" style="color:red"></strong></p>
+			<p><span>支付宝总充值：</span><strong id="aliTotalRecharge" style="color:red"></strong></p>
+			<p><span>后台总充值：</span><strong id="sysTotalRecharge" style="color:red"></strong></p>
+			<p><span>后台总扣除：</span><strong id="sysTotalReduce" style="color:red"></strong></p>
+			
+		</div>
+    </div>
+    <div class="layui-col-xs6">
+    	<div class="totalText" style="width:50%;margin:0 auto;">
+    		<p><span>红包总发送：</span><strong id="totalSendRedPacket" style="color:red"></strong></p>
+			<p><span>红包总领取：</span><strong id="totalGetRedPacket" style="color:red"></strong></p>
+			<p><span>红包总退款：</span><strong id="totalBackRedPacket" style="color:red"></strong></p>
+    		<p><span>总转账：</span><strong id="totalTransferMoney" style="color:red"></strong></p>
+			<p><span>总接受转账：</span><strong id="totalGetTransferMoney" style="color:red"></strong></p>
+			<p><span>总退回转账：</span><strong id="totalBackTransferMoney" style="color:red"></strong></p>
+			<p><span>总付款码付款：</span><strong id="totalCodePay" style="color:red"></strong></p>
+			<p><span>总付款码到账：</span><strong id="totalGetCodePay" style="color:red"></strong></p>
+			<p><span>总二维码付款：</span><strong id="totalQRCodePay" style="color:red"></strong></p>
+			<p><span>总二维码到账：</span><strong id="totalGetQRCodePay" style="color:red"></strong></p>
+		<!-- 	<p><span>总vip充值：</span><strong id="totalVipRecharge" style="color:red"></strong></p>
+			<p><span>总vip充值提成：</span><strong id="totalVipRechargeProfit" style="color:red"></strong></p> -->
+		</div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/common/jquery/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/console/js/totalBill.js"></script>
+</body>
+</html>

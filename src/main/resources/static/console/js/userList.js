@@ -34,22 +34,25 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
       ,limits:Common.limits
       ,groups: 7
       ,cols: [[ //表头
-           {type:'checkbox',fixed:'left'}// 多选
-          ,{field: 'id', title: 'ID',sort:'true', width:100}
-          ,{field: 'accid', title: 'accid',sort:'true', width:100}
-          ,{field: 'name', title: '昵称',sort:'true', width:100}
-          ,{field: 'token', title: '云信token',sort:'true', width:100}
-          ,{field: 'mobile', title: '手机号',sort:'true', width:120}
-          ,{field: 'balance', title: '余额',sort:'true', width:100}
-          ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:100}
-          ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:100}
-          ,{fixed: 'right', width: 400,title:"操作", align:'left', toolbar: '#baseListBar'}
+           //{type:'checkbox',fixed:'left'}// 多选
+          //,
+          {field: 'id', title: 'ID',sort:'true', width:120}
+          ,{field: 'accid', title: 'accid',sort:'true', width:255}
+          ,{field: 'name', title: '昵称',sort:'true', width:120}
+          ,{field: 'token', title: '云信token',sort:'true', width:255}
+          ,{field: 'mobile', title: '手机号',sort:'true', width:140}
+          ,{field: 'balance', title: '余额',sort:'true', width:80}
+          ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:80}
+          ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:80}
+          ,{fixed: 'right', title:"操作", align:'left',width:140, toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
                if(count==0&&lock==1){
                  layer.msg("暂无数据",{"icon":2});
                  renderTable();
                }
+//               $("table").css("width", "100%");    
+               var tableWidth = layui.$('.layui-table-header').width();
                lock=0;
                 $("#baseList").show();
                 $("#base_table").show();
@@ -59,11 +62,30 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                 var resCount = res.count;// 获取table总条数
                 currentCount = resCount;
                 currentPageIndex = pageIndex;
+            
+                console.log(window.screen.width);
+            	if (window.screen.width<700){
+            		/*$(".laytable-cell-1-id").width($(".laytable-cell-1-id").width()*8)
+            		$(".laytable-cell-1-accid").width($(".laytable-cell-1-accid").width()*8)
+            		$(".laytable-cell-1-name").width($(".laytable-cell-1-name").width()*16)
+            		$(".laytable-cell-1-token").width($(".laytable-cell-1-token").width()*8)
+            		$(".laytable-cell-1-mobile").width($(".laytable-cell-1-mobile").width()*8)
+            		$(".laytable-cell-1-balance").width($(".laytable-cell-1-balance").width()*8)
+            		$(".laytable-cell-1-totalRecharge").width($(".laytable-cell-1-totalRecharge").width()*6)
+            		$(".laytable-cell-1-totalConsume").width($(".laytable-cell-1-totalConsume").width()*6)*/
+            		
+            	} else{
+            		$(".laytable-cell-1-8").width($(".laytable-cell-1-8").width()*1.8)
+            	}
+                
 		  }
 
     });
  /*   $(".nickName").val('');*/
+    window.onresize = function(){
+    	
 
+    }
   //列表操作
   table.on('tool(body_list)', function(obj){
       var layEvent = obj.event,

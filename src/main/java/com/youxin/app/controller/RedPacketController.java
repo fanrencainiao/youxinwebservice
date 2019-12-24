@@ -20,6 +20,7 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.AuthServiceUtils;
+import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.ReqUtil;
@@ -134,6 +135,8 @@ public class RedPacketController extends AbstractController{
 			return Result.error("红包总金额在0.01~500之间哦!");
 		}else if((packet.getMoney()/packet.getCount()) < 0.01){
 			return Result.error("每人最少 0.01元 !");
+		}else if(packet.getType()==4&&CollectionUtil.isEmpty(packet.getToUserIds())){
+			return Result.error("定向红包请选择指定领取人!");
 		}
 		//红包接口授权
 		WalletFour wallet_Four = redServer.getUserWallet(userId, packet.getRoomJid());

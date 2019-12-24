@@ -30,6 +30,7 @@ function fillParameter(data){
     //数据回显
      
     $(".apiUrl").val(nullData(data.apiUrl));   
+    $(".regNotice").val(nullData(data.regNotice));   
     $(".isAutoAddressBook").val(data.isAutoAddressBook);
     $(".isOpenSwagger").val(data.isOpenSwagger);
     $(".authApi").val(data.isAuthApi);
@@ -44,6 +45,7 @@ function fillParameter(data){
 
     $(".iosVersion").val(nullData(data.iosVersion));
     $(".iosVersionDisable").val(nullData(data.iosVersionDisable));
+    $(".iosVersionVerify").val(nullData(data.iosVersionVerify)); 
     $(".iosAppUrl").val(nullData(data.iosAppUrl));
     $(".iosExplain").val(nullData(data.iosExplain));
 
@@ -97,7 +99,9 @@ layui.use(['form','jquery',"layer"],function() {
        var systemConfig = {};
         systemConfig.id = 10000;
    
-        systemConfig.apiUrl = $(".apiUrl").val();        
+        systemConfig.apiUrl = $(".apiUrl").val();   
+        
+        systemConfig.regNotice = $(".regNotice").val();   
         
         systemConfig.isAuthApi = $(".authApi").val();
 
@@ -136,7 +140,11 @@ layui.use(['form','jquery',"layer"],function() {
         }else {
             systemConfig.iosVersionDisable = $(".iosVersionDisable").val();
         }
-        
+        if($(".iosVersionVerify").val()=="" || $(".iosVersionVerify").val() == null){
+            systemConfig.iosVersionVerify = 0;
+        }else {
+            systemConfig.iosVersionVerify = $(".iosVersionVerify").val();
+        }
         systemConfig.iosAppUrl = $(".iosAppUrl").val();
         systemConfig.iosExplain = $(".iosExplain").val();
 

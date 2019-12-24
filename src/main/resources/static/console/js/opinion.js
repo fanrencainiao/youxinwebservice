@@ -47,7 +47,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'state',title:'处理状态',width:100,templet: function(d){
               return d.state==1?"处理":"未处理";
           }}
-          ,{fixed: 'right', width: 400,title:"操作", align:'left', toolbar: '#baseListBar'}
+          ,{fixed: 'right', width: 80,title:"操作", align:'left', toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
                if(count==0&&lock==1){

@@ -26,7 +26,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             {field: 'userId', title: '用户Id',sort: true,width:150}
             ,{field: 'userName', title: '昵称',sort: true,width:180}
             ,{field: 'type', title: '红包类型',sort:'true', width:110,templet: function(d){
-				       return d.type==1?"普通红包":(d.type==2?"拼手气红包":"口令红包");
+				       return d.type==1?"普通红包":(d.type==2?"拼手气红包":(d.type==3?"口令红包":"定向红包"));
 				     }}
             ,{field: 'money', title: '红包金额',sort: true, width:120}
             ,{field: 'count', title: '红包个数',sort: true, width:120}
@@ -38,7 +38,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             ,{field: 'sendTime',title:'发送时间',width:195,templet: function(d){
                     return UI.getLocalTime(d.sendTime);
                 }}
-            ,{fixed: 'right', width: 250,title:"操作", align:'left', toolbar: '#redPageListBar'}
+            ,{fixed: 'right', width: 100,title:"操作", align:'left', toolbar: '#redPageListBar'}
         ]]
         ,done:function(res, curr, count){
             if(count==0&&lock==1){

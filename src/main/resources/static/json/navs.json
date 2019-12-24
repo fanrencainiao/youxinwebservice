@@ -34,6 +34,42 @@
 			"icon": "&#xe65e;",
 			"href": "/templates/console/redEnvelope.html",
 			"spread": false
+		},
+		{
+			"title": "系统账单",
+			"icon": "&#xe62a;",
+			"href": "",
+			"spread": false,
+			"recharge":true,
+			"children": [
+			 {
+					"title": "总账",
+					"icon": "&#xe632;",
+					"href": "/templates/console/totalBill.html",
+					"spread": false
+				},{
+					"title": "充值记录",
+					"icon": "&#xe632;",
+					"href": "/templates/console/appRecharge.html",
+					"spread": false
+				},{
+					"title": "提现记录",
+					"icon": "&#xe632;",
+					"href": "/templates/console/raiseCash.html",
+					"spread": false
+				},{
+					"title": "转账记录",
+					"icon": "&#xe632;",
+					"href": "/templates/console/transfer.html",
+					"spread": false
+				},{
+					"title": "付款记录",
+					"icon": "&#xe632;",
+					"href": "/templates/console/paymentCode.html",
+					"spread": false
+				}
+			]
+
 		},{
 			"title": "举报管理",
 			"icon": "&#xe6b2;",

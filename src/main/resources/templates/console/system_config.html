@@ -2,12 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta name="renderer" content="webkit">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<meta name="apple-mobile-web-app-status-bar-style" content="black">
-	<meta name="apple-mobile-web-app-capable" content="yes">
-	<meta name="format-detection" content="telephone=no">
+	
 	<link rel="stylesheet" href="../../static/common/layui/css/layui.css" media="all" />
 	<link rel="stylesheet" href="../../static/console/css/public.css" media="all" />
 </head>
@@ -15,17 +10,15 @@
 <div class="layui-container" style="width: 90%;margin-top: 30px;">
 	<form class="layui-form">
 		<table class="layui-table mag0">
-			<colgroup>
-				<col width="25%">
-				<col width="45%">
-				<col>
-		    </colgroup>
+			<!-- <colgroup>
+				
+		    </colgroup> -->
 		    <thead>
 		    	<tr>
-		    		<th>参数说明</th>
-		    		<th>参数值</th>
-		    		<th>变量名</th>
-		    		<th>参数说明</th>
+		    		<th width="20%">参数说明</th>
+		    		<th width="40%">参数值</th>
+		    		<th width="20%">变量名</th>
+		    		<th width="20%">参数说明</th>
 		    	</tr>
 		    </thead>
 		    <tbody>
@@ -62,6 +55,13 @@
 		    		<td pc>apiUrl</td>
 		    		<td></td>
 		    	</tr>
+		    		<tr>
+		    		<td>regNotice</td>
+		    		<td><input type="text" class="layui-input regNotice" placeholder=" "></td>
+		    		<td pc>regNotice</td>
+		    		<td>注册通知语</td>
+		    	</tr>
+		    	
 		    	<tr>
 		    		<td>通讯录自动添加好友</td>
 		    		<td>
@@ -129,6 +129,13 @@
 		    		<td pc>iosVersionDisable</td>
 		    		<td>多个版本请用英文逗号隔开</td>
 		    	</tr>
+		    	<tr>
+		    		<td>IOS审核版本号</td>
+		    		<td><input type="text" class="layui-input iosVersionVerify" placeholder=" "></td>
+		    		<td pc>iosVersionVerify</td>
+		    		<td>多个版本请用英文逗号隔开</td>
+		    	</tr>
+		    	
 		    	<tr>
 		    		<td>IOS最新下载URL</td>
 		    		<td><input type="text" class="layui-input iosAppUrl" placeholder=" "></td>

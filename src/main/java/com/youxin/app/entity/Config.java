@@ -1,11 +1,16 @@
 package com.youxin.app.entity;
 
 import org.mongodb.morphia.annotations.Entity;
+
 import org.mongodb.morphia.annotations.Id;
 
-import lombok.Data;
+import com.alibaba.fastjson.JSON;
+
+import lombok.Getter;
+import lombok.Setter;
+@Getter
+@Setter
 @Entity(value = "Config",noClassnameStored=true)
-@Data
 public class Config {
 	
 	private @Id long id=10000;
@@ -26,6 +31,10 @@ public class Config {
 	 * 接口地址
 	 */
 	private String apiUrl;
+	/**
+	 * 注册通知语
+	 */
+	private String regNotice="欢迎来到友信app";
 	/**
 	 * 用户银行卡提现是否短信通知0不通知，1通知
 	 */
@@ -59,6 +68,10 @@ public class Config {
 	 */
 	private String iosVersionDisable;
 	/**
+	 * ios审核版本号 多个版本，隔开
+	 */
+	private String iosVersionVerify;
+	/**
 	 * android版本号
 	 */
 	private String androidVersion;
@@ -90,5 +103,8 @@ public class Config {
 	 */
 	private String area;
 	
-
+	@Override
+	public String toString() {
+		return JSON.toJSONString(this);
+	}
 }

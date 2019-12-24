@@ -39,7 +39,7 @@ public class RedPacket {
 	private String greetings;
 	@ApiModelProperty(value="发送时间")
 	private long sendTime;
-	@ApiModelProperty(value="红包类型 1：普通红包  2：拼手气红包  3:口令红包")
+	@ApiModelProperty(value="红包类型 1：普通红包  2：拼手气红包  3:口令红包 4:定向红包")
 	private @Indexed int type; // 
 	@ApiModelProperty(value="红包个数")
 	private int count;
@@ -55,8 +55,10 @@ public class RedPacket {
 	@ApiModelProperty(value="红包状态  1 ：发出   2：已领完       -1：已退款        //3:未领完退款")
 	private @Indexed int status=1;
 	
-	@ApiModelProperty(value="领取该红包的 userId")
+	@ApiModelProperty(value="已经领取该红包的 userId")
 	private List<Integer> userIds=new ArrayList<Integer>(); 
+	@ApiModelProperty(value="指定领取该红包的 userId")
+	private List<Integer> toUserIds=new ArrayList<Integer>(); 
 	
 	public ObjectId getId() {
 		return id;
@@ -168,6 +170,11 @@ public class RedPacket {
 		this.rid = rid;
 	}
 	
-	
+	public List<Integer> getToUserIds() {
+		return toUserIds;
+	}
+	public void setToUserIds(List<Integer> toUserIds) {
+		this.toUserIds = toUserIds;
+	}
 	
 }

@@ -1,26 +1,23 @@
 package com.youxin.app.controller;
 
+import static org.mongodb.morphia.aggregation.Group.grouping;
+import static org.mongodb.morphia.aggregation.Group.sum;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Base64;
+import java.text.DecimalFormat;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
+import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
@@ -28,14 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
@@ -44,11 +39,13 @@ import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.HelpCenter;
+import com.youxin.app.entity.MongdbGroup;
 import com.youxin.app.entity.Opinion;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Report;
 import com.youxin.app.entity.Role;
+import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.entity.User.UserLoginLog;
@@ -61,8 +58,8 @@ import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
+import com.youxin.app.service.impl.TransferManagerImpl;
 import com.youxin.app.utils.BeanUtils;
-import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.FileUtil;
 import com.youxin.app.utils.KConstants;
@@ -70,7 +67,6 @@ import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.PageVO;
-import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
@@ -78,18 +74,8 @@ import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
-import com.youxin.app.yx.request.team.MuteTeam;
 import com.youxin.app.yx.request.team.MuteTlistAll;
 import com.youxin.app.yx.request.team.QueryDetail;
-
-import io.netty.handler.codec.base64.Base64Encoder;
-import io.swagger.annotations.ApiOperation;
-
-
-
-
-
-
 
 
 @RestController
@@ -112,7 +98,9 @@ public class ConsoleController extends AbstractController{
 	RedPacketManagerImpl rpm;
 	@Autowired
 	ConfigService cs;
-
+	@Autowired
+	TransferManagerImpl tfm;
+	
 	
 	@PostMapping(value = "login")
 	public Object login(String name, String password, HttpServletRequest request) {
@@ -305,7 +293,7 @@ public class ConsoleController extends AbstractController{
 		ConsumeRecord record = new ConsumeRecord();
 		record.setUserId(userId);
 		record.setTradeNo(tradeNo);
-		record.setMoney(money);
+		record.setMoney(Math.abs(money));
 		record.setStatus(KConstants.OrderStatus.END);
 		if(money>=0) {
 			record.setType(KConstants.ConsumeType.SYSTEM_RECHARGE);
@@ -648,7 +636,15 @@ public class ConsoleController extends AbstractController{
 		return Result.layuieditimg(0, "成功", url, url);
 			
 	}
-
+	/**
+	 * 帮助中心列表
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param type
+	 * @param state
+	 * @param nickName
+	 * @return
+	 */
 	@RequestMapping(value = "/helpCenterList")
 	public Object helpCenterList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
 			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "-2") int state
@@ -669,6 +665,11 @@ public class ConsoleController extends AbstractController{
 		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
 		return Result.success(result);
 	}
+	/**
+	 * 获取帮助实体
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value = "/getCenterList")
 	public Object getCenterList(@RequestParam(defaultValue = "") String id) {
 		if(StringUtil.isEmpty(id)) {
@@ -678,6 +679,12 @@ public class ConsoleController extends AbstractController{
 		
 		return Result.success(q.get());
 	}
+	/**
+	 * 修改或者保存帮助实体
+	 * @param hcid
+	 * @param hc
+	 * @return
+	 */
 	@RequestMapping(value = "/saveCenterList")
 	public Object saveCenterList(@RequestParam(defaultValue = "") String hcid,@ModelAttribute HelpCenter hc) {
 		if(StringUtil.isEmpty(hcid)) {
@@ -704,5 +711,218 @@ public class ConsoleController extends AbstractController{
 		return Result.success();
 	}
 	
+	
+	/**
+	 * @Description:（系统充值记录）
+	 * @param userId
+	 * @param status
+	 * @param type
+	 * @return
+	 **/
+	@RequestMapping("/systemRecharge")
+	public Object systemRecharge(@RequestParam(defaultValue = "0") int userId,
+			@RequestParam(defaultValue = "0") int type, @RequestParam(defaultValue = "0") int payType,
+			@RequestParam(defaultValue = "") String desc, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "") String startDate,
+			@RequestParam(defaultValue = "") String endDate) {
+		try {
+			PageResult<ConsumeRecord> result = crm.recharge(userId, type, payType,
+					desc, page-1, limit, startDate, endDate);
+			return Result.success(result);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+	/**
+	 * 付款记录
+	 * 
+	 * @param userId
+	 * @param page
+	 * @param limit
+	 * @return
+	 */
+	@RequestMapping(value = "/paymentCodeList")
+	public Object paymentCodeList(@RequestParam(defaultValue = "0") int userId,
+			@RequestParam(defaultValue = "0") int type, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "15") int limit, @RequestParam(defaultValue = "") String startDate,
+			@RequestParam(defaultValue = "") String endDate) {
+		PageResult<ConsumeRecord> result = crm.payment(userId, type, page-1, limit,
+				startDate, endDate);
+		return Result.success(result);
+	}
+	/**
+	 * 转账记录
+	 * 
+	 * @param userId
+	 * @param page
+	 * @param limit
+	 * @return
+	 */
+	@RequestMapping(value = "/transferList")
+	public Object transferList(@RequestParam(defaultValue = "") String userId,@RequestParam(defaultValue = "0") int toUserId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "15") int limit,
+			@RequestParam(defaultValue = "") String startDate, @RequestParam(defaultValue = "") String endDate) {
+		PageResult<Transfer> result = tfm.queryTransfer(page-1, limit, userId,toUserId,startDate,
+				endDate);
+		return Result.success(result);
+	}
+	
+	/**
+	 * 总账统计
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping("/systemTotalBill")
+	public Object systemTotalBill(@RequestParam(defaultValue="0") Integer userId,
+			@RequestParam(defaultValue="")String startDate,@RequestParam(defaultValue="")String endDate) {
+		try {
+			long startTime = 0; //开始时间（秒）
+			long endTime = 0; //结束时间（秒）,默认为当前时间
+			startTime = StringUtil.isEmpty(startDate) ? 0 :DateUtil.toDate(startDate).getTime()/1000;
+			endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds() : DateUtil.toDate(endDate).getTime()/1000;
+
+			MongdbGroup g = new MongdbGroup();
+			if(userId!=null&&userId>0) {
+				g.setUserId(userId);
+			}
+			g.setStartDate(startTime);
+			g.setEndDate(endTime);
+			
+			//用户总充值
+			g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4}, new Integer[] { 1, 2}, g);
+			//用户总提现
+			g = getTotalMoney("totalCash", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
+			//微信总充值
+			g = getTotalMoney("wxTotalRecharge", "money", 1, new Integer[] {2},new Integer[] { 1, 2}, g);
+			//支付宝总充值
+			g = getTotalMoney("aliTotalRecharge", "money", 1, new Integer[] {1},new Integer[] { 1, 2}, g);
+			//后台总充值
+			g = getTotalMoney("sysTotalRecharge", "money", 3, new Integer[] {4},new Integer[] { 1, 2}, g);
+			//后台总扣除
+			g = getTotalMoney("sysTotalReduce", "money", 16, new Integer[] {4},new Integer[] { 1, 2}, g);
+			//红包总发送
+			g = getTotalMoney("totalSendRedPacket", "money", 4, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//红包总领取
+			g = getTotalMoney("totalGetRedPacket", "money", 5, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//红包总退款
+			g = getTotalMoney("totalBackRedPacket", "money", 6, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总转账
+			g = getTotalMoney("totalTransferMoney", "money", 7, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总接受转账
+			g = getTotalMoney("totalGetTransferMoney", "money", 8, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总退回转账
+			g = getTotalMoney("totalBackTransferMoney", "money", 9, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总付款码付款
+			g = getTotalMoney("totalCodePay", "money", 10, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总付款码到账
+			g = getTotalMoney("totalGetCodePay", "money", 11, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总二维码付款
+			g = getTotalMoney("totalQRCodePay", "money", 12, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总二维码到账
+			g = getTotalMoney("totalGetQRCodePay", "money", 13, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总vip充值
+			g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总vip充值提成
+			g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g.setTotalBalance(null);
+			return Result.success(g);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	/**
+	 * 
+	 * @param total 统计的金额(记录值)
+	 * @param sum	统计的金额
+	 * @param type
+	 * @param payType
+	 * @param status
+	 * @param g
+	 * @return
+	 */
+	private MongdbGroup getTotalMoney(String total, String sum, int type,Integer[] payType, Integer[] status, MongdbGroup g) {
+		DecimalFormat df = new DecimalFormat("#.00");
+		Query<ConsumeRecord> query = dfds.createQuery(ConsumeRecord.class).order("-time");
+		if(g.getUserId()>0)
+			query.field("userId").equal(g.getUserId());
+		
+		if(g.getStartDate()>0&&g.getEndDate()>0) {
+			query.and(query.criteria("time").greaterThanOrEq(g.getStartDate()),query.criteria("time").lessThanOrEq(g.getEndDate()));
+		}else {
+			if(g.getStartDate()>0)
+				query.field("time").greaterThanOrEq(g.getStartDate());
+			if(g.getEndDate()>0)
+				query.field("time").lessThanOrEq(g.getEndDate());
+		}
+		AggregationPipeline pipeline = dfds.createAggregation(ConsumeRecord.class);
+		pipeline.match(query.filter("type", type).filter("status in", status).filter("payType in", payType))
+				.group(grouping(total, sum(sum)));
+		Iterator<MongdbGroup> iterator = pipeline.aggregate(MongdbGroup.class);
+		System.out.println(iterator.hasNext());
+		while (iterator.hasNext()) {
+			MongdbGroup ug = iterator.next();
+			switch (total) {
+			case "totalRecharge":
+				g.setTotalRecharge(Double.valueOf(df.format(ug.getTotalRecharge())));
+				break;
+			case "totalCash":
+				g.setTotalCash(Double.valueOf(df.format(ug.getTotalCash())));
+				break;
+			case "wxTotalRecharge":
+				g.setWxTotalRecharge(Double.valueOf(df.format(ug.getWxTotalRecharge())));
+				break;
+			case "aliTotalRecharge":
+				g.setAliTotalRecharge(Double.valueOf(df.format(ug.getAliTotalRecharge())));
+				break;
+			case "sysTotalRecharge":
+				g.setSysTotalRecharge(Double.valueOf(df.format(ug.getSysTotalRecharge())));
+				break;
+			case "sysTotalReduce":
+				g.setSysTotalReduce(Double.valueOf(df.format(ug.getSysTotalReduce())));
+				break;
+			case "totalSendRedPacket":
+				g.setTotalSendRedPacket(Double.valueOf(df.format(ug.getTotalSendRedPacket())));
+				break;
+			case "totalGetRedPacket":
+				g.setTotalGetRedPacket(Double.valueOf(df.format(ug.getTotalGetRedPacket())));
+				break;
+			case "totalBackRedPacket":
+				g.setTotalBackRedPacket(Double.valueOf(df.format(ug.getTotalBackRedPacket())));
+				break;
+			case "totalTransferMoney":
+				g.setTotalTransferMoney(Double.valueOf(df.format(ug.getTotalTransferMoney())));
+				break;
+			case "totalGetTransferMoney":
+				g.setTotalGetTransferMoney(Double.valueOf(df.format(ug.getTotalGetTransferMoney())));
+				break;
+			case "totalBackTransferMoney":
+				g.setTotalBackTransferMoney(Double.valueOf(df.format(ug.getTotalBackTransferMoney())));
+				break;
+			case "totalCodePay":
+				g.setTotalCodePay(Double.valueOf(df.format(ug.getTotalCodePay())));
+				break;
+			case "totalGetCodePay":
+				g.setTotalGetCodePay(Double.valueOf(df.format(ug.getTotalGetCodePay())));
+				break;
+			case "totalQRCodePay":
+				g.setTotalQRCodePay(Double.valueOf(df.format(ug.getTotalQRCodePay())));
+				break;
+			case "totalGetQRCodePay":
+				g.setTotalGetQRCodePay(Double.valueOf(df.format(ug.getTotalGetQRCodePay())));
+				break;
+			case "totalVipRecharge":
+				g.setTotalVipRecharge(Double.valueOf(df.format(ug.getTotalVipRecharge())));
+				break;
+			case "totalVipRechargeProfit":
+				g.setTotalVipRechargeProfit(Double.valueOf(df.format(ug.getTotalVipRechargeProfit())));
+				break;
+			default:
+				break;
+			}
+			System.out.println(ug);
+		}
+		return g;
+	}
 
 }
