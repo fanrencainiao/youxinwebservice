@@ -18,10 +18,14 @@ import org.springframework.stereotype.Component;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayFundCouponOrderAppPayModel;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.request.AlipayFundCouponOrderAppPayRequest;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.youxin.app.entity.User.MyCard;
+import com.youxin.app.utils.DateUtil;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.alipay.config.AlipayConfig;
 import com.youxin.app.utils.alipay.sign.RSA;
 import com.youxin.app.utils.applicationBean.AliPayConfig;
@@ -95,6 +99,38 @@ public class AliPayUtil{
 		        return null;
 		}
 	   }
+	 
+	 /**
+	    * create the order info. 创建支付宝红包订单信息
+	    *
+	    */
+	/* public static String getOrderInfoByCoupon(String subject, String body, String price,String orderNo) {
+
+		//实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+		 AlipayFundCouponOrderAppPayRequest  request = new AlipayFundCouponOrderAppPayRequest ();
+			//SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+		 AlipayFundCouponOrderAppPayModel model = new AlipayFundCouponOrderAppPayModel();
+			
+			model.setOutRequestNo(DateUtil.currentTimeMilliSeconds()+""+ReqUtil.getUserId());
+			model.setOrderTitle(subject);
+			model.setOutOrderNo(orderNo);
+//			model.setTimeoutExpress("30m");
+//			model.setTotalAmount(price);
+//			model.setProductCode("QUICK_MSECURITY_PAY");
+//			model.setGoodsType("0");
+			request.setBizModel(model);
+			request.setNotifyUrl(callBackUrl());
+			try {
+		        //这里和普通的接口调用不同，使用的是sdkExecute
+		        AlipayTradeAppPayResponse response = getAliPayClient().sdkExecute(request);
+		        System.out.println("返回order  "+response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
+		        
+		        return response.getBody();
+		    } catch (AlipayApiException e) {
+		        e.printStackTrace();
+		        return null;
+		}
+	   }*/
 	   
 	   
 	   /**

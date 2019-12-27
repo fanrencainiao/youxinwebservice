@@ -89,6 +89,7 @@ public class KConstants {
 		public static final int VIP_RECHARGE = 14;// VIP充值
 		public static final int VIP_COMMISSION = 15;// 推广用户VIP充值提成
 		public static final int SYSTEM_REDUCE = 16;// 后台扣除（目前用于异常账号）
+		public static final int ALI_COUPON = 17;// 阿里红包
 	}
 	
 	

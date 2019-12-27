@@ -99,6 +99,56 @@ public class UserConsumeController extends AbstractController {
 		}
 		return Result.errorMsg("没有选择支付类型");
 	}
+	@ApiOperation(value = "用户发送支付宝红包", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "payType", value = "红包类型（1支付宝红包）", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "price", value = "红包金额", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "time", value = "发送时间", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
+	@PostMapping(value = "/sendAliCoupon")
+	public Object sendAliCoupon(@RequestParam int payType, @RequestParam String price,
+			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		String token = getAccess_token();
+		Integer userId = ReqUtil.getUserId();
+		// 充值接口授权
+		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
+			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
+			return Result.errorMsg("权限验证失败!");
+		}
+		Map<String, String> map = Maps.newLinkedHashMap();
+		String orderInfo = "";
+		if (0 < payType) {
+			String orderNo = AliPayUtil.getOutTradeNo();
+			ConsumeRecord entity = new ConsumeRecord();
+			entity.setUserId(ReqUtil.getUserId());
+			entity.setTime(DateUtil.currentTimeSeconds());
+			entity.setType(KConstants.ConsumeType.ALI_COUPON);
+			entity.setDesc("支付宝红包");
+			entity.setStatus(KConstants.OrderStatus.CREATE);
+			entity.setTradeNo(orderNo);
+			entity.setPayType(payType);
+			entity.setMoney(new Double(price));
+			if (KConstants.PayType.ALIPAY == payType) {
+				orderInfo = AliPayUtil.getOrderInfo("支付宝红包", "支付宝红包", price, orderNo);
+				consumeRecordServer.saveConsumeRecord(entity);
+				map.put("orderInfo", orderInfo);
+				System.out.println("orderInfo>>>>>" + orderInfo);
+				return Result.success(map);
+			} 
+//			else {
+//				WxPayDto tpWxPay = new WxPayDto();
+//				// tpWxPay.setOpenId(openId);
+//				tpWxPay.setBody("余额充值");
+//				tpWxPay.setOrderId(orderNo);
+//				tpWxPay.setSpbillCreateIp(WXPayConfig.WXSPBILL_CREATE_IP);
+//				tpWxPay.setTotalFee(price);
+//				consumeRecordServer.saveConsumeRecord(entity);
+//				Object data = WXPayUtil.getPackage(tpWxPay);
+//				return Result.success(data);
+//			}
+		}
+		return Result.errorMsg("没有选择支付类型");
+	}
 
 	@ApiOperation(value = "用户充值记录", response = Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "pageIndex", value = "页码", defaultValue = "0", paramType = "query"),
