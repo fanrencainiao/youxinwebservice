@@ -209,6 +209,15 @@ public final class KSessionUtil {
 		String config=redisCRUD.get(GET_CONFIG);
 		return StringUtil.isEmpty(config) ? null : JSON.parseObject(config, Config.class);
 	}
+	
+
+	public static void setClientConfig(Config config) {
+		redisCRUD.set(GET_CLIENTCONFIG, config.toString());
+	}
+	public static Config getClientConfig() {
+		String config=redisCRUD.get(GET_CLIENTCONFIG);
+		return StringUtil.isEmpty(config) ? null : JSON.parseObject(config, Config.class);
+	}
 
 	
 	public static final String GET_ADDRESS_BYIP="clientIp:%s";

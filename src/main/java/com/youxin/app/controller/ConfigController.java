@@ -22,9 +22,20 @@ import io.swagger.annotations.ApiOperation;
 public class ConfigController extends AbstractController{
 	@Autowired
 	private ConfigService cs;
-	@ApiOperation(value = "获取客户端信息",response=Result.class)
+	@ApiOperation(value = "获取客户端信息-未登录",response=Result.class)
 	@GetMapping(value = "/get")
 	public Object getConfig(HttpServletRequest request) {
+		String ip=NetworkUtil.getIpAddress(request);
+		String area=IpSearch.getArea(ip);
+		log.info("==Client-IP===>  {"+ip+"}  ===Address==>  {"+area+"} ");
+		Config config = new Config(cs.getConfig());
+		config.setIpAddress(ip);
+		config.setArea(area);
+		return Result.success(config);
+	}
+	@ApiOperation(value = "获取客户端信息-登录",response=Result.class)
+	@GetMapping(value = "/getOnline")
+	public Object getConfigByOnline(HttpServletRequest request) {
 		String ip=NetworkUtil.getIpAddress(request);
 		String area=IpSearch.getArea(ip);
 		log.info("==Client-IP===>  {"+ip+"}  ===Address==>  {"+area+"} ");

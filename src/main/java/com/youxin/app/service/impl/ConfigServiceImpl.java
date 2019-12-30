@@ -38,6 +38,24 @@ public class ConfigServiceImpl implements ConfigService {
 		return config;
 	}
 	
+	public Config getServerConfig() {
+		Config config=null;
+		try {
+			config=KSessionUtil.getConfig();
+			if(null==config){
+				config = cr.createQuery().field("_id").notEqual(null).get();
+				if(null==config)
+					config=initConfig();
+				KSessionUtil.setConfig(config);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			config = cr.createQuery().field("_id").notEqual(null).get();
+		}
+		
+		return config;
+	}
+	
 	@Override
 	public void setConfig(Config config) {
 		

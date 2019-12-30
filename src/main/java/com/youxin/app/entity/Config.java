@@ -32,6 +32,10 @@ public class Config {
 	 */
 	private String apiUrl;
 	/**
+	 * 云信key
+	 */
+	private String yunxinappkey;
+	/**
 	 * 注册通知语
 	 */
 	private String regNotice="欢迎来到友信app";
@@ -102,6 +106,31 @@ public class Config {
 	 * 请求区域
 	 */
 	private String area;
+	
+	private double afee=0;   // 手续费固定金额
+	
+	private double bfee=0;   // 手续费百分比
+	/**
+	 * 未登录能获取的config信息
+	 * @param config
+	 */
+	public Config() {
+	}
+	public Config(Config config) {
+		super();
+		this.apiUrl=config.getApiUrl();
+		this.androidDownUrl=config.getAndroidDownUrl();
+		this.androidExplain=config.getAndroidExplain();
+		this.androidVersion=config.getAndroidVersion();
+		this.androidVersionDisable=config.getAndroidVersionDisable();
+//		this.area=config.getArea();
+		this.iosDownUrl=config.getIosDownUrl();
+		this.iosExplain=config.getIosExplain();
+		this.iosVersion=config.getIosVersion();
+		this.iosVersionDisable=config.getIosVersionDisable();
+		this.iosVersionVerify=config.getIosVersionVerify();
+//		this.ipAddress=config.getIpAddress();
+	}
 	
 	@Override
 	public String toString() {

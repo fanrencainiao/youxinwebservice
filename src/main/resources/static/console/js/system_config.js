@@ -31,6 +31,8 @@ function fillParameter(data){
      
     $(".apiUrl").val(nullData(data.apiUrl));   
     $(".regNotice").val(nullData(data.regNotice));   
+    $(".afee").val(nullData(data.afee)); 
+    $(".bfee").val(nullData(data.bfee));  
     $(".isAutoAddressBook").val(data.isAutoAddressBook);
     $(".isOpenSwagger").val(data.isOpenSwagger);
     $(".authApi").val(data.isAuthApi);
@@ -114,7 +116,18 @@ layui.use(['form','jquery',"layer"],function() {
 //        systemConfig.isHideFinance = $(".isHideFinance").val();
         
         systemConfig.sendPhone = $(".sendPhone").val();
-
+        if($(".afee").val()>=0){
+        	systemConfig.afee = $(".afee").val();
+        }else{
+        	layer.alert("固定金额需大于0");
+        	return;
+        }
+        if($(".bfee").val()>=0&&$(".bfee").val()<1){
+        	systemConfig.bfee = $(".bfee").val();
+        }else{
+        	layer.alert("百分比需在0-1之间");
+        	return;
+        }
 
         if($(".androidVersion").val()=="" || $(".androidVersion").val() == null){
             systemConfig.androidVersion = 0;

@@ -2,14 +2,12 @@ package com.youxin.app.service.impl;
 
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -20,7 +18,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -28,7 +25,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.youxin.app.entity.Config;
 import com.youxin.app.entity.NearbyUser;
 import com.youxin.app.entity.Report;
 import com.youxin.app.entity.SdkLoginInfo;
@@ -38,8 +34,6 @@ import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
-import com.youxin.app.entity.exam.UserExample;
-import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.ConfigService;
@@ -180,7 +174,7 @@ public class UserServiceImpl implements UserService {
 //
 //		User user = repository.findOne("accid", accid);
 //		if (null == user) {
-//			System.out.println("accid为" + accid + "的用户不存在");
+//			log.debug("accid为" + accid + "的用户不存在");
 //			return null;
 //		}
 //		user.setEx("");
@@ -199,7 +193,7 @@ public class UserServiceImpl implements UserService {
 		if (null == user) {
 			user = repository.findOne("_id", userId);
 			if (null == user) {
-				System.out.println("id为" + userId + "的用户不存在");
+				log.debug("id为" + userId + "的用户不存在");
 				return null;
 			}
 		
@@ -211,13 +205,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, Object> login(User bean) {
+		Query<User> q = repository.createQuery();
 		User user = null;
 		if (!StringUtil.isEmpty(bean.getAccid()))
 			user = repository.findOne("_id", bean.getId());
 		else {
 			user = repository.findOne("mobile", bean.getMobile());
 			if(null == user) {
-				user=repository.findOne("account", bean.getAccount());
+				user = q.field("account").containsIgnoreCase(bean.getAccount()).get();
+//				user=repository.findOne("account", bean.getAccount());
 			}
 		}
 		if (null == user) {
@@ -314,12 +310,18 @@ public class UserServiceImpl implements UserService {
 //		friends.setMsg("加客服好友");
 //		SDKService.friendAdd(friends);
 
-//		System.out.println(SDKService.getUinfos("['2dd0c6c424d1afbf925b8be4fbe85981']"));
+//		log.debug(SDKService.getUinfos("['2dd0c6c424d1afbf925b8be4fbe85981']"));
 
-		User u=new User();
-		u.setAccid("assa");;
-		u.setName("123");
-		System.out.println(JSONObject.toJSON(u));
+//		User u=new User();
+//		u.setAccid("assa");;
+//		u.setName("123");
+//		System.out.println(JSONObject.toJSON(u));
+		User user=new User();
+		System.out.println("1"+user.getLoginLog());
+//		user.setLoginLog(null);
+//		System.out.println("2"+user.getLoginLog());
+		user.setLoginLog(new User.LoginLog());
+		System.out.println("3"+user.getLoginLog());
 	}
 
 	
@@ -350,7 +352,7 @@ public class UserServiceImpl implements UserService {
 			} else {
 				if (this.getUserMoeny(userId) < money) {
 					// 余额不足
-					System.out.println("余额不足");
+					log.debug("余额不足");
 					return 0.0;
 				}
 				ops.set("balance", Double.valueOf(df.format(dbUser.getBalance() - money)));
@@ -434,7 +436,7 @@ public class UserServiceImpl implements UserService {
 	public User getUserFromDB(Integer userId) {
 			User user = repository.findOne("_id", userId);
 			if (null == user) {
-				System.out.println("id为" + userId + "的用户不存在");
+				log.debug("id为" + userId + "的用户不存在");
 				return null;
 			}
 
@@ -443,7 +445,7 @@ public class UserServiceImpl implements UserService {
 	public String getAccid(Integer userId) {
 		User user = repository.findOne("_id", userId);
 		if (null == user) {
-			System.out.println("id为" + userId + "的用户不存在");
+			log.debug("id为" + userId + "的用户不存在");
 			return null;
 		}
 
@@ -486,7 +488,7 @@ public class UserServiceImpl implements UserService {
 		ops.set("account", account+"毛主席");
 		
 		UpdateResults update = repository.update(q, ops);
-		System.out.println(update);
+		log.debug(update);
 		
 		
 		User user2 = getUser(userId);
@@ -501,7 +503,7 @@ public class UserServiceImpl implements UserService {
 		User user = getUserFromDB(userId);
 		
 		user.setSettings(settings);
-		System.out.println(user.toString());
+		log.debug(user.toString());
 		repository.save(user);
 		
 		User user2 = getUser(userId);
@@ -513,7 +515,7 @@ public class UserServiceImpl implements UserService {
 	public User getUserByMobile(String mobile) {
 		User user = repository.findOne("mobile", mobile);
 		if (null == user) {
-			System.out.println("mobile为" + mobile + "的用户不存在");
+			log.debug("mobile为" + mobile + "的用户不存在");
 			return null;
 		}
 
@@ -524,7 +526,7 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByAccount(String account) {
 		List<User> users = repository.createQuery().field("account").containsIgnoreCase(account).asList();
 		if (CollectionUtil.isEmpty(users)) {
-			System.out.println("account为" + account + "的用户不存在");
+			log.debug("account为" + account + "的用户不存在");
 			return null;
 		}
 		
@@ -579,7 +581,7 @@ public class UserServiceImpl implements UserService {
 	public User getUserFromDB(String accid) {
 		User user = repository.findOne("accid", accid);
 		if (null == user) {
-			System.out.println("accid为" + accid + "的用户不存在");
+			log.debug("accid为" + accid + "的用户不存在");
 			return null;
 		}
 
@@ -590,6 +592,8 @@ public class UserServiceImpl implements UserService {
 	public Map<String, Object> saveLoginInfo(User user) {
 		// 获取上次登录日志
 		User.LoginLog login = getLogin(user.getId());
+		if(user.getLoginLog()==null) 
+			user.setLoginLog(new User.LoginLog());
 		// 1=没有设备号、2=设备号一致、3=设备号不一致
 		int serialStatus = null == login ? 1 : (user.getLoginLog().getSerial().equals(login.getSerial()) ? 2 : 3);
 		// 保存登录日志
@@ -611,7 +615,7 @@ public class UserServiceImpl implements UserService {
 		data.put("latitude", user.getLatitude());
 		data.put("longitude", user.getLongitude());
 		data.put("login", login);
-		System.out.println(data);
+		log.debug(data);
 		return data;
 	}
 
