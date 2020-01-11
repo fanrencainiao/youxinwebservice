@@ -992,7 +992,6 @@ public class ConsoleController extends AbstractController{
 			@RequestParam(defaultValue = "") String startDate, @RequestParam(defaultValue = "") String endDate) {
 
 		try {
-
 			Object data =userService.getUserRegisterCount(startDate.trim(), endDate.trim(), timeUnit);
 			return Result.success(data);
 		} catch (Exception e) {
