@@ -126,10 +126,14 @@ public class RedPacketManagerImpl{
 			// 判断当前用户是否领过该红包
 			//
 			if (null == packet.getUserIds() || !packet.getUserIds().contains(userId)) {
-				packet = openRedPacket(userId, packet);
-				map.put("packet", packet);
+				RedPacket packets = openRedPacket(userId, packet);
+				
+				map.put("packet", packets);
 				map.put("list", getRedReceivesByRedId(packet.getId()));
-				return Result.success(map);
+				if(packets==null) 
+					return Result.error("支付宝红包异常");
+				else
+					return Result.success(map);
 			} else {
 				map.put("list", getRedReceivesByRedId(packet.getId()));
 				return Result.error(null, map); // 你已经领过了 !
@@ -280,7 +284,7 @@ public class RedPacketManagerImpl{
 			ops.set("status", 2);
 			packet.setStatus(2);
 		}
-		redPacketRepository.update(q, ops);
+		
 
 		// 实例化一个红包接受对象
 		RedReceive receive = new RedReceive();
@@ -294,9 +298,17 @@ public class RedPacketManagerImpl{
 		receive.setSendName(userManager.getUser(packet.getUserId()).getName());
 		ObjectId id = (ObjectId) redReceiveRepository.save(receive).getId();
 		receive.setId(id);
-
-		// 修改金额
-		userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
+		if(packet.getPayType()!=1) {
+			// 修改金额
+			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
+		}else {
+			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"", packet.getPayNo());
+			JSONObject tu = JSON.parseObject(transUni);
+			log.debug(tu);
+			if(!"SUCCESS".equalsIgnoreCase(tu.getString("status")))
+				return null; //支付宝打款失败
+		}
+		redPacketRepository.update(q, ops);
 		final Double num = money;
 
 		MsgRequest messageBean = new MsgRequest();
@@ -321,25 +333,34 @@ public class RedPacketManagerImpl{
 			e.printStackTrace();
 			log.debug("红包领取 sdk消息发送失败"+e.getMessage());
 		}
-
-		// 开启一个线程 添加一条消费记录
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				String tradeNo = AliPayUtil.getOutTradeNo();
-				// 创建充值记录
-				ConsumeRecord record = new ConsumeRecord();
-				record.setUserId(userId);
-				record.setTradeNo(tradeNo);
-				record.setMoney(num);
-				record.setStatus(KConstants.OrderStatus.END);
-				record.setType(KConstants.ConsumeType.RECEIVE_REDPACKET);
-				record.setPayType(KConstants.PayType.BALANCEAY); // 余额支付
-				record.setDesc("红包接受");
-				record.setTime(DateUtil.currentTimeSeconds());
-				crmi.saveConsumeRecord(record);
-			}
-		}).start();
+		
+			// 开启一个线程 添加一条消费记录
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					String tradeNo = AliPayUtil.getOutTradeNo();
+					// 创建领取记录
+					ConsumeRecord record = new ConsumeRecord();
+					record.setUserId(userId);
+					record.setTradeNo(tradeNo);
+					record.setMoney(num);
+					if(packet.getPayType()!=1) {
+						record.setStatus(KConstants.OrderStatus.END);
+						record.setPayType(KConstants.PayType.BALANCEAY); // 余额支付
+						record.setType(KConstants.ConsumeType.RECEIVE_REDPACKET);
+					}else {
+						record.setStatus(KConstants.OrderStatus.CREATE);
+						record.setPayType(KConstants.PayType.ALIPAY); // 支付宝支付
+						record.setType(KConstants.ConsumeType.ALI_RECEIVE_COUPON);
+					}
+					
+					
+					record.setDesc("红包接受");
+					record.setTime(DateUtil.currentTimeSeconds());
+					crmi.saveConsumeRecord(record);
+				}
+			}).start();
+	
 		return packet;
 	}
 

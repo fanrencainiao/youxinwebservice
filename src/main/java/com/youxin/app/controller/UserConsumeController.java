@@ -129,23 +129,13 @@ public class UserConsumeController extends AbstractController {
 			entity.setPayType(payType);
 			entity.setMoney(new Double(price));
 			if (KConstants.PayType.ALIPAY == payType) {
-				orderInfo = AliPayUtil.getOrderInfo("支付宝红包", "支付宝红包", price, orderNo);
+				orderInfo = AliPayUtil.getOrderInfoByCoupon("支付宝红包", "支付宝红包", price, orderNo);
 				consumeRecordServer.saveConsumeRecord(entity);
 				map.put("orderInfo", orderInfo);
 				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
 			} 
-//			else {
-//				WxPayDto tpWxPay = new WxPayDto();
-//				// tpWxPay.setOpenId(openId);
-//				tpWxPay.setBody("余额充值");
-//				tpWxPay.setOrderId(orderNo);
-//				tpWxPay.setSpbillCreateIp(WXPayConfig.WXSPBILL_CREATE_IP);
-//				tpWxPay.setTotalFee(price);
-//				consumeRecordServer.saveConsumeRecord(entity);
-//				Object data = WXPayUtil.getPackage(tpWxPay);
-//				return Result.success(data);
-//			}
+
 		}
 		return Result.errorMsg("没有选择支付类型");
 	}

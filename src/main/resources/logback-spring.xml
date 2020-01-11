@@ -70,6 +70,20 @@
             <totalSizeCap>120MB</totalSizeCap>
         </rollingPolicy>
     </appender>
+    
+     <appender name="schefile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <file>${APP_LOG_PATH}/sche/sche.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_PATH}/sche/sche_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>120MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
 
     <logger name="api.log" level="debug">
      <appender-ref ref="CONSOLE"/>
@@ -84,6 +98,11 @@
      <logger name="pay" level="debug">
       <appender-ref ref="CONSOLE"/>
         <appender-ref ref="payfile"/>
+    </logger>
+    <!-- 定时任务 -->
+    <logger name="sche" level="debug">
+      <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="schefile"/>
     </logger>
 
     <root level="info">

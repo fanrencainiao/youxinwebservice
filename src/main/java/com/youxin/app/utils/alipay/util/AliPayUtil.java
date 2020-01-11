@@ -19,9 +19,22 @@ import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayFundCouponOrderAppPayModel;
+import com.alipay.api.domain.AlipayFundTransAppPayModel;
+import com.alipay.api.domain.AlipayFundTransCommonQueryModel;
+import com.alipay.api.domain.AlipayFundTransRefundModel;
+import com.alipay.api.domain.AlipayFundTransUniTransferModel;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayFundCouponOrderAppPayRequest;
+import com.alipay.api.request.AlipayFundTransAppPayRequest;
+import com.alipay.api.request.AlipayFundTransCommonQueryRequest;
+import com.alipay.api.request.AlipayFundTransRefundRequest;
+import com.alipay.api.request.AlipayFundTransUniTransferRequest;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.response.AlipayFundCouponOrderAppPayResponse;
+import com.alipay.api.response.AlipayFundTransAppPayResponse;
+import com.alipay.api.response.AlipayFundTransCommonQueryResponse;
+import com.alipay.api.response.AlipayFundTransRefundResponse;
+import com.alipay.api.response.AlipayFundTransUniTransferResponse;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
 import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.utils.DateUtil;
@@ -104,25 +117,24 @@ public class AliPayUtil{
 	    * create the order info. 创建支付宝红包订单信息
 	    *
 	    */
-	/* public static String getOrderInfoByCoupon(String subject, String body, String price,String orderNo) {
+	 public static String getOrderInfoByCoupon(String subject, String body, String price,String orderNo) {
 
 		//实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
-		 AlipayFundCouponOrderAppPayRequest  request = new AlipayFundCouponOrderAppPayRequest ();
+		 AlipayFundTransAppPayRequest   request = new AlipayFundTransAppPayRequest  ();
 			//SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
-		 AlipayFundCouponOrderAppPayModel model = new AlipayFundCouponOrderAppPayModel();
-			
-			model.setOutRequestNo(DateUtil.currentTimeMilliSeconds()+""+ReqUtil.getUserId());
+		 AlipayFundTransAppPayModel model = new AlipayFundTransAppPayModel();
+		 	model.setOutBizNo(orderNo);
+		 	model.setTransAmount(price);
+		 	model.setProductCode("STD_RED_PACKET");
+			model.setBizScene("PERSONAL_PAY");
+			model.setRemark(body);
 			model.setOrderTitle(subject);
-			model.setOutOrderNo(orderNo);
-//			model.setTimeoutExpress("30m");
-//			model.setTotalAmount(price);
-//			model.setProductCode("QUICK_MSECURITY_PAY");
-//			model.setGoodsType("0");
+//	扩展参数		model.setExtraParam();
 			request.setBizModel(model);
 			request.setNotifyUrl(callBackUrl());
 			try {
 		        //这里和普通的接口调用不同，使用的是sdkExecute
-		        AlipayTradeAppPayResponse response = getAliPayClient().sdkExecute(request);
+		        AlipayFundTransAppPayResponse response = getAliPayClient().sdkExecute(request);
 		        System.out.println("返回order  "+response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
 		        
 		        return response.getBody();
@@ -130,8 +142,100 @@ public class AliPayUtil{
 		        e.printStackTrace();
 		        return null;
 		}
-	   }*/
-	   
+	   }
+	   /**
+	    * 支付宝红包打款
+	    * @param subject
+	    * @param body
+	    * @param price
+	    * @param orderNo
+	    * @return
+	    */
+	 public static String transUni(String subject, String body, String price,String orderNo) {
+
+			//实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+		 	AlipayFundTransUniTransferRequest  request = new AlipayFundTransUniTransferRequest();
+				//SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+		 	AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
+			 	model.setOutBizNo(orderNo);
+			 	model.setTransAmount(price);
+			 	model.setProductCode("STD_RED_PACKET");
+				model.setBizScene("PERSONAL_COLLECTION");
+				model.setRemark(body);
+				model.setOrderTitle(subject);
+//		扩展参数		model.setExtraParam();
+				request.setBizModel(model);
+				request.setNotifyUrl(callBackUrl());
+				try {
+			        //这里和普通的接口调用不同，使用的是sdkExecute
+			        AlipayFundTransUniTransferResponse response = getAliPayClient().sdkExecute(request);
+			        System.out.println("返回order  "+response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
+			        
+			        return response.getBody();
+			    } catch (AlipayApiException e) {
+			        e.printStackTrace();
+			        return null;
+			}
+		   }
+	 /**
+	  * 红包退回
+	  
+	  */
+	 public static String backTransUni(String remark, String orderId, String price,String orderNo) {
+
+			//实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+		 	AlipayFundTransRefundRequest request = new AlipayFundTransRefundRequest();
+				//SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+		 	AlipayFundTransRefundModel model = new AlipayFundTransRefundModel();
+//			 	model.setOrderId(orderId);
+			 	model.setOutRequestNo(orderNo);
+			 	model.setRefundAmount(price);
+			 	model.setRemark(remark);
+//		扩展参数		model.setExtraParam();
+				request.setBizModel(model);
+				request.setNotifyUrl(callBackUrl());
+				try {
+			        //这里和普通的接口调用不同，使用的是sdkExecute
+			        AlipayFundTransRefundResponse response = getAliPayClient().sdkExecute(request);
+			        System.out.println("返回order  "+response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
+			        
+			        return response.getBody();
+			    } catch (AlipayApiException e) {
+			        e.printStackTrace();
+			        return null;
+			}
+		   }
+	
+	  /**
+	   * 查询发送红包、红包打款、红包退回订单的信息
+	   * @param orderNo
+	   * @param bizScene PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
+	   * @return
+	   */
+	 public static String commonQueryRequest(String orderNo,String bizScene) {
+
+			//实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+		 AlipayFundTransCommonQueryRequest  request = new AlipayFundTransCommonQueryRequest ();
+				//SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+		 AlipayFundTransCommonQueryModel model = new AlipayFundTransCommonQueryModel();
+//			 	model.setOrderId(orderId);
+			 	model.setOutBizNo(orderNo);
+			 	model.setBizScene(bizScene);//PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
+			 	model.setProductCode("STD_RED_PACKET");
+//		扩展参数		model.setExtraParam();
+				request.setBizModel(model);
+				request.setNotifyUrl(callBackUrl());
+				try {
+			        //这里和普通的接口调用不同，使用的是sdkExecute
+			        AlipayFundTransCommonQueryResponse response = getAliPayClient().sdkExecute(request);
+			        System.out.println("返回order  "+response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
+			        
+			        return response.getBody();
+			    } catch (AlipayApiException e) {
+			        e.printStackTrace();
+			        return null;
+			}
+		   }
 	   
 	   /**
 	    * sign the order info. 对订单信息进行签名

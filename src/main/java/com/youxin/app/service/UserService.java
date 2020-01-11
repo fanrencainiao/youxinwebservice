@@ -173,6 +173,28 @@ public interface UserService {
 	 * @return
 	 **/
 	List<User> nearbyUser(NearbyUser poi);
+	/**
+	 * 更新用户在线状态
+	 * @param id
+	 * @param type
+	 */
+	void updateUserByOnline(int id, int type);
+	/**
+	 * 1: 每个月的数据 2:每天的数据 3.每小时数据 4.每分钟的数据
+	 * @param startDate
+	 * @param endDate
+	 * @param timeUnit
+	 * @return
+	 */
+	List<Object> userOnlineStatusCount(String startDate, String endDate, short timeUnit);
+	/**
+	 * 用户注册统计 时间单位每日，最好可选择：每日、每月、每分钟、每小时
+	 * 
+	 * @param startDate
+	 * @param endDate
+	 * @param counType  统计类型 1: 每个月的数据 2:每天的数据 3.每小时数据 4.每分钟的数据 (小时)
+	 */
+	List<Object> getUserRegisterCount(String startDate, String endDate, short timeUnit);
 
 
 }

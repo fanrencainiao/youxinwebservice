@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
 import com.youxin.app.entity.NearbyUser;
 import com.youxin.app.entity.Opinion;
@@ -33,16 +32,13 @@ import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.LoginLog;
-import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.entity.exam.BaseExample;
-import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
-import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ReqUtil;
@@ -616,7 +612,7 @@ public class UserController extends AbstractController{
 			if(null != nearbyUser && nearbyUser.size()>0)
 				return Result.success(nearbyUser);
 			else
-				return Result.error("暂无该用户");
+				return Result.error("附近无用户");
 			
 		} catch (Exception e) {
 			return Result.error(e.getMessage());

@@ -164,7 +164,7 @@ public class AuthorizationFilter implements Filter {
 			System.out.println(_AccessToken);
 			userId = Integer.valueOf(KSessionUtil.getUserIdBytoken(_AccessToken));
 		} catch (Exception e) {
-			System.out.println("sdsdsds");
+			System.out.println("redis获取userId异常");
 			e.printStackTrace();
 		}
 

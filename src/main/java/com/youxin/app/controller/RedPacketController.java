@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
@@ -128,7 +130,7 @@ public class RedPacketController extends AbstractController{
 		User user=userService.getUserFromDB(userId);
 		packet.setMoney(Double.valueOf(moneyStr));
 		Double redPackgeMoney;
-		if(user.getBalance() < packet.getMoney()){
+		if(user.getBalance() < packet.getMoney()&&packet.getPayType()!=1){
 			//余额不足
 			return Result.error("余额不足,请先充值!");
 		}else if(packet.getMoney() < 0.01 || 500 < packet.getMoney()){
@@ -160,30 +162,38 @@ public class RedPacketController extends AbstractController{
 		long cuTime = DateUtil.currentTimeSeconds();
 		packet.setSendTime(cuTime);
 		packet.setOutTime(cuTime + KConstants.Expire.DAY1);
-		Object data = redServer.saveRedPacket(packet);
-		//修改金额
-		userService.rechargeUserMoeny(userId, redPackgeMoney, KConstants.MOENY_REDUCE);
-			
-		//开启一个线程 添加一条消费记录
-		new ThreadUtil().executeInThread(new Callback() {
-			@Override
-			public void execute(Object obj) {
-				String tradeNo = AliPayUtil.getOutTradeNo();
-				//创建充值记录
-				ConsumeRecord record = new ConsumeRecord();
-				record.setUserId(userId);
-				record.setTradeNo(tradeNo);
-				//record.setMoney(packet.getMoney());
-				record.setMoney(redPackgeMoney);
-				record.setStatus(KConstants.OrderStatus.END);
-				record.setType(KConstants.ConsumeType.SEND_REDPACKET);
-				record.setPayType(KConstants.PayType.BALANCEAY); //余额支付
-				record.setDesc("红包发送");
-				record.setTime(DateUtil.currentTimeSeconds());
-				consumeServer.saveConsumeRecord(record);
-			}
-		});
+		Object data = null;
+		//修改金额,非支付宝红包进行零钱修改
+		if(packet.getPayType()!=1) {
+			data = redServer.saveRedPacket(packet);
+			userService.rechargeUserMoeny(userId, redPackgeMoney, KConstants.MOENY_REDUCE);
 
+			//开启一个线程 添加一条消费记录
+			new ThreadUtil().executeInThread(new Callback() {
+				@Override
+				public void execute(Object obj) {
+					String tradeNo = AliPayUtil.getOutTradeNo();
+					//创建充值记录
+					ConsumeRecord record = new ConsumeRecord();
+					record.setUserId(userId);
+					record.setTradeNo(tradeNo);
+					//record.setMoney(packet.getMoney());
+					record.setMoney(redPackgeMoney);
+					record.setStatus(KConstants.OrderStatus.END);
+					record.setType(KConstants.ConsumeType.SEND_REDPACKET);
+					record.setPayType(KConstants.PayType.BALANCEAY); //余额支付
+					record.setDesc("红包发送");
+					record.setTime(DateUtil.currentTimeSeconds());
+					consumeServer.saveConsumeRecord(record);
+				}
+			});
+		}else {
+			//查询红包订单支付情况
+			String commonQueryRequest = AliPayUtil.commonQueryRequest(packet.getPayNo(), "PERSONAL_PAY");
+			JSONObject cqr = JSON.parseObject(commonQueryRequest);
+			if(!"SUCCESS".equalsIgnoreCase(cqr.getString("status"))) 
+				return Result.error("支付宝红包订单支付失败");
+		}
 		return Result.success(data);
 	}
 	

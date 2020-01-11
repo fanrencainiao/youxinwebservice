@@ -12,7 +12,6 @@ import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.utils.IndexDirection;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.youxin.app.entity.exam.BaseExample;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.utils.CollectionUtil;
@@ -145,6 +144,8 @@ public class User extends BaseExample{
 	@ApiModelProperty(value = "地理位置")
 	@Indexed(value = IndexDirection.GEO2D)
 	private Loc loc;
+	@ApiModelProperty(value = "用户在线状态")
+	private String online;
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();

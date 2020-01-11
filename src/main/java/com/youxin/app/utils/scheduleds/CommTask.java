@@ -10,6 +10,8 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
@@ -36,6 +38,7 @@ import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserStatusCount;
 import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.entity.msgbody.MsgBody.ID;
 import com.youxin.app.service.UserService;
@@ -54,12 +57,11 @@ import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgRequest;
 
 import lombok.extern.slf4j.Slf4j;
-@Slf4j
 @Component
 @EnableScheduling
 public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 
-	
+	protected Log log=LogFactory.getLog("sche");
 	@Autowired
 	@Qualifier("get")
 	private Datastore ds;
@@ -121,6 +123,107 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		autoRefreshTransfer();
 		System.out.println("刷新转账成功,耗时" + (System.currentTimeMillis() - start) + "毫秒");
 		
+	}
+	
+	@Scheduled(cron = "0 0/5 * * * ?")
+ 	public void refreshUserStatusCount(){
+		DBObject q = new BasicDBObject("online",1);
+		
+		long count =ds.getCollection(User.class).getCount(q);
+		
+		UserStatusCount userCount=new UserStatusCount();
+		//long count=(long)(Math.random()*(1000-100+1)+100);
+		userCount.setType(1);
+		userCount.setCount(count);
+		userCount.setTime(DateUtil.currentTimeSeconds());
+		ds.save(userCount);
+		log.debug("刷新用户状态统计======》" +count);
+	}
+	
+	@Scheduled(cron = "0 0 0/1 * * ?")
+ 	public void refreshUserStatusHour(){
+		
+		long currentTime =new Date().getTime()/1000;
+		//DBObject q =null;
+		Query<UserStatusCount> q=null;
+		long startTime=currentTime-KConstants.Expire.HOUR;
+			
+		long endTime=currentTime;
+		
+		List<UserStatusCount> counts=null;
+		UserStatusCount uCount=null;
+		long sum=0;
+		
+		
+			//q = new BasicDBObject();
+			q=ds.createQuery(UserStatusCount.class);
+			q.enableValidation();
+			
+			sum=0;
+			System.out.println("当前时间:"+DateUtil.TimeToStr(new Date()));
+			q.field("time").greaterThanOrEq(startTime);
+			q.field("time").lessThan(endTime);
+			q.field("type").equal(1);
+			counts=q.asList();
+			 uCount=new UserStatusCount();
+			for (UserStatusCount userStatus : counts) {
+				sum+=userStatus.getCount();
+			}
+			System.out.println("List Size======="+counts.size());
+			if(sum>0){
+				uCount.setTime(startTime);
+				uCount.setType(2);
+				uCount.setCount(sum/counts.size());
+				ds.save(uCount);
+				log.debug("平均用户在线======》" +uCount.getCount());
+			}
+	}
+	
+	@Scheduled(cron = "0 0 10 * * ?")
+ 	public void refreshUserStatusDay(){
+		Date yesterday=DateUtil.getYesterdayMorning();
+		//long currentTime =new Date().getTime()/1000;
+		//DBObject q =null;
+		Query<UserStatusCount> q=null;
+		long startTime=yesterday.getTime()/1000;
+		long endTime=startTime+KConstants.Expire.DAY1;
+		List<UserStatusCount> counts=null;
+		UserStatusCount uCount=null;
+		long sum=0;
+		
+		
+			//q = new BasicDBObject();
+			q=ds.createQuery(UserStatusCount.class);
+			q.enableValidation();
+			sum=0;
+			System.out.println("Day_Count 当前时间:"+DateUtil.TimeToStr(new Date()));
+			q.field("time").greaterThanOrEq(startTime);
+			q.field("time").lessThan(endTime);
+			q.field("type").equal(2);
+			counts=q.asList();
+			 uCount=new UserStatusCount();
+			for (UserStatusCount userStatus : counts) {
+				sum+=userStatus.getCount();
+			}
+			System.out.println("Day_Count List Size======="+counts.size());
+			if(sum>0){
+				uCount.setTime(startTime);
+				uCount.setType(3);
+				uCount.setCount(sum/counts.size());
+				ds.save(uCount);
+				log.debug("Day_Count 平均用户在线======》" +uCount.getCount());
+			}
+	}
+	/**
+	 * 四点都设为不在线，重新统计
+	 */
+	@Scheduled(cron = "0 0 4 * * ?")
+	public void refreshUserStatus(){
+		BasicDBObject q = new BasicDBObject("_id",new BasicDBObject(MongoOperator.GT,1000));
+		q.append("online", 1);
+		DBObject values = new BasicDBObject();
+		values.put(MongoOperator.SET,new BasicDBObject("online",0));
+		ds.getCollection(User.class).update(q, values, false, true);
 	}
 	//12点
 //	@Scheduled(cron = "30 59 23 * * ?")
@@ -185,6 +288,8 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		DBObject obj=null;
 		Integer userId=0;
 		Integer toUserId=0;
+		String payNo=null;
+		Integer payType=0;
 		String roomJid="";
 		ObjectId redPackectId=null;
 		Double money=0.0;
@@ -209,14 +314,20 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			 roomJid=(String) dbObject.get("roomJid");
 			 redPackectId=(ObjectId) dbObject.get("_id");
 			 toUserId=(Integer) dbObject.get("toUserId");
-			 recedeMoney(userId,toUserId,roomJid,money,redPackectId);
+			 payType = (Integer)dbObject.get("payType");
+			 payNo=(String)dbObject.get("payNo");
+			 if(payType!=null&&payType==1) 
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,1,payNo);
+			 else
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,0,"");
 		}
 			
 		System.out.println("红包超时未领取的数量 ======> "+objs.size());
 		
 	}
 	
-	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id){
+	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id,int payType,String payNo){
+		
 		if(0<money){
 			DecimalFormat df = new DecimalFormat("#.00");
 			 money= Double.valueOf(df.format(money));
@@ -233,33 +344,20 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		record.setTime(DateUtil.currentTimeSeconds());
 		record.setStatus(KConstants.OrderStatus.END);
 		record.setDesc("红包退款");
+		if(payType==1) {
+			String backTransUni = AliPayUtil.backTransUni("超时退款", "", money+"", payNo);
+			JSONObject btu = JSON.parseObject(backTransUni);
+			log.debug(btu);
+			if(!"SUCCESS".equalsIgnoreCase(btu.getString("status"))) {
+				return;
+			}
+		}else {
+			recordManager.saveConsumeRecord(record);
+			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
+		}
 		
-		recordManager.saveConsumeRecord(record);
-		userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 		User toUser=userManager.getUser(toUserId);
-//		MessageBean messageBean=new MessageBean();
-//		messageBean.setType(KXMPPServiceImpl.RECEDEREDPAKET);
-//		if(toUser!=null){
-//			messageBean.setFromUserId(toUser.getUserId().toString());
-//			messageBean.setFromUserName(toUser.getNickname());
-//		}else {
-//			messageBean.setFromUserId(roomJid);
-//			messageBean.setFromUserName(roomJid);
-//		}
-//		
-//		if(roomJid!=null){
-//			messageBean.setObjectId(roomJid);
-//		}
-//		messageBean.setContent(id.toString());
-//		messageBean.setToUserId(userId.toString());
-//		messageBean.setMsgType(0);// 单聊消息
-//		messageBean.setMessageId(StringUtil.randomUUID());
-//		try {
-//			KXMPPServiceImpl.getInstance().send(messageBean);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
+	
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setType(100);// 自定义
 		messageBean.setOpe(0);// 个人消息

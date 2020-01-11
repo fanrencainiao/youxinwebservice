@@ -2,6 +2,9 @@ package com.youxin.app.service.impl;
 
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -25,6 +29,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.MapReduceCommand;
+import com.mongodb.MapReduceOutput;
 import com.youxin.app.entity.NearbyUser;
 import com.youxin.app.entity.Report;
 import com.youxin.app.entity.SdkLoginInfo;
@@ -33,6 +39,7 @@ import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.User.UserSettings;
+import com.youxin.app.entity.UserStatusCount;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
@@ -44,6 +51,7 @@ import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoOperator;
+import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
@@ -54,6 +62,7 @@ import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
 import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.team.QueryDetail;
+
 
 
 
@@ -244,7 +253,6 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
-	
 		KSessionUtil.saveUserByUserId(user.getId(), user);
 		Map<String, Object> data = saveLoginInfo(user);
 		return data;
@@ -598,7 +606,8 @@ public class UserServiceImpl implements UserService {
 		int serialStatus = null == login ? 1 : (user.getLoginLog().getSerial().equals(login.getSerial()) ? 2 : 3);
 		// 保存登录日志
 		updateUserLoginLog(user.getId(), user);
-		
+		//更新用户在线状态
+		updateUserByOnline(user.getId(), 1);
 		
 		Map<String, Object> data = KSessionUtil.loginSaveAccessToken(user.getId(), user.getId(), null);
 //		Object token = data.get("access_token");
@@ -649,13 +658,33 @@ public class UserServiceImpl implements UserService {
 		}
 		if(bean.getLatitude()>0) {
 			ops.set("latitude", bean.getLatitude());
+			ops.set("loc.lat", bean.getLatitude());
 		}
 		if(bean.getLongitude()>0) {
 			ops.set("longitude", bean.getLongitude());
+			ops.set("loc.lng", bean.getLongitude());
 		}
-		ops.set("updateTime",DateUtil.currentTimeSeconds());
+		if(bean.getUpdateTime()!=null&&bean.getUpdateTime()>0) {
+			ops.set("updateTime",DateUtil.currentTimeSeconds());
+		}
+		
 		repository.update(q, ops);
 		KSessionUtil.saveUserByUserId(bean.getId(), q.get());
+	}
+	@Override
+	public void updateUserByOnline(int id,int type) {
+		//容错处理
+		if(id<1000) {
+			log.debug("用户信息更新失败");
+			return;
+		}
+			
+		Query<User> q = repository.createQuery();
+		q.field("_id").equal(id);
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		ops.set("online",type);
+		repository.update(q, ops);
+		KSessionUtil.saveUserByUserId(id, q.get());
 	}
 	
 	@Override
@@ -723,6 +752,7 @@ public class UserServiceImpl implements UserService {
 	}
 	@Override
 	public void updateLoginoutLogTime(int userId) {
+		updateUserByOnline(userId, 0);
 		DBObject query = new BasicDBObject("_id", userId);
 
 		DBObject values = new BasicDBObject();
@@ -918,6 +948,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public List<User> nearbyUser(NearbyUser poi) {
 		List<User> data = null;
@@ -926,7 +957,7 @@ public class UserServiceImpl implements UserService {
 //			Query<User> q = getDatastore().createQuery(User.class).field("settings.phoneSearch").notEqual(0)
 //					.field("settings.nameSearch").notEqual(0);
 			Query<User> q = dfds.createQuery(User.class);
-			q.or(q.criteria("settings.searchByMobile").notEqual(0),q.criteria("disableUser").notEqual(-1));
+			q.and(q.criteria("settings.searchByMobile").notEqual(0),q.criteria("disableUser").notEqual(-1));
 			
 			if (null != poi.getSex())
 				q.field("gender").equal(poi.getSex());
@@ -939,6 +970,8 @@ public class UserServiceImpl implements UserService {
 
 			if (0 != poi.getLatitude() && 0 != poi.getLongitude())
 				q.field("loc").near(poi.getLongitude(), poi.getLatitude(), d);
+			else 
+				return null;
 			/*if (!StringUtil.isEmpty(poi.getNickname())) {
 				Config config = configService.getConfig();
 				if (0 == config.getTelephoneSearchUser()) { // 手机号搜索关闭
@@ -1000,8 +1033,13 @@ public class UserServiceImpl implements UserService {
 			}
 			// 排除系统号
 			q.field("_id").greaterThan(100050);
-			q.offset(poi.getPageIndex() * (poi.getPageSize())).limit(poi.getPageSize());
-			data = q.asList();
+//			q.offset(poi.getPageIndex() * (poi.getPageSize())).limit(poi.getPageSize());
+			System.out.println(q);
+			data = q.asList(MongoUtil.pageFindOption(poi.getPageIndex(), poi.getPageSize()));
+			data.forEach(item->
+				System.out.println(item.getId())
+			);
+//			System.out.println(dat));
 			return data;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1009,6 +1047,164 @@ public class UserServiceImpl implements UserService {
 		return data;
 
 	}
+		
+		@Override
+		public List<Object> userOnlineStatusCount(String startDate, String endDate, short timeUnit) {
+
+			List<Object> countData = new ArrayList<>();
+
+			long startTime = 0; // 开始时间（秒）
+
+			long endTime = 0; // 结束时间（秒）,默认为当前时间
+
+			/**
+			 * 如时间单位为月和天，默认开始时间为当前时间的一年前 ; 时间单位为小时，默认开始时间为当前时间的一个月前;
+			 * 时间单位为分钟，则默认开始时间为当前这一天的0点
+			 */
+			long defStartTime = timeUnit == 4 ? DateUtil.getTodayMorning().getTime() / 1000
+					: timeUnit == 3 ? DateUtil.getLastMonth().getTime() / 1000 : DateUtil.getLastYear().getTime() / 1000;
+
+			startTime = StringUtil.isEmpty(startDate) ? defStartTime : DateUtil.toDate(startDate).getTime() / 1000;
+			endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds()
+					: DateUtil.toDate(endDate).getTime() / 1000;
+
+			BasicDBObject queryTime = new BasicDBObject("$ne", null);
+
+			if (startTime != 0 && endTime != 0) {
+				queryTime.append("$gte", startTime);
+				queryTime.append("$lt", endTime);
+			}
+
+			// 用户在线采样标识, 对应 UserStatusCount 表的type 字段 1零时统计 2:小时统计 3:天数统计
+			short minute_sampling = 1, hour_sampling = 2, day_sampling = 3;
+
+			BasicDBObject queryType = new BasicDBObject("$eq", day_sampling); // 默认筛选天数据
+
+			if (1 == timeUnit) { // 月数据
+				queryType.append("$eq", day_sampling);
+			} else if (2 == timeUnit) {// 天数据
+				queryType.append("$eq", day_sampling);
+			} else if (timeUnit == 3) {// 小时数据
+				queryType.append("$eq", hour_sampling);
+			} else if (timeUnit == 4) {// 分钟数据
+				queryType.append("$eq", minute_sampling);
+			}
+
+			BasicDBObject query = new BasicDBObject("time", queryTime).append("type", queryType);
+
+			// 获得用户集合对象
+			DBCollection collection = dfds.getCollection(UserStatusCount.class);
+
+			String mapStr = "function Map() { " + "var date = new Date(this.time*1000);" + "var year = date.getFullYear();"
+					+ "var month = (\"0\" + (date.getMonth()+1)).slice(-2);" // month 从0开始，此处要加1
+					+ "var day = (\"0\" + date.getDate()).slice(-2);" + "var hour = (\"0\" + date.getHours()).slice(-2);"
+					+ "var minute = (\"0\" + date.getMinutes()).slice(-2);" + "var dateStr = date.getFullYear()" + "+'-'+"
+					+ "(parseInt(date.getMonth())+1)" + "+'-'+" + "date.getDate();";
+
+			if (timeUnit == 1) { // counType=1: 每个月的数据
+				mapStr += "var key= year + '-'+ month;";
+			} else if (timeUnit == 2) { // counType=2:每天的数据
+				mapStr += "var key= year + '-'+ month + '-' + day;";
+			} else if (timeUnit == 3) { // counType=3 :每小时数据
+				mapStr += "var key= year + '-'+ month + '-' + day + '  ' + hour +' : 00';";
+			} else if (timeUnit == 4) { // counType=4 :每分钟的数据
+				mapStr += "var key= year + '-'+ month + '-' + day + '  ' + hour + ':'+ minute;";
+			}
+
+			mapStr += "emit(key,this.count);}";
+
+			String reduce = "function Reduce(key, values) {" + "return Array.sum(values);" + "}";
+			MapReduceCommand.OutputType type = MapReduceCommand.OutputType.INLINE;//
+			MapReduceCommand command = new MapReduceCommand(collection, mapStr, reduce, null, type, query);
+
+			MapReduceOutput mapReduceOutput = collection.mapReduce(command);
+			Iterable<DBObject> results = mapReduceOutput.results();
+			Map<String, Object> map = new HashMap<String, Object>();
+			for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+				DBObject obj = (DBObject) iterator.next();
+
+				map.put((String) obj.get("_id"), obj.get("value"));
+				countData.add(JSON.toJSON(map));
+				map.clear();
+				// System.out.println("=======>>>> 用户在线 "+JSON.toJSON(obj));
+
+			}
+
+			return countData;
+
+		}
+		
+		
 	
+		@Override
+		public List<Object> getUserRegisterCount(String startDate, String endDate, short timeUnit) {
+
+			List<Object> countData = new ArrayList<>();
+
+			long startTime = 0; // 开始时间（秒）
+
+			long endTime = 0; // 结束时间（秒）,默认为当前时间
+
+			/**
+			 * 如时间单位为月和天，默认开始时间为当前时间的一年前 ; 时间单位为小时，默认开始时间为当前时间的一个月前;
+			 * 时间单位为分钟，则默认开始时间为当前这一天的0点
+			 */
+			long defStartTime = timeUnit == 4 ? DateUtil.getTodayMorning().getTime() / 1000
+					: timeUnit == 3 ? DateUtil.getLastMonth().getTime() / 1000 : DateUtil.getLastYear().getTime() / 1000;
+
+			startTime = StringUtil.isEmpty(startDate) ? defStartTime : DateUtil.toDate(startDate).getTime() / 1000;
+			endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds()
+					: DateUtil.toDate(endDate).getTime() / 1000;
+
+			BasicDBObject queryTime = new BasicDBObject("$ne", null);
+
+			if (startTime != 0 && endTime != 0) {
+				queryTime.append("$gt", startTime);
+				queryTime.append("$lt", endTime);
+			}
+
+			BasicDBObject query = new BasicDBObject("createTime", queryTime);
+
+			// 获得用户集合对象
+			DBCollection collection = dfds.getCollection(User.class);
+
+			String mapStr = "function Map() { " + "var date = new Date(this.createTime*1000);"
+					+ "var year = date.getFullYear();" + "var month = (\"0\" + (date.getMonth()+1)).slice(-2);" // month
+																												// 从0开始，此处要加1
+					+ "var day = (\"0\" + date.getDate()).slice(-2);" + "var hour = (\"0\" + date.getHours()).slice(-2);"
+					+ "var minute = (\"0\" + date.getMinutes()).slice(-2);" + "var dateStr = date.getFullYear()" + "+'-'+"
+					+ "(parseInt(date.getMonth())+1)" + "+'-'+" + "date.getDate();";
+
+			if (timeUnit == 1) { // counType=1: 每个月的数据
+				mapStr += "var key= year + '-'+ month;";
+			} else if (timeUnit == 2) { // counType=2:每天的数据
+				mapStr += "var key= year + '-'+ month + '-' + day;";
+			} else if (timeUnit == 3) { // counType=3 :每小时数据
+				mapStr += "var key= year + '-'+ month + '-' + day + '  ' + hour +' : 00';";
+			} else if (timeUnit == 4) { // counType=4 :每分钟的数据
+				mapStr += "var key= year + '-'+ month + '-' + day + '  ' + hour + ':'+ minute;";
+			}
+
+			mapStr += "emit(key,1);}";
+
+			String reduce = "function Reduce(key, values) {" + "return Array.sum(values);" + "}";
+			MapReduceCommand.OutputType type = MapReduceCommand.OutputType.INLINE;//
+			MapReduceCommand command = new MapReduceCommand(collection, mapStr, reduce, null, type, query);
+
+			MapReduceOutput mapReduceOutput = collection.mapReduce(command);
+			Iterable<DBObject> results = mapReduceOutput.results();
+			Map<String, Double> map = new HashMap<String, Double>();
+			for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+				DBObject obj = (DBObject) iterator.next();
+
+				map.put((String) obj.get("_id"), (Double) obj.get("value"));
+				countData.add(JSON.toJSON(map));
+				map.clear();
+				// System.out.println("=======>>>> 用户注册 "+JSON.toJSON(obj));
+
+			}
+
+			return countData;
+		}
 
 }

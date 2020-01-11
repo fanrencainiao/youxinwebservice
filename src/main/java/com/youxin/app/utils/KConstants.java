@@ -19,7 +19,7 @@ public class KConstants {
 	
 	public static final int MOENY_ADD = 1; //金钱增加
 	public static final int MOENY_REDUCE = 2; //金钱减少
-	public static final double LBS_KM=111.01;
+	public static final double LBS_KM=111.12;//$maxDistance为经纬弧度（1° latitude = 111.12 kilometers）即 1/111.12，表示查找附近一公里。
 	public static final int LBS_DISTANCE=50;//默认50公里
 	
 	// 不经过普通接口校验
@@ -90,6 +90,8 @@ public class KConstants {
 		public static final int VIP_COMMISSION = 15;// 推广用户VIP充值提成
 		public static final int SYSTEM_REDUCE = 16;// 后台扣除（目前用于异常账号）
 		public static final int ALI_COUPON = 17;// 阿里红包
+		public static final int ALI_RECEIVE_COUPON = 18;// 阿里领取红包
+		public static final int ALI_BACK_COUPON = 19;// 阿里退回红包
 	}
 	
 	

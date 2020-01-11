@@ -159,23 +159,23 @@ public class TransferManagerImpl{
 		userService.rechargeUserMoeny(userId, transfer.getMoney(), KConstants.MOENY_ADD);
 		// 发送xmpp消息
 
-		MsgRequest messageBean = new MsgRequest();
-		messageBean.setFrom(Md5Util.md5HexToAccid(userId+""));
-		messageBean.setType(100);// 文本
-	
-		messageBean.setOpe(0);// 个人消息
-		messageBean.setTo(transfer.getAccid());
-		transfer.setRid(transfer.getId().toString());
-//		messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERRECIEVE+",\"data\":"+JSON.toJSONString(transfer)+"}");
-		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.TRANSFERRECIEVE, transfer)));
-		try {
-			JSONObject json=SDKService.sendMsg(messageBean);
-			if(json.getInteger("code")!=200) 
-				log.debug("收钱 sdk消息发送失败");
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.debug("收钱 sdk消息发送失败"+e.getMessage());
-		}
+//		MsgRequest messageBean = new MsgRequest();
+//		messageBean.setFrom(Md5Util.md5HexToAccid(userId+""));
+//		messageBean.setType(100);// 文本
+//	
+//		messageBean.setOpe(0);// 个人消息
+//		messageBean.setTo(transfer.getAccid());
+//		transfer.setRid(transfer.getId().toString());
+////		messageBean.setBody("{\"type\":"+KConstants.MsgType.TRANSFERRECIEVE+",\"data\":"+JSON.toJSONString(transfer)+"}");
+//		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.TRANSFERRECIEVE, transfer)));
+//		try {
+//			JSONObject json=SDKService.sendMsg(messageBean);
+//			if(json.getInteger("code")!=200) 
+//				log.debug("收钱 sdk消息发送失败");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			log.debug("收钱 sdk消息发送失败"+e.getMessage());
+//		}
 		
 		//开启一个线程 添加一条消费记录
 		new Thread(new Runnable() {

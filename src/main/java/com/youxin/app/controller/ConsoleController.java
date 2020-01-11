@@ -6,6 +6,7 @@ import static org.mongodb.morphia.aggregation.Group.sum;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,11 @@ import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.team.MuteTlistAll;
 import com.youxin.app.yx.request.team.QueryDetail;
+
+
+
+
+
 
 
 @RestController
@@ -923,6 +929,76 @@ public class ConsoleController extends AbstractController{
 			System.out.println(ug);
 		}
 		return g;
+	}
+	
+	
+	/**
+	 * 用户，群组，单聊消息，好友关系数量 统计
+	 */
+	@RequestMapping(value = "/countNum")
+	public Result countNum(HttpServletRequest request, HttpServletResponse response) {
+
+		try {
+			long userNum = dfds.getCollection(User.class).count();
+			long roomNum = 0;
+			long msgNum = 0;
+			long friendsNum = 0;
+
+			Map<String, Long> dataMap = new HashMap<String, Long>();
+			dataMap.put("userNum", userNum);
+			dataMap.put("roomNum", roomNum);
+			dataMap.put("msgNum", msgNum);
+			dataMap.put("friendsNum", friendsNum);
+			return Result.success(dataMap);
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+
+	}
+	
+	/**
+	 * 用户在线数量统计
+	 * 
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param sign
+	 * @param startDate
+	 * @param endDate
+	 * @param timeUnit
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/getUserStatusCount")
+	public Result getUserStatusCount(@RequestParam(defaultValue = "0") int pageIndex,
+			@RequestParam(defaultValue = "100") int pageSize, @RequestParam(defaultValue = "2") short timeUnit,
+			@RequestParam(defaultValue = "") String startDate, @RequestParam(defaultValue = "") String endDate)
+			throws Exception {
+
+		try {
+
+			Object data = userService.userOnlineStatusCount(startDate.trim(), endDate.trim(),
+					timeUnit);
+			return Result.success(data);
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+	}
+	
+	/**
+	 * 统计用户注册信息
+	 */
+	@RequestMapping(value = "/getUserRegisterCount")
+	public Result getUserRegisterCount(@RequestParam(defaultValue = "0") int pageIndex,
+			@RequestParam(defaultValue = "100") int pageSize, @RequestParam(defaultValue = "2") short timeUnit,
+			@RequestParam(defaultValue = "") String startDate, @RequestParam(defaultValue = "") String endDate) {
+
+		try {
+
+			Object data =userService.getUserRegisterCount(startDate.trim(), endDate.trim(), timeUnit);
+			return Result.success(data);
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+
 	}
 
 }

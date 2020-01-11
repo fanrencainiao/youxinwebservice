@@ -41,6 +41,10 @@ public class RedPacket {
 	private long sendTime;
 	@ApiModelProperty(value="红包类型 1：普通红包  2：拼手气红包  3:口令红包 4:定向红包")
 	private @Indexed int type; // 
+	@ApiModelProperty(value="红包支付类型 0零钱支付，1支付宝支付")
+	private @Indexed int payType; // 
+	@ApiModelProperty(value="商户端支付宝订单号")
+	private  String payNo;
 	@ApiModelProperty(value="红包个数")
 	private int count;
 	@ApiModelProperty(value="已领取个数")
@@ -175,6 +179,18 @@ public class RedPacket {
 	}
 	public void setToUserIds(List<Integer> toUserIds) {
 		this.toUserIds = toUserIds;
+	}
+	public int getPayType() {
+		return payType;
+	}
+	public void setPayType(int payType) {
+		this.payType = payType;
+	}
+	public String getPayNo() {
+		return payNo;
+	}
+	public void setPayNo(String payNo) {
+		this.payNo = payNo;
 	}
 	
 }
