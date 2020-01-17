@@ -13,6 +13,8 @@ import lombok.Setter;
 public class AliPayConfig {
 	// 支付宝认证应用Id
 	private String appid;
+	// 支付宝认证应用pid
+	private String pid;
 	// 应用私钥
 	private String appPrivateKey;
 	// 字符编码格式
@@ -23,4 +25,13 @@ public class AliPayConfig {
 	private String callBackUrl;
 	// 支付宝银行卡验证接口code码
 	private String appCode;
+	
+	// 支付宝应用公钥证书路径  apppublickey
+	private String pubPath;
+	
+	// 支付宝根证书路径
+	private String rootPath;
+	
+	// 支付公钥证书路径
+	private String pubJobPath;
 }

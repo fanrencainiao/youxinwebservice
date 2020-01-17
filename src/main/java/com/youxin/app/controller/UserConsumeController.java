@@ -34,6 +34,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import jodd.util.URLDecoder;
 
 @Api(tags = "用户消费管理")
 @RestController
@@ -132,6 +133,7 @@ public class UserConsumeController extends AbstractController {
 				orderInfo = AliPayUtil.getOrderInfoByCoupon("支付宝红包", "支付宝红包", price, orderNo);
 				consumeRecordServer.saveConsumeRecord(entity);
 				map.put("orderInfo", orderInfo);
+				System.out.println("orderInfo>>>>>" + URLDecoder.decode(orderInfo));
 				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
 			} 

@@ -1,6 +1,8 @@
 package com.youxin.app.controller;
 
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.mongodb.morphia.Datastore;
@@ -25,6 +27,7 @@ import com.youxin.app.utils.AuthServiceUtils;
 import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
@@ -125,6 +128,8 @@ public class RedPacketController extends AbstractController{
 	public Result sendRedPacketV1(@RequestBody RedPacket packet,
 			@RequestParam(defaultValue="0") long time,@RequestParam(defaultValue="") String moneyStr,
 			@RequestParam(defaultValue="") String secret) {
+		if(packet.getPayType()!=1)
+			return Result.error("暂时只支持支付宝红包");
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
 		User user=userService.getUserFromDB(userId);
@@ -145,8 +150,8 @@ public class RedPacketController extends AbstractController{
 		if(StringUtil.isEmpty(user.getPayPassword())){
 			return Result.error("请设置支付密码");
 		}
-		if(!AuthServiceUtils.authRedPacketV1(user.getPayPassword(),userId+"", token, time,moneyStr,secret)) {
-			return Result.error("支付密码错误!");
+		if(!AuthServiceUtils.authRedPacketV2(Md5Util.md5Hex("1"),userId+"", token, time,moneyStr,secret)) {
+			return Result.error("权限验证错误!");
 		}
 		packet.setUserId(userId);
 		packet.setAccid(user.getAccid());
@@ -189,10 +194,11 @@ public class RedPacketController extends AbstractController{
 			});
 		}else {
 			//查询红包订单支付情况
-			String commonQueryRequest = AliPayUtil.commonQueryRequest(packet.getPayNo(), "PERSONAL_PAY");
-			JSONObject cqr = JSON.parseObject(commonQueryRequest);
-			if(!"SUCCESS".equalsIgnoreCase(cqr.getString("status"))) 
-				return Result.error("支付宝红包订单支付失败");
+			String orderid = AliPayUtil.commonQueryRequest(packet.getPayNo(),packet.getAliPayNo(), "PERSONAL_PAY");
+			System.out.println(orderid);
+			data = redServer.saveRedPacket(packet);
+//			if(orderid==null||orderid=="") 
+//				return Result.error("支付宝红包订单支付失败");
 		}
 		return Result.success(data);
 	}
@@ -245,23 +251,24 @@ public class RedPacketController extends AbstractController{
 	//查询发出的红包
 	@ApiOperation(value = "查询发出的红包",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "pageIndex", defaultValue="0",value = "页码", paramType = "query"),
-		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query")})
+		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query"),
+		@ApiImplicitParam(name = "q", value = "参数查询（startTime，endTime）",   defaultValue="",paramType = "query")})
 	@GetMapping("getSendRedPacketList")
-	public Result getSendRedPacketList(@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
-		Object data=redServer.getSendRedPacketList(ReqUtil.getUserId(),pageIndex,pageSize);
+	public Result getSendRedPacketList(@RequestParam(defaultValue="null") Map<String, String> q,@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
+		Object data=redServer.getSendRedPacketList(ReqUtil.getUserId(),pageIndex,pageSize,q);
 		return Result.success(data);
 	}
 	//查询收到的红包
 	@ApiOperation(value = "查询收到的红包",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "pageIndex", defaultValue="0",value = "页码", paramType = "query"),
-		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query")})
+		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query"),
+		@ApiImplicitParam(name = "q", value = "参数查询（startTime，endTime）",   defaultValue="",paramType = "query")})
 	@GetMapping("getRedReceiveList")
-	public Result getRedReceiveList(@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
-		Object data=redServer.getRedReceiveList(ReqUtil.getUserId(),pageIndex,pageSize);
+	public Result getRedReceiveList(@RequestParam(defaultValue="null") Map<String, String> q,@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
+		Object data=redServer.getRedReceiveList(ReqUtil.getUserId(),pageIndex,pageSize,q);
 		return	Result.success(data);
 	}
 	
-	
-	
+
 	
 }

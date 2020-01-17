@@ -228,6 +228,9 @@ public class UserServiceImpl implements UserService {
 		if (null == user) {
 			throw new ServiceException(20004, "帐号不存在, 请注册!");
 		} else {
+			if(user.getIsDelUser()==1)
+				throw new ServiceException(20012, "帐号已经注销!");
+			
 			user.setLoginLog(bean.getLoginLog());
 			if (bean.getLoginType() == 0) {
 				// 账号密码登录
@@ -613,7 +616,7 @@ public class UserServiceImpl implements UserService {
 //		Object token = data.get("access_token");
 		data.put("serialStatus", serialStatus);
 		data.put("id", user.getId());
-//		data.put("accid", user.getAccid());
+		data.put("isDelUser", user.getIsDelUser());
 		data.put("account", user.getAccount());
 		data.put("name", user.getName());
 		data.put("birth", user.getBirth());
@@ -641,6 +644,10 @@ public class UserServiceImpl implements UserService {
 		if(bean.getCityId()!=null&&bean.getCityId()>0) {
 			ops.set("cityId", bean.getCityId());
 		}
+		if(!StringUtil.isEmpty(bean.getMobile())) {
+			//没有同步更新云信手机号
+			ops.set("mobile", bean.getMobile());
+		}
 		if(bean.getAreaId()!=null&&bean.getAreaId()>0) {
 			ops.set("areaId", bean.getAreaId());
 		}
@@ -656,6 +663,12 @@ public class UserServiceImpl implements UserService {
 		if(!StringUtil.isEmpty(bean.getCityName())) {
 			ops.set("cityName", bean.getCityName());
 		}
+		if(!StringUtil.isEmpty(bean.getPassword())) {
+			ops.set("password", bean.getPassword());
+		}
+		if(!StringUtil.isEmpty(bean.getPayPassword())) {
+			ops.set("payPassword", bean.getPayPassword());
+		}
 		if(bean.getLatitude()>0) {
 			ops.set("latitude", bean.getLatitude());
 			ops.set("loc.lat", bean.getLatitude());
@@ -666,6 +679,12 @@ public class UserServiceImpl implements UserService {
 		}
 		if(bean.getUpdateTime()!=null&&bean.getUpdateTime()>0) {
 			ops.set("updateTime",DateUtil.currentTimeSeconds());
+		}
+		if(!StringUtil.isEmpty(bean.getAliUserId())) {
+			ops.set("aliUserId", bean.getAliUserId());
+		}
+		if(bean.getIsDelUser()==1||bean.getIsDelUser()==-1) {
+			ops.set("isDelUser", bean.getIsDelUser());
 		}
 		
 		repository.update(q, ops);

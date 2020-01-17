@@ -146,6 +146,10 @@ public class User extends BaseExample{
 	private Loc loc;
 	@ApiModelProperty(value = "用户在线状态")
 	private String online;
+	@ApiModelProperty(value = "用户是否注销 1注销 -1未注销")
+	private int isDelUser=-1;
+	
+	
 
 	public String setExs() {
 		JSONObject exs = new JSONObject();

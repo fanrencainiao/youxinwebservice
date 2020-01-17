@@ -505,6 +505,26 @@ public class AuthServiceUtils implements ApplicationContextAware{
 			}
 			
 		}
+		public static boolean authRedPacketV2(String payPassword,String userId,String token,long time,String money,String secret) {
+			if(!authRequestTime(time)) {
+				return false;
+			}
+			if(StringUtil.isEmpty(secret)) {
+				return false;
+			}
+//			if(StringUtil.isEmpty(payPassword)){
+//				return false;
+//			}
+				
+			String secretKey=getRedPacketSecretV1(payPassword,userId, token,time,money);
+			
+			if(!secretKey.equals(secret)) {
+				return false;
+			}else {
+				return true;
+			}
+			
+		}
 		public static boolean authRedPacket(String userId,String token,long time,String secret) {
 			if(!authRequestTime(time)) {
 				return false;

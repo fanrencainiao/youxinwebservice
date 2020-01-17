@@ -65,8 +65,10 @@ public class AlipayController extends AbstractController{
 		try {
 			String tradeNo = params.get("out_trade_no");
 			log.debug("订单号    "+tradeNo);
-			
-			boolean flag = AlipaySignature.rsaCheckV1(params,AliPayUtil.ALIPAY_PUBLIC_KEY(), AliPayUtil.CHARSET(),"RSA2");
+//			公钥方式验签
+//			boolean flag = AlipaySignature.rsaCheckV1(params,AliPayUtil.ALIPAY_PUBLIC_KEY(), AliPayUtil.CHARSET(),"RSA2");
+//			公钥证书方式验签
+			boolean flag = AlipaySignature.rsaCertCheckV1(params, AliPayUtil.pubJobPath(), AliPayUtil.CHARSET(),"RSA2");
 			if(flag){
 				log.debug("支付宝回调成功"+flag);
 
@@ -86,9 +88,10 @@ public class AlipayController extends AbstractController{
 					AliPayParam aliCallBack=new AliPayParam();
 					BeanUtils.populate(aliCallBack, params);
 					log.debug("支付宝支付返回用户id："+entity.getUserId());
-					User user=userService.getUser(entity.getUserId());
+					User user=new User();
 					log.debug("支付宝支付返回用户："+user);
 					user.setAliUserId(aliCallBack.getBuyer_id());
+//					userService.updateUserByEle(user);
 					log.debug("支付宝支付返回aliid："+aliCallBack.getBuyer_id());
 					crpository.save(entity);
 					log.debug("支付宝支付返回保存消费记录：");

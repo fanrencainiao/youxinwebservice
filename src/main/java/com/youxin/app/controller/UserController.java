@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
+import org.luaj.vm2.lib.PackageLib.require;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +46,7 @@ import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Friends;
@@ -106,9 +108,7 @@ public class UserController extends AbstractController{
 					return Result.success(userService.saveLoginInfo(ubm));
 				}else {
 					throw new ServiceException(0, "账户已绑定");
-				}
-				
-				
+				}	
 			}
 			
 		}
@@ -135,6 +135,24 @@ public class UserController extends AbstractController{
 			return Result.failure(ResultCode.UNBindingTelephone);
 		}
 	}
+	@ApiOperation(value = "注销",response=Result.class)
+	@DeleteMapping("delUser")
+	public Object delUser() {
+		User relUser = userService.getUserFromDB(ReqUtil.getUserId());
+		User user=new User();
+		//设置为注销状态
+		user.setIsDelUser(1);
+		//手机号：手机号+用户id
+		user.setMobile(relUser.getMobile()+relUser.getId());
+		//密码：yxdel+用户id
+		user.setPassword("yxdel"+relUser.getId());
+		user.setId(ReqUtil.getUserId());
+		userService.updateUserByEle(user);
+		logout();
+		
+		return Result.success();
+		
+	}
 	/**
 	 * 绑定
 	 * @param loginInfo
@@ -142,7 +160,7 @@ public class UserController extends AbstractController{
 	 */
 	@ApiOperation(value = "绑定第三方sdk",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "loginInfo", value = "sdk登录标识", required = true, paramType = "query"),
-		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信", required = true, paramType = "query")})
+		 @ApiImplicitParam(name = "sdkType", value = "第三方类型：1qq, 2微信,3支付宝", required = true, paramType = "query")})
 	@PostMapping("bingdingSDK")
 	public Object bingdingSDK(@RequestParam int sdkType,@RequestParam String loginInfo) {
 		SdkLoginInfo sdkLoginInfo = userService.findSdkLoginInfo(sdkType, loginInfo);
@@ -155,7 +173,7 @@ public class UserController extends AbstractController{
 			dfds.save(sdkLoginInfo);
 			return Result.success(sdkLoginInfo);
 		} else {
-			// 微信已经被绑定
+			// 账户已经被绑定
 			return Result.failure(ResultCode.BINGDINGWXED);
 		}
 	}
@@ -191,6 +209,35 @@ public class UserController extends AbstractController{
 	@GetMapping("getOpenids")
 	public Object getOpenids(@RequestParam String code) {
 		return Result.success(userService.getWxOpenId(code));
+	}
+	/**
+	 * 获取支付宝accesstoken信息
+	 * @return
+	 */
+	@ApiOperation(value = "组装支付宝授权信息",response=Result.class)
+	@GetMapping("getAliAuthInfo")
+	public Object getAliAuthInfo() {
+		return Result.success(AliPayUtil.getAuthInfoStr());
+	}
+	/**
+	 * 获取支付宝accesstoken信息
+	 * @return
+	 */
+	@ApiOperation(value = "获取支付宝accesstoken信息",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "code", value = "code", required = true, paramType = "query")})
+	@GetMapping("getAliAccesstoken")
+	public Object getAliAccesstoken(@RequestParam String code) {
+		return Result.success(AliPayUtil.getAccesstoken(code, null));
+	}
+	/**
+	 * 获取支付宝用户信息
+	 * @return
+	 */
+	@ApiOperation(value = "获取支付宝用户信息",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "accesstoken", value = "accesstoken", required = true, paramType = "query")})
+	@GetMapping("getAliUserInfo")
+	public Object getAliUserInfo(@RequestParam String accesstoken) {
+		return Result.success(AliPayUtil.getAliUserInfo(accesstoken));
 	}
 	
 	
@@ -444,6 +491,18 @@ public class UserController extends AbstractController{
 		
 		return Result.success();
 
+	}
+	@ApiOperation(value = "更新支付宝用户id",response=Result.class)
+	@PostMapping("updateAliUserId")
+	public Object updateAliUserId(String aliUserId){
+		if(StringUtils.isBlank(aliUserId)) {
+			return Result.errorMsg("aliUserId不能为空");
+		}
+		User user = new User();
+		user.setAliUserId(aliUserId);
+		user.setId(ReqUtil.getUserId());
+		userService.updateUserByEle(user);
+		return Result.success();
 	}
 //	@ApiOperation(value = "更新用户地址",response=Result.class)
 //	@PostMapping("updateAddr")

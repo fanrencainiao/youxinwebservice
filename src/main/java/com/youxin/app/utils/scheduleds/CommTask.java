@@ -289,6 +289,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		Integer userId=0;
 		Integer toUserId=0;
 		String payNo=null;
+		String aliPayNo=null;
 		Integer payType=0;
 		String roomJid="";
 		ObjectId redPackectId=null;
@@ -316,17 +317,18 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			 toUserId=(Integer) dbObject.get("toUserId");
 			 payType = (Integer)dbObject.get("payType");
 			 payNo=(String)dbObject.get("payNo");
+			 aliPayNo=(String)dbObject.get("aliPayNo");
 			 if(payType!=null&&payType==1) 
-				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,1,payNo);
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,1,payNo,aliPayNo);
 			 else
-				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,0,"");
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,0,"","");
 		}
 			
 		System.out.println("红包超时未领取的数量 ======> "+objs.size());
 		
 	}
 	
-	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id,int payType,String payNo){
+	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id,int payType,String payNo,String aliPayNo){
 		
 		if(0<money){
 			DecimalFormat df = new DecimalFormat("#.00");
@@ -345,12 +347,13 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		record.setStatus(KConstants.OrderStatus.END);
 		record.setDesc("红包退款");
 		if(payType==1) {
-			String backTransUni = AliPayUtil.backTransUni("超时退款", "", money+"", payNo);
-			JSONObject btu = JSON.parseObject(backTransUni);
-			log.debug(btu);
-			if(!"SUCCESS".equalsIgnoreCase(btu.getString("status"))) {
-				return;
-			}
+			String backTransUni = AliPayUtil.backTransUni("支付宝红包超时退款",aliPayNo, money+"", payNo);
+			log.debug("支付宝红包超时退款信息"+backTransUni);
+//			JSONObject btu = JSON.parseObject(backTransUni);
+//			log.debug(btu);
+//			if(!"SUCCESS".equalsIgnoreCase(btu.getString("status"))) {
+//				return;
+//			}
 		}else {
 			recordManager.saveConsumeRecord(record);
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);

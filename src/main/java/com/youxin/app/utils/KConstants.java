@@ -45,6 +45,8 @@ public class KConstants {
 		
 		add("/pay/codeReceipt");// 二维码收款
 		add("/bank/pay");// 银行卡提现
+		add("/redPacket/sendAliCoupon");//发送支付宝红包验证
+		
 
 		
 	}};

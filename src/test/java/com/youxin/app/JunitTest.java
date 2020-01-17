@@ -43,6 +43,7 @@
 //import com.youxin.app.utils.HttpUtil;
 //import com.youxin.app.utils.KConstants;
 //import com.youxin.app.utils.StringUtil;
+//import com.youxin.app.utils.alipay.util.AliPayUtil;
 //import com.youxin.app.yx.ApplicationType;
 //import com.youxin.app.yx.HttpClientUtil;
 //import com.youxin.app.yx.SDKService;
@@ -56,32 +57,6 @@
 //public class JunitTest {
 //	
 //
-//	/**
-//	 * 计算两个数字相乘的绝对值
-//	 */
-////	@Test
-//	public void TestAbs() {
-//		try {
-//			int a=getA(-23);
-//			int b=getB(-34);
-//			System.out.println(a*b);
-//		} catch (Exception e) {
-//			System.out.println("程序异常");
-//		}
-//	}
-//	
-//	public int getA(int a){
-//		
-//		return Math.abs(a);
-//	}
-//	public int getB(int b){
-//			
-//		return b;
-//	}
-//	public int getC(int c){
-//		
-//		return Math.abs(c);
-//	}
 ////	@Test
 //	public void sendMsgTest() {
 //		//1100  1e6e0a04d20f50967c64dac2d639a577
@@ -253,5 +228,10 @@
 //	}
 //
 //	
+//	@Test
+//	public void aliTest() {
+//		String code = AliPayUtil.getAuthInfoStr();
+//		System.out.println(code);
+//	}
 //
 //}

@@ -26,6 +26,7 @@ import com.youxin.app.entity.User;
 import com.youxin.app.entity.UserWallet;
 import com.youxin.app.entity.WalletFour;
 import com.youxin.app.entity.msgbody.MsgBody;
+import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.LastWalletRepository;
 import com.youxin.app.repository.RedPacketRepository;
 import com.youxin.app.repository.RedReceiveRepository;
@@ -147,6 +148,8 @@ public class RedPacketManagerImpl{
 	private synchronized RedPacket openRedPacket(Integer userId, RedPacket packet) {
 		int overCount = packet.getCount() - packet.getReceiveCount();
 		User user =userManager.getUser(userId);
+		if(StringUtil.isEmpty(user.getAliUserId()))
+			throw new ServiceException(-1, "请先绑定支付宝");
 		WalletFour walletFour = getWalletFour(packet.getUserId(), packet.getRoomJid());
 		UserWallet userWallet = getUserWallet(userId);
 		LastWallet lastWallet = getLastWallet(packet.getRoomJid());
@@ -302,11 +305,12 @@ public class RedPacketManagerImpl{
 			// 修改金额
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 		}else {
-			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"", packet.getPayNo());
-			JSONObject tu = JSON.parseObject(transUni);
-			log.debug(tu);
-			if(!"SUCCESS".equalsIgnoreCase(tu.getString("status")))
-				return null; //支付宝打款失败
+			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"", packet.getPayNo(),packet.getAliPayNo(),user.getAliUserId());
+			log.debug(transUni);
+//			JSONObject tu = JSON.parseObject(transUni);
+//			
+//			if(!"SUCCESS".equalsIgnoreCase(tu.getString("status")))
+//				return null; //支付宝打款失败
 		}
 		redPacketRepository.update(q, ops);
 		final Double num = money;
@@ -405,15 +409,36 @@ public class RedPacketManagerImpl{
 	}
 
 	// 发送的红包
-	public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int pageSize) {
+public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int pageSize,Map<String, String> param) {
+		
 		Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId);
+		System.out.println(param);
+		if(param!=null) {
+			if(!StringUtil.isEmpty(param.get("startTime"))) {
+				q.field("sendTime").greaterThanOrEq(Long.valueOf(param.get("startTime")));
+			}
+			if(!StringUtil.isEmpty(param.get("endTime"))) {
+				q.field("sendTime").lessThanOrEq(Long.valueOf(param.get("endTime")));		
+			}
+		}
 		return q.order("-sendTime").offset(pageIndex * pageSize).limit(pageSize).asList();
 	}
 
 	// 收到的红包
-	public List<RedReceive> getRedReceiveList(Integer userId, int pageIndex, int pageSize) {
-		return (List<RedReceive>) redReceiveRepository.createQuery().field("userId").equal(userId).asList();
-	}
+	public List<RedReceive> getRedReceiveList(Integer userId, int pageIndex, int pageSize,Map<String, String> param) {
+			Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
+			System.out.println(param);
+			if(param!=null) {
+				if(!StringUtil.isEmpty(param.get("startTime"))) {
+					q.field("time").greaterThanOrEq(Long.valueOf(param.get("startTime")));
+				}
+				if(!StringUtil.isEmpty(param.get("endTime"))) {
+					q.field("time").lessThanOrEq(Long.valueOf(param.get("endTime")));		
+				}
+			}
+			
+			return q.order("-time").offset(pageIndex * pageSize).limit(pageSize).asList();
+		}
 
 	// 发送的红包
 	public PageResult<RedPacket> getRedPacketList(String userName,int userId,int toUserId, int pageIndex, int pageSize) {

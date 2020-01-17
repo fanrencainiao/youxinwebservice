@@ -29,6 +29,7 @@ public enum ResultCode {
     BINGDINGWXED(20009, "账户已经被绑定，请先解绑"),
     BINGDINGMOBILED(20010, "手机号已存在"),
     USER_DIS_TOKEN(20011, "授权认证失败"),
+    USER_DEL_EXIST(20012, "用户已经注销"),
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
 

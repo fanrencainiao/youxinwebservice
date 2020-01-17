@@ -45,6 +45,8 @@ public class RedPacket {
 	private @Indexed int payType; // 
 	@ApiModelProperty(value="商户端支付宝订单号")
 	private  String payNo;
+	@ApiModelProperty(value="支付宝订单号")
+	private  String aliPayNo;
 	@ApiModelProperty(value="红包个数")
 	private int count;
 	@ApiModelProperty(value="已领取个数")
@@ -192,5 +194,12 @@ public class RedPacket {
 	public void setPayNo(String payNo) {
 		this.payNo = payNo;
 	}
+	public String getAliPayNo() {
+		return aliPayNo;
+	}
+	public void setAliPayNo(String aliPayNo) {
+		this.aliPayNo = aliPayNo;
+	}
+	
 	
 }
