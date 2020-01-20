@@ -1,6 +1,8 @@
 package com.youxin.app.controller;
 
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -28,6 +30,7 @@ import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.NumberUtil;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
@@ -138,16 +141,30 @@ public class RedPacketController extends AbstractController{
 		if(user.getBalance() < packet.getMoney()&&packet.getPayType()!=1){
 			//余额不足
 			return Result.error("余额不足,请先充值!");
-		}else if(packet.getMoney() < 0.01 || 500 < packet.getMoney()){
-			return Result.error("红包总金额在0.01~500之间哦!");
+		}else if(packet.getMoney() < 0.01 || 20000 < packet.getMoney()){
+			return Result.error("红包金额在0.01~20000之间哦!");
 		}else if((packet.getMoney()/packet.getCount()) < 0.01){
 			return Result.error("每人最少 0.01元 !");
 		}else if(packet.getType()==4&&CollectionUtil.isEmpty(packet.getToUserIds())){
 			return Result.error("定向红包请选择指定领取人!");
 		}
+		//支付宝红包
+		if(packet.getPayType()==1) {
+			BigDecimal money = NumberUtil.getBigDecimalForDouble(packet.getMoney());
+			BigDecimal count = NumberUtil.getBigDecimalForDouble(packet.getCount());
+			//单个红包金额
+			double divideMoney = money.divide(count).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+			log.debug("money:"+money+"count:"+count+"=divideMoney:"+divideMoney);
+			if(divideMoney>200)
+				return Result.error("单个红包不能超过200元");
+			Double sendTotalMoney = redServer.sendBill(userId);
+			if(NumberUtil.add(sendTotalMoney, packet.getMoney(), null)>20000) 
+				return Result.error("每日发送总金额不能超过20000,您24小时内已经发送了"+sendTotalMoney+"元红包");
+		}
+		
 		//红包接口授权
 		WalletFour wallet_Four = redServer.getUserWallet(userId, packet.getRoomJid());
-		if(StringUtil.isEmpty(user.getPayPassword())){
+		if(packet.getPayType()!=1&&StringUtil.isEmpty(user.getPayPassword())){
 			return Result.error("请设置支付密码");
 		}
 		if(!AuthServiceUtils.authRedPacketV2(Md5Util.md5Hex("1"),userId+"", token, time,moneyStr,secret)) {
@@ -167,6 +184,7 @@ public class RedPacketController extends AbstractController{
 		long cuTime = DateUtil.currentTimeSeconds();
 		packet.setSendTime(cuTime);
 		packet.setOutTime(cuTime + KConstants.Expire.DAY1);
+//		packet.setOutTime(cuTime + 60);
 		Object data = null;
 		//修改金额,非支付宝红包进行零钱修改
 		if(packet.getPayType()!=1) {
@@ -195,7 +213,7 @@ public class RedPacketController extends AbstractController{
 		}else {
 			//查询红包订单支付情况
 			String orderid = AliPayUtil.commonQueryRequest(packet.getPayNo(),packet.getAliPayNo(), "PERSONAL_PAY");
-			System.out.println(orderid);
+			System.out.println("发送红包状态后实时查询订单号："+orderid);
 			data = redServer.saveRedPacket(packet);
 //			if(orderid==null||orderid=="") 
 //				return Result.error("支付宝红包订单支付失败");

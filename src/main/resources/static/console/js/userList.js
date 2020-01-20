@@ -155,7 +155,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                 curr: 1 //重新从第 1 页开始
             },
             where: {
-//                onlinestate:$("#status").val(),// 在线状态
+            	online:$("#online").val(),// 在线状态
                 keyWorld : $(".nickName").val()  //搜索的关键字
             }
         })
@@ -175,7 +175,7 @@ function renderTable(){
             curr: 1 //重新从第 1 页开始
         },
         where: {
-//            onlinestate:$("#status").val(),// 在线状态
+        	online:$("#online").val(),// 在线状态
             keyWorld : $(".nickName").val()  //搜索的关键字
         }
     })

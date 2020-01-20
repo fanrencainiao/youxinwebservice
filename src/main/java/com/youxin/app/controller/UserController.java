@@ -136,9 +136,13 @@ public class UserController extends AbstractController{
 		}
 	}
 	@ApiOperation(value = "注销",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "pwd", value = "密码验证（md5加密）", required = true, paramType = "query"),
+		})
 	@DeleteMapping("delUser")
-	public Object delUser() {
+	public Object delUser(@RequestParam String pwd) {
 		User relUser = userService.getUserFromDB(ReqUtil.getUserId());
+		if(!pwd.equals(relUser.getPassword()))
+			return Result.error("密码错误");
 		User user=new User();
 		//设置为注销状态
 		user.setIsDelUser(1);

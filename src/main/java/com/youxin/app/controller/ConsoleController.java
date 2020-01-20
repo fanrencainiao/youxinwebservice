@@ -135,7 +135,7 @@ public class ConsoleController extends AbstractController{
 	
 	@GetMapping(value = "userList")
 	public Object userList(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "") String onlinestate,
+			@RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "") Integer online,
 			@RequestParam(defaultValue = "") String keyWorld) {
 		Query<User> query = ur.createQuery();
 
@@ -148,8 +148,18 @@ public class ConsoleController extends AbstractController{
 			query.or(query.criteria("name").containsIgnoreCase(keyWorld), query.criteria("_id").equal(userId),
 					query.criteria("mobile").containsIgnoreCase(keyWorld));
 		}
-		if (!StringUtil.isEmpty(onlinestate)) {
-			query.filter("onlinestate", Integer.valueOf(onlinestate));
+		if (online!=null) {
+			if(online==0||online==1){
+				query.filter("online =", online);
+			}
+			if(online==2) {
+				query.filter("isDelUser =", 1);
+			}
+			if(online==3) {
+				query.filter("isDelUser !=", 1);
+			}
+			
+			
 		}
 		// 排序、分页
 		List<User> pageData = query.order("-createTime").asList(MongoUtil.pageFindOption(page-1, limit));

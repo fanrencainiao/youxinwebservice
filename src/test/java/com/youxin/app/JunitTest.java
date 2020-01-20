@@ -32,16 +32,25 @@
 //import org.apache.http.message.BasicNameValuePair;
 //import org.junit.Test;
 //import org.junit.runner.RunWith;
+//import org.mongodb.morphia.Datastore;
+//import org.mongodb.morphia.query.Query;
+//import org.mongodb.morphia.query.UpdateOperations;
+//import org.mongodb.morphia.query.UpdateResults;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Qualifier;
 //import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.test.context.junit4.SpringRunner;
 //
 //import com.alibaba.fastjson.JSON;
 //import com.alibaba.fastjson.JSONObject;
+//import com.mongodb.DBCollection;
 //import com.youxin.app.entity.RedPacket;
+//import com.youxin.app.entity.User;
 //import com.youxin.app.entity.msgbody.MsgBody;
 //import com.youxin.app.entity.msgbody.MsgBody.ID;
 //import com.youxin.app.utils.HttpUtil;
 //import com.youxin.app.utils.KConstants;
+//import com.youxin.app.utils.KSessionUtil;
 //import com.youxin.app.utils.StringUtil;
 //import com.youxin.app.utils.alipay.util.AliPayUtil;
 //import com.youxin.app.yx.ApplicationType;
@@ -55,7 +64,10 @@
 //@RunWith(SpringRunner.class)
 //@SpringBootTest(classes=YouxinApplication.class)
 //public class JunitTest {
-//	
+//
+//	@Autowired
+//	@Qualifier("get")
+//	private Datastore dfds;
 //
 ////	@Test
 //	public void sendMsgTest() {
@@ -103,7 +115,7 @@
 //
 //	}
 //	
-//	@Test
+////	@Test
 //	public void sdkTest() {
 //		
 //		JSONObject uinfos = SDKService.getUinfos("b170a070802741f667201b54880c925f");
@@ -113,14 +125,7 @@
 //
 //	}
 //	
-//	  public static void main(String[] args) throws IOException {
-//
-////	        System.out.println(getPicCode());
-////	        sendStations();
-////		  sendPhoneCode();
-////		  String urlPost = HttpUtil.URLPost("https://app.crv.com.cn/app_timelimit/v1/dc-timelimit/presale/presaleLog/addTimeLimit", null);
-////		  System.out.println("返回"+urlPost);
-//	  }
+//	
 //
 //	private static void sendPhoneCode() {
 //		for (int i = 0; i < 10; i++) {
@@ -228,10 +233,38 @@
 //	}
 //
 //	
-//	@Test
+////	@Test
 //	public void aliTest() {
-//		String code = AliPayUtil.getAuthInfoStr();
-//		System.out.println(code);
+////		String code = AliPayUtil.getAuthInfoStr();
+////		System.out.println(code);
+//		//PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
+//		String oderId = AliPayUtil.commonQueryRequest("281579254219583", "20200117110075000006820073811194", "PERSONAL_PAY");
+//		System.out.println("查询结果："+oderId);
 //	}
+//	@Test
+//	public void redisTest() {
+////		KSessionUtil.deleteUserByUserId("user*");
+//		DBCollection userCollection = dfds.getCollection(User.class);
+//		if (userCollection != null && userCollection.count() > 0) {
+//
+//			Query<User> q = dfds.createQuery(User.class);
+//			UpdateOperations<User> ops = dfds.createUpdateOperations(User.class);
+//			ops.set("online",0);
+//			UpdateResults update = dfds.update(q, ops);
+//			System.out.println(update.getUpdatedCount());
+//			q.filter("_id >", 10000005).forEach(u->KSessionUtil.deleteUserByUserId(u.getId()));
+//			
+//		}
+//		
+//	}
+//	
+//	  public static void main(String[] args) throws IOException {
+//
+////	        System.out.println(getPicCode());
+////	        sendStations();
+////		  sendPhoneCode();
+////		  String urlPost = HttpUtil.URLPost("https://app.crv.com.cn/app_timelimit/v1/dc-timelimit/presale/presaleLog/addTimeLimit", null);
+////		  System.out.println("返回"+urlPost);
+//	  }
 //
 //}

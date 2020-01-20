@@ -258,4 +258,8 @@ public final class KSessionUtil {
 		redisCRUD.del(key);
 	}
 	
+	
+	public static void deleteUserByUserId(String dbtable) {
+		redisCRUD.del(dbtable);
+	}
 }

@@ -221,7 +221,8 @@ public class UserServiceImpl implements UserService {
 		else {
 			user = repository.findOne("mobile", bean.getMobile());
 			if(null == user) {
-				user = q.field("account").containsIgnoreCase(bean.getAccount()).get();
+				if(!StringUtil.isEmpty(bean.getAccount()))
+					user = q.field("account").containsIgnoreCase(bean.getAccount()).get();
 //				user=repository.findOne("account", bean.getAccount());
 			}
 		}

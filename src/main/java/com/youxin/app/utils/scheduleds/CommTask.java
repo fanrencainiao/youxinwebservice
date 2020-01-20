@@ -285,6 +285,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 	private void autoRefreshRedPackect(){
 		//q.put("status", new BasicDBObject(MongoOperator.NE,STATUS_RECEDE).append(MongoOperator.NE,STATUS_END));
 		long currentTime=DateUtil.currentTimeSeconds();
+		long sendTime=DateUtil.currentTimeSeconds();
 		DBObject obj=null;
 		Integer userId=0;
 		Integer toUserId=0;
@@ -318,17 +319,18 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			 payType = (Integer)dbObject.get("payType");
 			 payNo=(String)dbObject.get("payNo");
 			 aliPayNo=(String)dbObject.get("aliPayNo");
+			 sendTime=(Long)dbObject.get("sendTime");
 			 if(payType!=null&&payType==1) 
-				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,1,payNo,aliPayNo);
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,1,payNo,aliPayNo,DateUtil.strToDateTime(sendTime));
 			 else
-				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,0,"","");
+				 recedeMoney(userId,toUserId,roomJid,money,redPackectId,0,"","",DateUtil.strToDateTime(sendTime));
 		}
 			
 		System.out.println("红包超时未领取的数量 ======> "+objs.size());
 		
 	}
 	
-	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id,int payType,String payNo,String aliPayNo){
+	private void recedeMoney(Integer userId,Integer toUserId,String roomJid,Double money,ObjectId id,int payType,String payNo,String aliPayNo,String sendTime){
 		
 		if(0<money){
 			DecimalFormat df = new DecimalFormat("#.00");
@@ -341,12 +343,13 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		record.setTradeNo(tradeNo);
 		record.setMoney(money);
 		record.setUserId(userId);
-		record.setType(KConstants.ConsumeType.REFUND_REDPACKET);
-		record.setPayType(KConstants.PayType.BALANCEAY);
 		record.setTime(DateUtil.currentTimeSeconds());
-		record.setStatus(KConstants.OrderStatus.END);
-		record.setDesc("红包退款");
+		
 		if(payType==1) {
+			record.setType(KConstants.ConsumeType.ALI_BACK_COUPON);
+			record.setPayType(KConstants.PayType.ALIPAY);
+			record.setStatus(KConstants.OrderStatus.CREATE);
+			record.setDesc("支付宝红包退款");
 			String backTransUni = AliPayUtil.backTransUni("支付宝红包超时退款",aliPayNo, money+"", payNo);
 			log.debug("支付宝红包超时退款信息"+backTransUni);
 //			JSONObject btu = JSON.parseObject(backTransUni);
@@ -355,6 +358,10 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 //				return;
 //			}
 		}else {
+			record.setType(KConstants.ConsumeType.REFUND_REDPACKET);
+			record.setPayType(KConstants.PayType.BALANCEAY);
+			record.setStatus(KConstants.OrderStatus.END);
+			record.setDesc("红包退款");
 			recordManager.saveConsumeRecord(record);
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 		}
@@ -363,6 +370,7 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 	
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setType(100);// 自定义
+//		messageBean.setType(0);// 文字
 		messageBean.setOpe(0);// 个人消息
 		if (toUser!=null) {
 			messageBean.setFrom(Md5Util.md5HexToAccid(toUserId+""));
@@ -373,9 +381,8 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 		ID ids=new ID();
 		ids.setId(id.toString());
 		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, ids)));
-//		messageBean.setBody("{\"type\":"+KConstants.MsgType.BACKREDPACKET+",\"data\":"+id.toString()+"}");
-		
-		
+//		String notice="退款通知。退款方式：发送红包时使用的支付宝账户。红包发送时间："+sendTime+"。退款金额："+money+"元。退款原因：红包超过24小时未被领取。备注：你可以打开支付宝APP，在账单中搜索\"红包\"，查看红包相关记录。";
+//		messageBean.setBody("{\"msg\":\""+notice+"\"}");
 		try {
 			JSONObject json=SDKService.sendMsg(messageBean);
 			if(json.getInteger("code")!=200) 

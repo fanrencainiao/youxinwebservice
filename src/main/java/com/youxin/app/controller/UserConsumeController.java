@@ -24,6 +24,7 @@ import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
+import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.utils.wxpay.utils.WXPayConfig;
@@ -140,6 +141,36 @@ public class UserConsumeController extends AbstractController {
 
 		}
 		return Result.errorMsg("没有选择支付类型");
+	}
+	@ApiOperation(value = "退还支付宝发送的金额", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "aliNo", value = "支付宝订单号", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "outNo", value = "平台订单号", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "moneyStr", value = "退款金额", required = true, paramType = "query"),
+			})
+	@PostMapping(value = "/backAliRedPacket")
+	public Object backAliRedPacket(@RequestParam String aliNo, @RequestParam String outNo,
+			@RequestParam(defaultValue = "PERSONAL_PAY") String moneyStr ) {
+		
+		String orderId = AliPayUtil.backTransUni("友讯红包退款", aliNo, moneyStr, outNo);
+		if(StringUtil.isEmpty(orderId))
+			return Result.error();
+		return Result.success();
+	}
+	@ApiOperation(value = "查询支付宝红包实际付款打款状态", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "aliNo", value = "支付宝订单号", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "outNo", value = "平台订单号", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "type", value = "查询类型  PERSONAL_PAY，C2C现金红包-发红包 PERSONAL_COLLECTION，C2C现金红包-领红包", defaultValue="PERSONAL_PAY", required = true, paramType = "query"),
+			})
+	@PostMapping(value = "/queryAliNoStatus")
+	public Object queryAliNoStatus(@RequestParam String aliNo, @RequestParam String outNo,
+			@RequestParam(defaultValue = "PERSONAL_PAY") String type ) {
+		
+		String orderId = AliPayUtil.commonQueryRequest(outNo, aliNo, type);
+		if(StringUtil.isEmpty(orderId))
+			return Result.error();
+		return Result.success();
 	}
 
 	@ApiOperation(value = "用户充值记录", response = Result.class)

@@ -1,11 +1,15 @@
 package com.youxin.app.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import javax.sound.midi.Receiver;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -150,6 +154,11 @@ public class RedPacketManagerImpl{
 		User user =userManager.getUser(userId);
 		if(StringUtil.isEmpty(user.getAliUserId()))
 			throw new ServiceException(-1, "请先绑定支付宝");
+//		Map<String, Object> receiveBill = receiveBill(userId, packet.getUserId());
+		//24小时内超过 总共接收100次，或者接收同一个用户10次
+//		if(Integer.valueOf(receiveBill.get("num").toString())>=100||Integer.valueOf(receiveBill.get("numBysameId").toString())>=10)
+//			throw new ServiceException("一天只能接收100个红包，或者接收同一个人10次红包");
+		
 		WalletFour walletFour = getWalletFour(packet.getUserId(), packet.getRoomJid());
 		UserWallet userWallet = getUserWallet(userId);
 		LastWallet lastWallet = getLastWallet(packet.getRoomJid());
@@ -301,16 +310,16 @@ public class RedPacketManagerImpl{
 		receive.setSendName(userManager.getUser(packet.getUserId()).getName());
 		ObjectId id = (ObjectId) redReceiveRepository.save(receive).getId();
 		receive.setId(id);
+		String tradeNo = AliPayUtil.getOutTradeNo();
 		if(packet.getPayType()!=1) {
 			// 修改金额
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
 		}else {
-			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"", packet.getPayNo(),packet.getAliPayNo(),user.getAliUserId());
-			log.debug(transUni);
-//			JSONObject tu = JSON.parseObject(transUni);
-//			
-//			if(!"SUCCESS".equalsIgnoreCase(tu.getString("status")))
-//				return null; //支付宝打款失败
+			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"",tradeNo,packet.getAliPayNo(),user.getAliUserId());
+			log.debug("支付宝打款："+transUni);
+			
+			if(transUni==null||!"SUCCESS".equals(transUni))
+				throw new ServiceException("领取失败");
 		}
 		redPacketRepository.update(q, ops);
 		final Double num = money;
@@ -342,7 +351,7 @@ public class RedPacketManagerImpl{
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String tradeNo = AliPayUtil.getOutTradeNo();
+					
 					// 创建领取记录
 					ConsumeRecord record = new ConsumeRecord();
 					record.setUserId(userId);
@@ -367,8 +376,57 @@ public class RedPacketManagerImpl{
 	
 		return packet;
 	}
+	 private static synchronized Double getRandomMoney(int num,Double moeny) {
+		  Double max=200d;//最大金额
+		  Double min=0.01d;//最小金额
+		  DecimalFormat df = new DecimalFormat("#.00");
+		  df.setRoundingMode(RoundingMode.HALF_EVEN);
+		  Double resultMoney=0.0d;
+		  Random r = new Random();
+		  long currentTimeMilliSeconds = DateUtil.currentTimeMilliSeconds();
+		  if (num == 1) {
+		   System.out.println(moeny);
+		   resultMoney = moeny;
+		  } else {
+		   if (Double.valueOf(df.format(moeny / num)) == max) {
+		    System.out.println(max);
+		    resultMoney = max;
+		   } else if (Double.valueOf(df.format(moeny / num)) == min) {
+		    System.out.println(min);
+		    resultMoney = min;
+		   } else if (Double.valueOf(df.format(moeny / num)) > max || Double.valueOf(df.format(moeny / num)) < min) {
+		    System.out.println("无法分配");
+		   } else {
 
-	private synchronized Double getRandomMoney(int remainSize, Double remainMoney) {
+		    double nd = r.nextDouble();
+		    Double rmoney = 0.0d;
+
+		    Double lesMoney = Double.valueOf(df.format(moeny - (num - 1) * max));
+		    if (lesMoney > 0) {
+		     rmoney = (max - lesMoney) * nd + lesMoney;
+		     System.out.println("1:" + rmoney);
+		    } else {
+		     // 计算此次最大分配金额，保证此次之后剩余金额与数量足够最小分配
+		     if ((moeny - (num - 1) * min) < max) {
+		      rmoney = (moeny - (num - 1) * min) * nd;
+		      System.out.println("2:" + rmoney);
+		     } else {
+		      rmoney = (max - (num - 1) * min) * nd;
+		      System.out.println("3:" + rmoney);
+		     }
+		    }
+		    rmoney = Double.valueOf(df.format(rmoney));
+		    if (rmoney == 0.0)
+		     rmoney = 0.01;
+		    System.out.println("结果：" + rmoney);
+		    resultMoney = rmoney;
+		   }
+		  }
+		  System.out.println("抢红包耗时："+(DateUtil.currentTimeMilliSeconds() - currentTimeMilliSeconds));
+		  return resultMoney;
+		 }
+
+	/*private static synchronized Double getRandomMoney(int remainSize, Double remainMoney) {
 		// remainSize 剩余的红包数量
 		// remainMoney 剩余的钱
 		Double money = 0.0;
@@ -380,7 +438,9 @@ public class RedPacketManagerImpl{
 		}
 		Random r = new Random();
 		double min = 0.01; //
-		double max = remainMoney / remainSize * 2;
+//		double max = remainMoney / remainSize * 2;
+		//支付宝红包，单个发送不能超过200，单个领取不超过400,
+		double max = remainMoney / remainSize*2;
 		money = r.nextDouble() * max;
 		money = money <= min ? 0.01 : money;
 		money = Math.floor(money * 100) / 100;
@@ -389,7 +449,7 @@ public class RedPacketManagerImpl{
 		remainMoney -= money;
 		DecimalFormat df = new DecimalFormat("#.00");
 		return Double.valueOf(df.format(money));
-	}
+	}*/
 
 	public void replyRedPacket(String id, String reply) {
 		Integer userId = ReqUtil.getUserId();
@@ -467,7 +527,43 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex, pageSize)));
 		return result;
 	}
-	
+	// 一天之内发送的红包金额
+	public Double sendBill(Integer userId) {
+			Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId)
+					.field("status").equal(1);
+			long nowTime = DateUtil.currentTimeSeconds();
+			q.field("sendTime").lessThanOrEq(nowTime);
+			q.field("sendTime").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
+			
+			List<RedPacket> asList = q.asList();
+			Double totalMoney=0.0;
+			for (int i = 0; i < asList.size(); i++) {
+				totalMoney=totalMoney+asList.get(0).getMoney();
+			}
+			DecimalFormat df = new DecimalFormat("#.00");
+			
+			return Double.valueOf(df.format(totalMoney));
+		}
+		// 一天之内接收的红包金额,个数
+		public Map<String, Object> receiveBill(Integer userId,Integer sendId) {
+				Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
+				long nowTime = DateUtil.currentTimeSeconds();
+				q.field("time").lessThanOrEq(nowTime);
+				q.field("time").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
+				
+				List<RedReceive> asList = q.asList();
+				Double totalMoney=0.0;
+				for (int i = 0; i < asList.size(); i++) {
+					totalMoney=totalMoney+asList.get(0).getMoney();
+				}
+				DecimalFormat df = new DecimalFormat("#.00");
+				Map<String, Object> result=new HashMap<String, Object>();
+				result.put("totalMoney", Double.valueOf(df.format(totalMoney)));
+				result.put("num", q.count());
+				q.field("sendId").equal(sendId);
+				result.put("numBysameId", q.count());
+				return result;
+			}
 	
 	
 	/**
@@ -559,6 +655,6 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			return null;
 		}
 	}
-
+	
 	
 }

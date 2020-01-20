@@ -317,7 +317,7 @@ public class AliPayUtil {
 		AlipayFundTransUniTransferRequest request = new AlipayFundTransUniTransferRequest();
 		// SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
 		AlipayFundTransUniTransferModel model = new AlipayFundTransUniTransferModel();
-		model.setOutBizNo(orderNo);
+		model.setOutBizNo(getOutTradeNo());
 		model.setTransAmount(price);
 		model.setProductCode("STD_RED_PACKET");
 		model.setBizScene("PERSONAL_COLLECTION");
@@ -338,11 +338,10 @@ public class AliPayUtil {
 			System.out.println("orderNo==>"+orderNo+"aliNo==>"+aliNo+"uid==>"+uid);
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransUniTransferResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("返回状态  " + response.isSuccess());
-			System.out.println("返回时间  " + response.getTransDate());
-			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
+		
+			System.out.println("红包打款: " + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
 
-			return response.getBody();
+			return response.getStatus();
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
 			return null;
@@ -365,13 +364,13 @@ public class AliPayUtil {
 		model.setRemark(remark);
 //		扩展参数		model.setExtraParam();
 		request.setBizModel(model);
-		request.setNotifyUrl(callBackUrl());
+//		request.setNotifyUrl(callBackUrl());
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransRefundResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
+			System.out.println("红包退回:" + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
 
-			return response.getBody();
+			return response.getOrderId();
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
 			return null;
@@ -400,19 +399,13 @@ public class AliPayUtil {
 		request.setBizModel(model);
 //		request.setNotifyUrl(callBackUrl());
 */		
-		request.setBizContent("{\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\"PERSONAL_PAY\",\"out_biz_no\":\""+orderNo+"\",\"order_id\":\""+aliNo+"\"}");
+		//PERSONAL_PAY，C2C现金红包-发红包 PERSONAL_COLLECTION，C2C现金红包-领红包
+		request.setBizContent("{\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\""+bizScene+"\",\"out_biz_no\":\""+orderNo+"\",\"order_id\":\""+aliNo+"\"}");
 		try {
-			System.out.println("orderNo  " +orderNo +"aliNo"+aliNo);
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransCommonQueryResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("返回order  " + response.isSuccess()+"-"+response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
-
+			System.out.println("红包查询  " + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
 			if (response.isSuccess()) {
-				System.out.println("orderid "+JSON.toJSONString(response));
-				System.out.println("response.getTransferBillInfo() "+response.getTransferBillInfo());
-				System.out.println("orderid "+response.getOrderId());
-				System.out.println("orderid "+response.getOutBizNo());
-				System.out.println("orderid "+response.getStatus());
 	            return response.getOrderId();
 	        }else
 	        	return null;
