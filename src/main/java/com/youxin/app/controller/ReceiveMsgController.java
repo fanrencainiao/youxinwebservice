@@ -2,6 +2,8 @@ package com.youxin.app.controller;
 
 
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,8 +15,8 @@ import com.youxin.app.utils.Result;
 public class ReceiveMsgController extends AbstractController{
 	
 	@PostMapping("receive")
-	public Object register(JSONObject obj){
-		System.out.println(obj); 
+	public Object register(Map<String, Object> obj){
+		System.out.println("消息抄送"+obj); 
 		return Result.success();
 	}
 	

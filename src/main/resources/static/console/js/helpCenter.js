@@ -23,7 +23,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
  	var lbd=layedit.build('content', {
          height: 180,
          uploadImage: {
-             url: "http://localhost:9898/console/uploadSdkImage"
+             url: "http://youxinruanjian.cn/console/uploadSdkImage"
          }
      }); //建立编辑器
 
@@ -51,7 +51,10 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'title', title: '标题',sort:'true', width:100}
           ,{field: 'content', title: '内容',sort:'true', width:100}
           ,{field: 'state',title:'状态',width:100,templet: function(d){
-              return d.state==0?"未反馈过":"已反馈";
+        	  if(d.state==1)
+        		  return "已反馈";
+        	  else
+        		  return "未反馈";
           }}
           ,{field: 'noUserIds',title:'未解决人',width:100,templet: function(d){
         	  if(d.noUserIds){
@@ -59,7 +62,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         	  }
               return "";
           }}
-          ,{field: 'overUserIds',title:'未解决人',width:100,templet: function(d){
+          ,{field: 'overUserIds',title:'已解决人',width:100,templet: function(d){
         	  if(d.overUserIds){
         		  return d.overUserIds.join(",");
         	  }

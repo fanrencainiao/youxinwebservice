@@ -131,6 +131,9 @@ public class RedPacketController extends AbstractController{
 	public Result sendRedPacketV1(@RequestBody RedPacket packet,
 			@RequestParam(defaultValue="0") long time,@RequestParam(defaultValue="") String moneyStr,
 			@RequestParam(defaultValue="") String secret) {
+		try {
+			
+		
 		if(packet.getPayType()!=1)
 			return Result.error("暂时只支持支付宝红包");
 		String token = getAccess_token();
@@ -153,7 +156,7 @@ public class RedPacketController extends AbstractController{
 			BigDecimal money = NumberUtil.getBigDecimalForDouble(packet.getMoney());
 			BigDecimal count = NumberUtil.getBigDecimalForDouble(packet.getCount());
 			//单个红包金额
-			double divideMoney = money.divide(count).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+			double divideMoney = money.divide(count,2,BigDecimal.ROUND_HALF_UP).doubleValue();
 			log.debug("money:"+money+"count:"+count+"=divideMoney:"+divideMoney);
 			if(divideMoney>200)
 				return Result.error("单个红包不能超过200元");
@@ -219,6 +222,11 @@ public class RedPacketController extends AbstractController{
 //				return Result.error("支付宝红包订单支付失败");
 		}
 		return Result.success(data);
+		} catch (Exception e) {
+			log.debug("发红包异常："+e.getMessage());
+			AliPayUtil.backTransUni("支付宝红包异常退回", packet.getAliPayNo(), packet.getMoney()+"", packet.getPayNo());
+			return Result.error("系统异常,金额已原路退回");
+		}
 	}
 	
 	
