@@ -684,6 +684,10 @@ public class UserServiceImpl implements UserService {
 		if(!StringUtil.isEmpty(bean.getAliUserId())) {
 			ops.set("aliUserId", bean.getAliUserId());
 		}
+		if(!StringUtil.isEmpty(bean.getAliAppAuthToken())) {
+			ops.set("aliAppAuthToken", bean.getAliAppAuthToken());
+		}
+		
 		if(bean.getIsDelUser()==1||bean.getIsDelUser()==-1) {
 			ops.set("isDelUser", bean.getIsDelUser());
 		}

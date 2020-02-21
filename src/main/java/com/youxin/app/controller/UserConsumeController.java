@@ -112,6 +112,9 @@ public class UserConsumeController extends AbstractController {
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
+		if(Double.valueOf(price) < 0.01 || 20000 < Double.valueOf(price)){
+			return Result.error("红包金额在0.01~20000之间哦!");
+		}
 		// 充值接口授权
 		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
 			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);

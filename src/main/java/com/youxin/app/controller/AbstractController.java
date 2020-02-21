@@ -22,7 +22,7 @@ import com.youxin.app.utils.KSessionUtil;
 
 public abstract class AbstractController {
 	
-	protected Log log=LogFactory.getLog("api.log");
+	protected static Log log=LogFactory.getLog("api.log");
 
 	
 	public HttpServletRequest getRequest() {

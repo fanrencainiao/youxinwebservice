@@ -241,7 +241,7 @@
 //		String oderId = AliPayUtil.commonQueryRequest("281579254219583", "20200117110075000006820073811194", "PERSONAL_PAY");
 //		System.out.println("查询结果："+oderId);
 //	}
-//	@Test
+////	@Test
 //	public void redisTest() {
 ////		KSessionUtil.deleteUserByUserId("user*");
 //		DBCollection userCollection = dfds.getCollection(User.class);

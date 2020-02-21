@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -132,8 +133,10 @@ public class RedPacketController extends AbstractController{
 			@RequestParam(defaultValue="0") long time,@RequestParam(defaultValue="") String moneyStr,
 			@RequestParam(defaultValue="") String secret) {
 		try {
+			RedPacket rp = dsdt.createQuery(RedPacket.class).field("aliPayNo").equal(packet.getAliPayNo()).get();
+		if(rp!=null) 
+			return Result.error("非法操作");
 			
-		
 		if(packet.getPayType()!=1)
 			return Result.error("暂时只支持支付宝红包");
 		String token = getAccess_token();
@@ -217,9 +220,12 @@ public class RedPacketController extends AbstractController{
 			//查询红包订单支付情况
 			String orderid = AliPayUtil.commonQueryRequest(packet.getPayNo(),packet.getAliPayNo(), "PERSONAL_PAY");
 			System.out.println("发送红包状态后实时查询订单号："+orderid);
-			data = redServer.saveRedPacket(packet);
-//			if(orderid==null||orderid=="") 
-//				return Result.error("支付宝红包订单支付失败");
+			if(StringUtil.isEmpty(orderid)) {
+				log.debug("发红包打款异常：");
+				AliPayUtil.backTransUni("支付宝红包异常退回", packet.getAliPayNo(), packet.getMoney()+"", packet.getPayNo());
+				return Result.error("系统打款异常,金额已原路退回");
+			}
+			data = redServer.saveRedPacket(packet);	
 		}
 		return Result.success(data);
 		} catch (Exception e) {
@@ -278,10 +284,23 @@ public class RedPacketController extends AbstractController{
 	@ApiOperation(value = "查询发出的红包",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "pageIndex", defaultValue="0",value = "页码", paramType = "query"),
 		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query"),
-		@ApiImplicitParam(name = "q", value = "参数查询（startTime，endTime）",   defaultValue="",paramType = "query")})
+		@ApiImplicitParam(name = "q", value = "参数查询（startTime，endTime,isOver(false则查询未领完的，为空不限制)，jid(群名称)，isOnlyUser(true或者空查询个人，false不查询个人)）",   defaultValue="",paramType = "query")})
 	@GetMapping("getSendRedPacketList")
 	public Result getSendRedPacketList(@RequestParam(defaultValue="null") Map<String, String> q,@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
 		Object data=redServer.getSendRedPacketList(ReqUtil.getUserId(),pageIndex,pageSize,q);
+		return Result.success(data);
+	}
+	//查询发出的红包
+	@ApiOperation(value = "查询群组发出的某时间范围未领取的红包",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "pageIndex", defaultValue="0",value = "页码", paramType = "query"),
+		@ApiImplicitParam(name = "pageSize", value = "长度",   defaultValue="10",paramType = "query"),
+		@ApiImplicitParam(name = "q", value = "参数查询（startTime，endTime,isOver(false未领完，true领完，空不限制)，jid(群名称,必填)）",   defaultValue="",paramType = "query")})
+	@GetMapping("getSendRedPacketListByjid")
+	public Result getSendRedPacketListByjid(@RequestParam(defaultValue="null") Map<String, String> q,@RequestParam(defaultValue="0")int pageIndex,@RequestParam(defaultValue="10")int pageSize) {
+		if(StringUtil.isEmpty(q.get("jid"))) 
+			return Result.error("系统异常");
+		System.out.println("map参数："+q);
+		Object data=redServer.getSendRedPacketList(null,pageIndex,pageSize,q);
 		return Result.success(data);
 	}
 	//查询收到的红包

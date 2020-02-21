@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.HelpCenter;
+import com.youxin.app.entity.MessageReceive;
 import com.youxin.app.entity.MongdbGroup;
 import com.youxin.app.entity.Opinion;
 import com.youxin.app.entity.RedPacket;
@@ -56,6 +58,7 @@ import com.youxin.app.filter.LoginSign;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
 import com.youxin.app.service.ConfigService;
+import com.youxin.app.service.MessageReceiveService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
@@ -73,6 +76,7 @@ import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
 import com.youxin.app.yx.request.team.MuteTlistAll;
@@ -106,6 +110,8 @@ public class ConsoleController extends AbstractController{
 	ConfigService cs;
 	@Autowired
 	TransferManagerImpl tfm;
+	@Autowired
+	MessageReceiveService mrs;
 	
 	
 	@PostMapping(value = "login")
@@ -707,7 +713,10 @@ public class ConsoleController extends AbstractController{
 			hc.setCreateTime(DateUtil.currentTimeSeconds());
 			hc.setState(0);
 		}else {
-			hc.setId(parse(hcid));
+			Query<HelpCenter> q = dfds.find(HelpCenter.class);
+			q.field("_id").equal(parse(hcid));
+			HelpCenter helpCenter = q.get();
+			hc.setCreateTime(helpCenter.getCreateTime());
 			hc.setUpdateTime(DateUtil.currentTimeSeconds());
 		}
 		Key<HelpCenter> save = dfds.save(hc);
@@ -1009,5 +1018,49 @@ public class ConsoleController extends AbstractController{
 		}
 
 	}
+	
+	@RequestMapping("/getMessageReceiveList")
+	public Object getMessageReceiveList(@RequestParam(defaultValue = "") String fromAccount,@RequestParam(defaultValue = "") String to,
+			@RequestParam(defaultValue = "") String eventType,
+			@RequestParam(defaultValue = "") String convType, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int limit,@RequestParam(defaultValue = "")String startTime,@RequestParam(defaultValue = "")String endTime) {
+		try {
+			PageResult<MessageReceive> list = mrs.getList(fromAccount,to,eventType, convType, limit, page-1, DateUtil.toTimestamp(startTime), DateUtil.toTimestamp(endTime));
+			return Result.success(list);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+	@RequestMapping("/sendBatchMsg")
+	public Object sendBatchMsg(@RequestParam(defaultValue = "") String text) {
+		try {
+			Query<User> q = ur.createQuery();
+			q.field("disableUser").notEqual(-1).field("isDelUser").notEqual(1);
+			Double count = (double) q.count();
+			int ceil = (int) Math.ceil(count/500.00);
+			//分页查询用户进行消息发送
+			for (int i = 0; i < ceil; i++) {
+				List<User> asList = q.asList(MongoUtil.pageFindOption(i, 500));
+				List<String> accids=asList.stream().map(User::getAccid).collect(Collectors.toList());
+				Msg msg=new Msg();
+				msg.setBody("{\"msg\":\""+text+"\"}");
+				msg.setFrom(Md5Util.md5HexToAccid("10000"));
+				msg.setTo(JSON.toJSONString(accids));
+				msg.setType(0);//文本
+				JSONObject json = SDKService.sendBatchMsg(msg);
+				if(json.getIntValue("code")==200) {
+					log.debug("群发消息成功，第"+(i+1)+"页");
+				}
+			}
+			log.debug("总计"+count+"人");
+			return Result.success(count);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+
+	
 
 }

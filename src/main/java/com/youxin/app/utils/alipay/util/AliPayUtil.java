@@ -33,6 +33,7 @@ import com.alipay.api.request.AlipayFundTransAppPayRequest;
 import com.alipay.api.request.AlipayFundTransCommonQueryRequest;
 import com.alipay.api.request.AlipayFundTransRefundRequest;
 import com.alipay.api.request.AlipayFundTransUniTransferRequest;
+import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
@@ -43,6 +44,7 @@ import com.alipay.api.response.AlipayFundTransAppPayResponse;
 import com.alipay.api.response.AlipayFundTransCommonQueryResponse;
 import com.alipay.api.response.AlipayFundTransRefundResponse;
 import com.alipay.api.response.AlipayFundTransUniTransferResponse;
+import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
@@ -174,7 +176,7 @@ public class AliPayUtil {
 		strInfo.append("&sign="+sign);
 		return strInfo.toString();
 	}
-
+	
 
 	/**
 	 * 获取或者刷新支付宝token
@@ -207,24 +209,21 @@ public class AliPayUtil {
 	}
 
 	/**
-	 * 获取支付宝用户信息
+	 * 获取支付宝用户授权信息
 	 * 
-	 * @param token
+	 * @param appAuthToken
 	 * @return
 	 */
-	public static String getAliUserInfo(String token) {
+	public static String getAliUserAuthInfo(String appAuthToken) {
 
-		// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
-		AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest();
-
+		AlipayOpenAuthTokenAppQueryRequest request = new AlipayOpenAuthTokenAppQueryRequest(); 
+		request.setBizContent("{\"app_auth_token\":\""+appAuthToken+"\"}"); 
 		try {
-			// 这里和普通的接口调用不同，使用的是sdkExecute
-			AlipayUserInfoShareResponse response = getAliPalyClientByCert().execute(request);
-
-			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
-
-			return response.getBody();
+			AlipayOpenAuthTokenAppQueryResponse response = getAliPalyClientByCert().execute(request);
+			System.out.println(response.getBody());
+			return response.getUserId();
 		} catch (AlipayApiException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}

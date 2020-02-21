@@ -1,24 +1,95 @@
 package com.youxin.app.controller;
-
-
-
-import java.util.Map;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.youxin.app.utils.Result;
-@RestController
-@RequestMapping("/message/")
-public class ReceiveMsgController extends AbstractController{
-	
-	@PostMapping("receive")
-	public Object register(Map<String, Object> obj){
-		System.out.println("消息抄送"+obj); 
-		return Result.success();
-	}
-	
-	
+import com.youxin.app.entity.MessageReceive;
+import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.utils.CheckSumBuilder;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mongodb.morphia.Datastore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+@Controller
+@RequestMapping(value = {"/message"})
+public class ReceiveMsgController {
+    public static final Log logger = LogFactory
+            .getLog(ReceiveMsgController.class);
+    //表示CONVERSATION消息，即会话类型的消息（目前包括P2P会话内消息与自定义系统通知，群聊会话内消息与自定义系统通知，以及云信内置系统通知）。
+    public static final String CONVERSATION="1";
+    
+    @Value("${youxin.yunxinappaecret}")
+    private String appSecret;
+    @Autowired
+	@Qualifier("get")
+	private Datastore dfds;
+    @RequestMapping(value = {"/receive"}, method = {RequestMethod.POST})
+    @ResponseBody
+    public JSONObject mockClient(HttpServletRequest request)
+            throws Exception {
+    	 logger.warn("appSecret="+appSecret);
+        JSONObject result = new JSONObject();
+        try {
+            // 获取请求体
+            byte[] body = readBody(request);
+            if (body == null) {
+                logger.warn("request wrong, empty body!");
+                result.put("code", 414);
+                return result;
+            }
+            // 获取部分request header，并打印
+            String ContentType = request.getContentType();
+            String AppKey = request.getHeader("AppKey");
+            String CurTime = request.getHeader("CurTime");
+            String MD5 = request.getHeader("MD5");
+            String CheckSum = request.getHeader("CheckSum");
+            logger.info("request headers: ContentType = "+ContentType+", AppKey = "+AppKey+", CurTime = "+CurTime+", " +
+                    "MD5 = "+MD5+", CheckSum = "+CheckSum+"");
+            // 将请求体转成String格式，并打印
+            String requestBody = new String(body, "utf-8");
+            logger.info("request body = "+requestBody+"");
+            // 获取计算过的md5及checkSum
+            String verifyMD5 = CheckSumBuilder.getMD5(requestBody);
+            String verifyChecksum = CheckSumBuilder.getCheckSum(appSecret, verifyMD5, CurTime);
+            logger.info("verifyMD5 = "+verifyMD5+",MD5 = "+MD5+", verifyChecksum = "+verifyChecksum+", Checksum = "+CheckSum+"" );
+            // TODO: 比较md5、checkSum是否一致，以及后续业务处理
+            if (verifyMD5.equals(MD5)&&CheckSum.equals(verifyChecksum)) {
+            	logger.info("消息验证通过");
+            	MessageReceive mr=JSON.parseObject(requestBody, MessageReceive.class);
+            	if (mr.getMsgidServer()==null||mr.getMsgidServer()==""||mr.getMsgidServer().equals("0")) {
+					
+				}else {
+					if (mr.getEventType().equals("1")) 
+						dfds.save(mr);
+				}
+            	logger.info(mr.toString());
+			}else 
+				logger.info("消息验证失败");
+
+            result.put("code", 200);
+            return result;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+            result.put("code", 414);
+            return result;
+        }
+    }
+    private byte[] readBody(HttpServletRequest request) throws IOException {
+        if (request.getContentLength() > 0) {
+            byte[] body = new byte[request.getContentLength()];
+            IOUtils.readFully(request.getInputStream(), body);
+            return body;
+        } else
+            return null;
+    }
 }

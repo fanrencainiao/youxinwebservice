@@ -30,6 +30,13 @@
 			"spread": false
 		},
 		{
+			"title": "消息记录",
+			"icon":"&#xe63a;",
+			"href": "/templates/console/messageRecord.html",
+			"spread": false
+		},
+		
+		{
 			"title": "红包管理",
 			"icon": "&#xe65e;",
 			"href": "/templates/console/redEnvelope.html",
@@ -70,6 +77,12 @@
 				}
 			]
 
+		},{
+			"title": "群发",
+			"icon": "&#xe6b2;",
+			"href": "/templates/console/sendBathMessage.html",
+			"spread": false,
+			"complaint": true
 		},{
 			"title": "举报管理",
 			"icon": "&#xe6b2;",

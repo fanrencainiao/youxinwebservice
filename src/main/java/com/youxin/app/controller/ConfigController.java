@@ -40,6 +40,7 @@ public class ConfigController extends AbstractController{
 		String area=IpSearch.getArea(ip);
 		log.info("==Client-IP===>  {"+ip+"}  ===Address==>  {"+area+"} ");
 		Config config = cs.getConfig();
+		config.setIosAppUrl(config.getIosDownUrl());
 		config.setIpAddress(ip);
 		config.setArea(area);
 		return Result.success(config);

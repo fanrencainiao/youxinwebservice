@@ -2,8 +2,11 @@ package com.youxin.app.controller;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -33,6 +36,9 @@ import com.youxin.app.entity.SdkLoginInfo;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.DeviceInfo;
 import com.youxin.app.entity.User.LoginLog;
+import com.youxin.app.entity.User.MyFreids;
+import com.youxin.app.entity.User.MyItemCode;
+import com.youxin.app.entity.User.MyTeam;
 import com.youxin.app.entity.User.UserSettings;
 import com.youxin.app.entity.UserVo;
 import com.youxin.app.entity.exam.BaseExample;
@@ -215,7 +221,7 @@ public class UserController extends AbstractController{
 		return Result.success(userService.getWxOpenId(code));
 	}
 	/**
-	 * 获取支付宝accesstoken信息
+	 * 组装支付宝授权信息
 	 * @return
 	 */
 	@ApiOperation(value = "组装支付宝授权信息",response=Result.class)
@@ -223,6 +229,7 @@ public class UserController extends AbstractController{
 	public Object getAliAuthInfo() {
 		return Result.success(AliPayUtil.getAuthInfoStr());
 	}
+	
 	/**
 	 * 获取支付宝accesstoken信息
 	 * @return
@@ -234,14 +241,14 @@ public class UserController extends AbstractController{
 		return Result.success(AliPayUtil.getAccesstoken(code, null));
 	}
 	/**
-	 * 获取支付宝用户信息
+	 * 获取支付宝用户授权信息
 	 * @return
 	 */
-	@ApiOperation(value = "获取支付宝用户信息",response=Result.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "accesstoken", value = "accesstoken", required = true, paramType = "query")})
-	@GetMapping("getAliUserInfo")
-	public Object getAliUserInfo(@RequestParam String accesstoken) {
-		return Result.success(AliPayUtil.getAliUserInfo(accesstoken));
+	@ApiOperation(value = "获取支付宝用户授权信息",response=Result.class,notes="若返回支付宝用户id则授权成功，否则失败")
+	@GetMapping("getAliUserAuthInfo")
+	public Object getAliUserInfo() {
+		User reluser = userService.getUserFromDB(ReqUtil.getUserId());
+		return Result.success(AliPayUtil.getAliUserAuthInfo(reluser.getAliAppAuthToken()));
 	}
 	
 	
@@ -498,12 +505,27 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "更新支付宝用户id",response=Result.class)
 	@PostMapping("updateAliUserId")
-	public Object updateAliUserId(String aliUserId){
+	public Object updateAliUserId(@RequestParam String aliUserId){
 		if(StringUtils.isBlank(aliUserId)) {
-			return Result.errorMsg("aliUserId不能为空");
+			return Result.errorMsg("更新授权失败");
 		}
 		User user = new User();
 		user.setAliUserId(aliUserId);
+		user.setId(ReqUtil.getUserId());
+		userService.updateUserByEle(user);
+		return Result.success();
+	}
+	@ApiOperation(value = "更新支付宝用户id",response=Result.class)
+	@PostMapping("updateAliUserIdV1")
+	public Object updateAliUserIdV1(@RequestParam String appAuthToken){
+		if(StringUtil.isEmpty(appAuthToken)) 
+			return Result.errorMsg("token不能为空");
+		String aliUserId = AliPayUtil.getAliUserAuthInfo(appAuthToken);
+		if(StringUtil.isEmpty(aliUserId)) 
+			return Result.errorMsg("授权失败");
+		User user = new User();
+		user.setAliUserId(aliUserId);
+		user.setAliAppAuthToken(appAuthToken);
 		user.setId(ReqUtil.getUserId());
 		userService.updateUserByEle(user);
 		return Result.success();
@@ -568,6 +590,43 @@ public class UserController extends AbstractController{
 		List<DBObject> u = userService.queryUser(vo);
 		return Result.success(u);
 	}
+	@ApiOperation(value = "保存或者修改用户好友添加方式",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "addType", value = "添加方式1二维码添加对方，2搜索手机号，3有讯号，4群聊，5名片分享，6附近的人",  paramType = "query"),
+	@ApiImplicitParam(name = "toUserId", value = "好友userid",  paramType = "query")
+	})
+	@PostMapping("addType")
+	public Object addType(@RequestParam int addType,@RequestParam int toUserId){
+		MyFreids mf = dfds.createQuery(MyFreids.class).field("userId").equal(ReqUtil.getUserId()).field("toUserId").equal(toUserId).get();
+		MyFreids tomf = dfds.createQuery(MyFreids.class).field("userId").equal(toUserId).field("toUserId").equal(ReqUtil.getUserId()).get();
+		
+		if(mf==null) 
+			mf=new MyFreids();
+		mf.setAddType(addType);
+		mf.setUserId(ReqUtil.getUserId());
+		mf.setToUserId(toUserId);
+		dfds.save(mf);
+		if(tomf==null) 
+			tomf=new MyFreids();
+		tomf.setAddType(-addType);
+		tomf.setUserId(toUserId);
+		tomf.setToUserId(ReqUtil.getUserId());
+		dfds.save(tomf);
+		return Result.success();
+	}
+	@ApiOperation(value = "获取用户好友信息",response=Result.class)
+	@ApiImplicitParams({ 
+		@ApiImplicitParam(name = "toUserId", value = "好友userid",  paramType = "query")
+	})
+	@GetMapping("getFriedsInfo")
+	public Object getFriedsInfo(@RequestParam Integer toUserId){
+		Map<String, Object> data=new HashMap<String, Object>();
+		MyFreids myFreids = dfds.createQuery(MyFreids.class).field("userId").equal(ReqUtil.getUserId()).field("toUserId").equal(toUserId).get();
+		if(myFreids!=null)
+			data.put("addType", myFreids.getAddType());
+		else
+			data.put("addType", 0);
+		return Result.success(data);
+	}
 	
 	@ApiOperation(value = "修改友讯号",response=Result.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "account", value = "友讯号",  paramType = "query")
@@ -626,6 +685,27 @@ public class UserController extends AbstractController{
 		user.setCodeSign(codeSign);
 		userService.updateUserByEle(user);
 		return Result.success(codeSign);
+	}
+	@ApiOperation(value = "刷新群二维码",response=Result.class)
+	@PostMapping("refreshItemCode")
+	public Object refreshItemCode(@RequestParam Long itemId){
+		String codeSign=StringUtil.randomString(6);
+		MyItemCode mic=new MyItemCode();
+		mic.setTeamId(itemId);
+		mic.setErCode(codeSign);
+		dfds.save(mic);
+		return Result.success(codeSign);
+	}
+	@ApiOperation(value = "获取群信息",response=Result.class)
+	@GetMapping("getItemInfo")
+	public Object getItemInfo(@RequestParam Long itemId){
+		Map<String, Object> data=new HashMap<String, Object>();
+		MyItemCode myItemCode = dfds.createQuery(MyItemCode.class).field("_id").equal(itemId).get();
+		if(myItemCode!=null)
+			data.put("erCode", myItemCode.getErCode());
+		else
+			data.put("erCode", 0);
+		return Result.success(data);
 	}
 
 	@ApiOperation(value = "用户举报",response=Result.class)
@@ -696,6 +776,64 @@ public class UserController extends AbstractController{
 			return Result.error("提交失败");
 		}
 		
+	}
+	
+	
+	@ApiOperation(value = "用户保存的群组",response=Result.class)
+	@PostMapping(value = "/teamList")
+	public Result teamList() {
+		try {
+			Query<MyTeam> q = createMyteamQuery();
+			return Result.success(q.get().getTeams());
+		} catch (Exception e) {
+			return Result.error("无数据");
+		}
+		
+	}
+	@ApiOperation(value = "添加到我的群组",response=Result.class)
+	@PostMapping(value = "/saveTeam")
+	public Object saveTeam(@RequestParam(defaultValue="") Long teamId) {
+		try {
+			Query<MyTeam> q = createMyteamQuery();
+			MyTeam teams = q.get();
+			if(teams==null) {
+				teams=new MyTeam();
+				teams.setUserId(ReqUtil.getUserId());
+				teams.setTeams(new HashSet<>());
+			}
+			Set<Long> teams2 = teams.getTeams();
+			if(teams2==null) {
+				teams2=new HashSet<>();
+			}
+			teams2.add(teamId);
+			teams.setTeams(teams2);
+			dfds.save(teams);
+			return Result.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Result.error("系统繁忙");
+		}
+		
+	}
+	@ApiOperation(value = "从我的群组移除",response=Result.class)
+	@PostMapping(value = "/removeTeam")
+	public Object removeTeam(@RequestParam(defaultValue="") Long teamId) {
+		try {
+			Query<MyTeam> q = createMyteamQuery();
+			MyTeam teams = q.get();
+			teams.getTeams().remove(teamId);
+			dfds.save(teams);
+			return Result.success();
+		} catch (Exception e) {
+			return Result.error("系统繁忙");
+		}
+		
+	}
+
+	private Query<MyTeam> createMyteamQuery() {
+		Query<MyTeam> q = dfds.createQuery(MyTeam.class);
+		q.field("_id").equal(ReqUtil.getUserId());
+		return q;
 	}
 
 }

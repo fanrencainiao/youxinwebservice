@@ -41,14 +41,15 @@ function fillParameter(data){
     $(".sendPhone").val(nullData(data.sendPhone));  
     
     $(".androidVersion").val(nullData(data.androidVersion));
+    $(".androidGoVersion").val(nullData(data.androidGoVersion));
     $(".androidVersionDisable").val(nullData(data.androidVersionDisable));
-    $(".androidAppUrl").val(nullData(data.androidAppUrl));
+    $(".androidDownUrl").val(nullData(data.androidDownUrl));
     $(".androidExplain").val(nullData(data.androidExplain));
 
     $(".iosVersion").val(nullData(data.iosVersion));
     $(".iosVersionDisable").val(nullData(data.iosVersionDisable));
     $(".iosVersionVerify").val(nullData(data.iosVersionVerify)); 
-    $(".iosAppUrl").val(nullData(data.iosAppUrl));
+    $(".iosDownUrl").val(nullData(data.iosDownUrl));
     $(".iosExplain").val(nullData(data.iosExplain));
 
    
@@ -134,13 +135,18 @@ layui.use(['form','jquery',"layer"],function() {
         }else {
             systemConfig.androidVersion = $(".androidVersion").val();
         }
+        if($(".androidGoVersion").val()=="" || $(".androidGoVersion").val() == null){
+            systemConfig.androidGoVersion = 0;
+        }else {
+            systemConfig.androidGoVersion = $(".androidGoVersion").val();
+        }
         if($(".androidVersionDisable").val()=="" || $(".androidVersionDisable").val() == null){
             systemConfig.androidVersionDisable = 0;
         }else {
             systemConfig.androidVersionDisable = $(".androidVersionDisable").val();
         }
         
-        systemConfig.androidAppUrl = $(".androidAppUrl").val();
+        systemConfig.androidDownUrl = $(".androidDownUrl").val();
         systemConfig.androidExplain = $(".androidExplain").val();
 
         if($(".iosVersion").val()=="" || $(".iosVersion").val() == null){
@@ -158,7 +164,7 @@ layui.use(['form','jquery',"layer"],function() {
         }else {
             systemConfig.iosVersionVerify = $(".iosVersionVerify").val();
         }
-        systemConfig.iosAppUrl = $(".iosAppUrl").val();
+        systemConfig.iosDownUrl = $(".iosDownUrl").val();
         systemConfig.iosExplain = $(".iosExplain").val();
 
  

@@ -270,7 +270,7 @@ var Base={
 	},
 
 
-	//  新增用户
+	//  新增
 	add:function(){
 		$("#baseList").hide();
 		$("#addConfig").show();

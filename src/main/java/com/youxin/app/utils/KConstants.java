@@ -50,6 +50,10 @@ public class KConstants {
 
 		
 	}};
+	public interface Key {
+		public static final String RANDCODE = "KSMSService:randcode:%s";
+		public static final String IMGCODE = "KSMSService:imgcode:%s";
+	}
 	/**
 	* @Description: TODO(设备标识)
 	 */

@@ -12,6 +12,7 @@ import com.aliyuncs.exceptions.ClientException;
 import com.youxin.app.entity.Config;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.service.ConfigService;
+import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.applicationBean.SmsConfig;
@@ -122,6 +123,16 @@ public class SMSServiceImpl {
 		} catch (ClientException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean checkImgCode(String telephone, String imgCode) {
+		String key = String.format(KConstants.Key.IMGCODE, telephone);
+		String cached = redisServer.get(key);
+		System.out.println("imgCode"+imgCode);
+		System.out.println("telephone"+telephone);
+		System.out.println("cached"+cached);
+		System.out.println("imgCode.toUpperCase().equals(cached)"+(imgCode.toUpperCase().equals(cached)));
+		return imgCode.toUpperCase().equals(cached);
 	}
  	
 	public static class Result {

@@ -74,6 +74,9 @@ public final class DateUtil {
 	}
 
 	public static long toTimestamp(String strDate) {
+		System.out.println("strDate="+strDate);
+		if(StringUtil.isEmpty(strDate)) 
+			return 0;
 		return toDate(strDate).getTime();
 	}
 

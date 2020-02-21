@@ -58,6 +58,7 @@ public class Config {
 	 * ios下载地址
 	 */
 	private String iosDownUrl;
+	private String iosAppUrl;
 	/**
 	 * android下载地址
 	 */
@@ -79,6 +80,10 @@ public class Config {
 	 * android版本号
 	 */
 	private String androidVersion;
+	/**
+	 * android需要更新的版本号
+	 */
+	private String androidGoVersion;
 	
 	/**
 	 * android禁用版本号 多个版本，隔开
@@ -123,12 +128,14 @@ public class Config {
 		this.androidExplain=config.getAndroidExplain();
 		this.androidVersion=config.getAndroidVersion();
 		this.androidVersionDisable=config.getAndroidVersionDisable();
+		this.androidGoVersion=config.getAndroidGoVersion();
 //		this.area=config.getArea();
 		this.iosDownUrl=config.getIosDownUrl();
 		this.iosExplain=config.getIosExplain();
 		this.iosVersion=config.getIosVersion();
 		this.iosVersionDisable=config.getIosVersionDisable();
 		this.iosVersionVerify=config.getIosVersionVerify();
+		this.iosAppUrl=config.getIosDownUrl();
 //		this.ipAddress=config.getIpAddress();
 	}
 	

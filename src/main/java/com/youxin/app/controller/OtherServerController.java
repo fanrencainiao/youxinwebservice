@@ -3,9 +3,15 @@ package com.youxin.app.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,9 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.service.UserService;
+import com.youxin.app.utils.KConstants;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
+import com.youxin.app.utils.ValidateCode;
 import com.youxin.app.utils.applicationBean.SmsConfig;
+import com.youxin.app.utils.jedis.RedisCRUD;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 
 import io.swagger.annotations.Api;
@@ -29,12 +38,41 @@ import io.swagger.annotations.ApiOperation;
 public class OtherServerController {
 	@Autowired
 	private UserService us;
+	
 	@Autowired
 	@Qualifier("scf")
 	private SmsConfig smsConfig;
+	
 	@Autowired
 	private SMSServiceImpl smsServer;
+	@Autowired
+	private RedisCRUD redisServer;
 	
+	@ApiOperation(value = "获取/更新图形验证码",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "telephone", value = "区号+手机号", required = true, paramType = "query")
+	})
+	@GetMapping("/getImgCode")
+	public void getImgCode(HttpServletRequest request, HttpServletResponse response,@RequestParam String telephone) throws Exception {
+		
+		 // 设置响应的类型格式为图片格式  
+        response.setContentType("image/jpeg");  
+        //禁止图像缓存。  
+        response.setHeader("Pragma", "no-cache");  
+        response.setHeader("Cache-Control", "no-cache");  
+        response.setDateHeader("Expires", 0); 
+        HttpSession session = request.getSession();  
+          
+      
+        ValidateCode vCode = new ValidateCode(140,50,4,0);  
+        String key = String.format(KConstants.Key.IMGCODE, telephone.trim());
+        redisServer.set(key, vCode.getCode());
+        redisServer.expire(key, 600);
+		
+        session.setAttribute("code", vCode.getCode()); 
+       // session.setMaxInactiveInterval(10*60);
+        System.out.println("getImgCode telephone ===>"+telephone+" code "+vCode.getCode());
+        vCode.write(response.getOutputStream());  
+	}
 	@ApiOperation(value = "发送短信",response=Result.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "telephone", value = "手机号", required = true, paramType = "query")
 	,@ApiImplicitParam(name = "areaCode", value = "区号", defaultValue="86", paramType = "query"),
@@ -55,17 +93,19 @@ public class OtherServerController {
 		}
 		
 		telephone = areaCode + telephone;
+		System.out.println("smsConfig.getIsstart()"+smsConfig.getIsstart());
 		
+		System.out.println("smsConfig.getIsstart()==1"+(smsConfig.getIsstart()==1));
 		if(smsConfig.getIsstart()==1) {
 			if(StringUtils.isEmpty(imgCode)){
 				return Result.failure(ResultCode.PARAM_IMG_ERROR);
 			}else{
-//				if(!SKBeanUtils.getSMSService().checkImgCode(telephone, imgCode)){
-//					String key = String.format(KConstants.Key.IMGCODE, telephone);
-//					String cached = SKBeanUtils.getRedisCRUD().get(key);
-//					System.out.println("ImgCodeError  getImgCode "+cached+"  imgCode "+imgCode);
-//					return JSONMessage.failureByErrCode(KConstants.ResultCode.ImgCodeError,language,params);
-//				}
+				if(!smsServer.checkImgCode(telephone, imgCode)){
+					String key = String.format(KConstants.Key.IMGCODE, telephone);
+					String cached = redisServer.get(key);
+					System.out.println("ImgCodeError  getImgCode "+cached+"  imgCode "+imgCode);
+					return Result.failure(KConstants.ResultCode.ImgCodeError,language,params);
+				}
 			}
 		}
 		

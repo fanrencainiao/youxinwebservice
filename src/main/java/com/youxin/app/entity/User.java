@@ -2,6 +2,7 @@ package com.youxin.app.entity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -132,6 +133,8 @@ public class User extends BaseExample{
 
 	@ApiModelProperty(value = "支付宝买家id")
 	private String aliUserId;
+	@ApiModelProperty(value = "支付宝买家token")
+	private String aliAppAuthToken;
 	@ApiModelProperty(value = "友讯号")
 	@Indexed(unique = true)
 	private String account;
@@ -197,6 +200,10 @@ public class User extends BaseExample{
 		private int pushLocalFriends=1;
 		@ApiModelProperty(value = "是否允许添加我（0不允许，1允许）默认1")
 		private int isAllowAddMy=1;
+		@ApiModelProperty(value = "是否已读回执（0不允许，1允许）默认1")
+		private int isRead=1;
+		@ApiModelProperty(value = "是否显示输入状态（0不允许，1允许）默认1")
+		private int isShowInputType=1;
 	}
 
 	@Data
@@ -233,6 +240,56 @@ public class User extends BaseExample{
 
 		private long offlineTime;
 	}
+	/**
+	 * 我保存的群
+	 * @author cf
+	 * @date 2020年2月6日 上午10:37:32
+	 */
+	@Entity(value = "myTeam", noClassnameStored = true)
+	@Data
+	public static class MyTeam {
+
+		@Id
+		private Integer userId;
+		
+		private Set<Long> teams;
+		
+	}
+	/**
+	 * 我的好友添加方式
+	 * @author cf
+	 * @date 2020年2月14日 上午10:44:39
+	 */
+	@Entity(value = "myFreids", noClassnameStored = true)
+	@Data
+	public static class MyFreids {
+
+		@Id
+		private ObjectId id;
+		@ApiModelProperty("用户id")
+		private Integer userId;
+		@ApiModelProperty("好友id")
+		private Integer toUserId;
+		@ApiModelProperty("添加方式：1二维码添加对方-1对方二维码添加我，2搜索手机号-2，3有讯号-3，4群聊-4，5名片分享-5，6附近的人-6")
+		private int addType;
+		
+	}
+	/**
+	 * 群二维码
+	 * @author cf
+	 * @date 2020年2月14日 下午12:03:11
+	 */
+	@Entity(value = "myItemCode", noClassnameStored = true)
+	@Data
+	public static class MyItemCode {
+
+		@Id
+		@ApiModelProperty("群id")
+		private Long teamId;
+		@ApiModelProperty("群二维码")
+		private String erCode;
+		
+	}
 
 	@Entity(value = "userLoginLog", noClassnameStored = true)
 	@Data
@@ -241,10 +298,7 @@ public class User extends BaseExample{
 		@Id
 		private Integer userId;
 		/**
-		 * 
-		 * @Description: TODO(登陆日志信息)
-		 * @author lidaye
-		 * @date 2018年8月18日
+		 * 登陆日志信息
 		 */
 		@Embedded
 		private LoginLog loginLog;

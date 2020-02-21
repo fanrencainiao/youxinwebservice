@@ -308,8 +308,7 @@ public class RedPacketManagerImpl{
 		receive.setTime(DateUtil.currentTimeSeconds());
 		receive.setUserName(userManager.getUser(userId).getName());
 		receive.setSendName(userManager.getUser(packet.getUserId()).getName());
-		ObjectId id = (ObjectId) redReceiveRepository.save(receive).getId();
-		receive.setId(id);
+		
 		String tradeNo = AliPayUtil.getOutTradeNo();
 		if(packet.getPayType()!=1) {
 			// 修改金额
@@ -321,6 +320,8 @@ public class RedPacketManagerImpl{
 			if(transUni==null||!"SUCCESS".equals(transUni))
 				throw new ServiceException("领取失败");
 		}
+		ObjectId id = (ObjectId) redReceiveRepository.save(receive).getId();
+		receive.setId(id);
 		redPacketRepository.update(q, ops);
 		final Double num = money;
 
@@ -471,7 +472,7 @@ public class RedPacketManagerImpl{
 	// 发送的红包
 public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int pageSize,Map<String, String> param) {
 		
-		Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId);
+		Query<RedPacket> q = redPacketRepository.createQuery();
 		System.out.println(param);
 		if(param!=null) {
 			if(!StringUtil.isEmpty(param.get("startTime"))) {
@@ -480,7 +481,23 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			if(!StringUtil.isEmpty(param.get("endTime"))) {
 				q.field("sendTime").lessThanOrEq(Long.valueOf(param.get("endTime")));		
 			}
+			System.out.println(param.get("jid"));
+			System.out.println(!StringUtil.isEmpty(param.get("jid")));
+			if(!StringUtil.isEmpty(param.get("jid"))) {
+				q.field("roomJid").equal(param.get("jid"));	
+			}
+			//红包是否领完
+			if(!StringUtil.isEmpty(param.get("isOver"))) {
+				if (param.get("isOver").equals("true"))
+					q.field("status").equal(2);	
+				else 
+					q.field("status").equal(1);	
+			}
 		}
+		
+		if(userId!=null&&userId>0) 
+			q.field("userId").equal(userId);
+		System.out.println("查询参数:"+q);
 		return q.order("-sendTime").offset(pageIndex * pageSize).limit(pageSize).asList();
 	}
 
