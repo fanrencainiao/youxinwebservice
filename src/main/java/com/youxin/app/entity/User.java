@@ -133,7 +133,7 @@ public class User extends BaseExample{
 
 	@ApiModelProperty(value = "支付宝买家id")
 	private String aliUserId;
-	@ApiModelProperty(value = "支付宝买家token")
+	@ApiModelProperty(value = "支付宝买家token,非authToken")
 	private String aliAppAuthToken;
 	@ApiModelProperty(value = "友讯号")
 	@Indexed(unique = true)

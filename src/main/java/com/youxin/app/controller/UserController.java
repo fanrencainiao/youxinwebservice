@@ -244,11 +244,14 @@ public class UserController extends AbstractController{
 	 * 获取支付宝用户授权信息
 	 * @return
 	 */
-	@ApiOperation(value = "获取支付宝用户授权信息",response=Result.class,notes="若返回支付宝用户id则授权成功，否则失败")
-	@GetMapping("getAliUserAuthInfo")
+	@ApiOperation(value = "获取支付宝用户信息",response=Result.class,notes="若返回支付宝用户id则授权成功，否则失败")
+	@GetMapping("getAliUserInfo")
 	public Object getAliUserInfo() {
 		User reluser = userService.getUserFromDB(ReqUtil.getUserId());
-		return Result.success(AliPayUtil.getAliUserAuthInfo(reluser.getAliAppAuthToken()));
+		String aliUserAuthInfo = AliPayUtil.getAliUserInfo(reluser.getAliAppAuthToken());
+		if (StringUtil.isEmpty(aliUserAuthInfo)) 
+			return Result.error("无授权信息");
+		return Result.success(aliUserAuthInfo);
 	}
 	
 	
@@ -517,15 +520,16 @@ public class UserController extends AbstractController{
 	}
 	@ApiOperation(value = "更新支付宝用户id",response=Result.class)
 	@PostMapping("updateAliUserIdV1")
-	public Object updateAliUserIdV1(@RequestParam String appAuthToken){
-		if(StringUtil.isEmpty(appAuthToken)) 
+	public Object updateAliUserIdV1(@RequestParam String code){
+		String token = AliPayUtil.getAccesstoken(code, null);
+		if(StringUtil.isEmpty(token)) 
 			return Result.errorMsg("token不能为空");
-		String aliUserId = AliPayUtil.getAliUserAuthInfo(appAuthToken);
+		String aliUserId = AliPayUtil.getAliUserInfo(token);
 		if(StringUtil.isEmpty(aliUserId)) 
 			return Result.errorMsg("授权失败");
 		User user = new User();
 		user.setAliUserId(aliUserId);
-		user.setAliAppAuthToken(appAuthToken);
+		user.setAliAppAuthToken(token);
 		user.setId(ReqUtil.getUserId());
 		userService.updateUserByEle(user);
 		return Result.success();

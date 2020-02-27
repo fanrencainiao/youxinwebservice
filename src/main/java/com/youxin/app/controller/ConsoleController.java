@@ -44,6 +44,7 @@ import com.youxin.app.entity.HelpCenter;
 import com.youxin.app.entity.MessageReceive;
 import com.youxin.app.entity.MongdbGroup;
 import com.youxin.app.entity.Opinion;
+import com.youxin.app.entity.PublicPermission;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Report;
@@ -59,6 +60,7 @@ import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
 import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.MessageReceiveService;
+import com.youxin.app.service.PublicPermissionService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
@@ -112,7 +114,8 @@ public class ConsoleController extends AbstractController{
 	TransferManagerImpl tfm;
 	@Autowired
 	MessageReceiveService mrs;
-	
+	@Autowired
+	private PublicPermissionService pps;
 	
 	@PostMapping(value = "login")
 	public Object login(String name, String password, HttpServletRequest request) {
@@ -711,7 +714,7 @@ public class ConsoleController extends AbstractController{
 	public Object saveCenterList(@RequestParam(defaultValue = "") String hcid,@ModelAttribute HelpCenter hc) {
 		if(StringUtil.isEmpty(hcid)) {
 			hc.setCreateTime(DateUtil.currentTimeSeconds());
-			hc.setState(0);
+			hc.setState(-1);
 		}else {
 			Query<HelpCenter> q = dfds.find(HelpCenter.class);
 			q.field("_id").equal(parse(hcid));
@@ -1060,7 +1063,52 @@ public class ConsoleController extends AbstractController{
 		}
 	}
 	
-
+	/**
+	 * 获取授权列表
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param state
+	 * @return
+	 */
+	@RequestMapping(value = "/pplist")
+	public Object pplist(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+			,@RequestParam(defaultValue = "") int state ) {
+		return Result.success(pps.pageList());
+	}
+	/**
+	 * 获取授权实体
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/getpp")
+	public Object getpp(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		return Result.success(pps.getPP(id));
+	}
+	/**
+	 * 修改或者保存授权
+	 * @param hcid
+	 * @param hc
+	 * @return
+	 */
+	@RequestMapping(value = "/savepp")
+	public Object savepp(@ModelAttribute PublicPermission pp) {
+		pps.SaveOrUpdatePP(pp);
+		return Result.success();
+	}
+	@RequestMapping(value = "/delpp")
+	public Object delpp(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		String[] ids = StringUtil.getStringList(id, ",");
+		for(String idd:ids) {
+			pps.delPP(idd);
+		}
+		return Result.success();
+	}
 	
 
 }

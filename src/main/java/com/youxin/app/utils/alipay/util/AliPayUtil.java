@@ -197,11 +197,11 @@ public class AliPayUtil {
 			request.setRefreshToken(token);
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
-			AlipaySystemOauthTokenResponse response = getAliPalyClientByCert().execute(request);
+			AlipaySystemOauthTokenResponse response = getAliPalyClientByCert().certificateExecute(request);
 
 			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
 
-			return response.getBody();
+			return response.getAccessToken();
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
 			return null;
@@ -214,12 +214,11 @@ public class AliPayUtil {
 	 * @param appAuthToken
 	 * @return
 	 */
-	public static String getAliUserAuthInfo(String appAuthToken) {
+	public static String getAliUserInfo(String token) {
 
-		AlipayOpenAuthTokenAppQueryRequest request = new AlipayOpenAuthTokenAppQueryRequest(); 
-		request.setBizContent("{\"app_auth_token\":\""+appAuthToken+"\"}"); 
+		AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest(); 
 		try {
-			AlipayOpenAuthTokenAppQueryResponse response = getAliPalyClientByCert().execute(request);
+			AlipayUserInfoShareResponse response = getAliPalyClientByCert().certificateExecute(request,token);
 			System.out.println(response.getBody());
 			return response.getUserId();
 		} catch (AlipayApiException e) {

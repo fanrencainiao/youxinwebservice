@@ -72,6 +72,24 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         	  if(d.type==1){
         		  return "帮助中心";
         	  }
+        	  if(d.type==2){
+        		  return "账号问题";
+        	  }
+        	  if(d.type==3){
+        		  return "好友管理";
+        	  }
+        	  if(d.type==4){
+        		  return "聊天功能";
+        	  }
+        	  if(d.type==5){
+        		  return "群聊功能";
+        	  }
+        	  if(d.type==6){
+        		  return "红包功能";
+        	  }
+        	  if(d.type==7){
+        		  return "钱包";
+        	  }
             return "";
           }}
           ,{field: 'userId', title: '反馈人id集合',sort:'true', width:100}

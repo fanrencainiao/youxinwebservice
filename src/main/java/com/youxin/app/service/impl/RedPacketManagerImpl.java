@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.sound.midi.Receiver;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -398,7 +397,7 @@ public class RedPacketManagerImpl{
 		   } else if (Double.valueOf(df.format(moeny / num)) > max || Double.valueOf(df.format(moeny / num)) < min) {
 		    System.out.println("无法分配");
 		   } else {
-
+			moeny=moeny*2/num;
 		    double nd = r.nextDouble();
 		    Double rmoney = 0.0d;
 
