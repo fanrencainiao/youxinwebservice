@@ -12,7 +12,13 @@
 					"icon": "&#xe857;",
 					"href": "/templates/console/system_config.html",
 					"spread": false
+				},{
+					"title": "平台授权管理",
+					"icon": "&#xe857;",
+					"href": "/templates/console/permission.html",
+					"spread": false
 				}
+				
 			]
 			
 		},

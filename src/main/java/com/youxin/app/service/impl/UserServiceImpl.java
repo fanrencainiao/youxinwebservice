@@ -412,8 +412,11 @@ public class UserServiceImpl implements UserService {
 			ref.put("mobile", example.getMobile());
 		}
 			
-		if (!StringUtil.isEmpty(example.getAccount()))
+		if (!StringUtil.isEmpty(example.getAccount())) {
+			ref.put("settings.searchByAccount", 1);
 			ref.put("account", Pattern.compile(example.getAccount(),Pattern.CASE_INSENSITIVE));
+		}
+			
 		
 		
 		ref.put("disableUser", 1);

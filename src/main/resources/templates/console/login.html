@@ -30,12 +30,18 @@
 
 		<div class="layui-form-item input-item">
 			<label style="top:-10px">账号</label>
-			<input type="text" placeholder="请输入用户名" autocomplete="off" name="name" class="layui-input" lay-verify="required">
+			<input type="text" id="name" placeholder="请输入用户名" autocomplete="off" name="name" class="layui-input" lay-verify="required">
 		</div>
 
 		<div class="layui-form-item input-item">
 			<label style="top:-10px">密码</label>
-			<input type="password" placeholder="请输入密码" autocomplete="off" name="password" class="layui-input" lay-verify="required">
+			<input type="password" id="password" placeholder="请输入密码" autocomplete="off" name="password" class="layui-input" lay-verify="required">
+		</div>
+		<div class="layui-form-item input-item">
+			<label style="top:-10px"  >验证码</label>
+			<input type="text" id="password" placeholder="请输入密码" autocomplete="off" name="imgCode" class="layui-input" lay-verify="required">
+			<img alt="" src="" style="-webkit-user-select: none;margin: auto;width:100px;height:30px;background-color: rgb(232, 240, 254);" class="getImgCode" >
+			<scan style="color:red;">点击左侧刷新验证码</scan>
 		</div>
 
 		<div class="layui-form-item" style="margin-top: 40px;">

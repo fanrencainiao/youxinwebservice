@@ -40,7 +40,32 @@ layui.use(['form'], function() {
 
     });
 
-
+    $(".getImgCode").on("click",function(){
+    	var userId=$("#name").val();
+    	if(userId==""){
+    		 layer.msg("请输入用户名");
+    		return;
+    	} 
+    	$(".getImgCode").attr("src","/other/getImgCode?telephone="+userId+"&time="+new Date());
+    	
+//    	$.ajax({
+//			type:'GET',
+//			url:'/other/getImgCode',
+//			data:{
+//				telephone:userId
+//			},
+//			
+//			async:false,
+//			success:function(result){
+//				$(".getImgCode").attr("src",window.URL.createObjectURL(result));
+//				},
+//			error:function(result){
+//				layer.msg("获取失败");
+//				}
+//
+//			
+//		})
+    });
     //表单输入效果
     $(".loginBody .input-item").click(function(e){
         e.stopPropagation();

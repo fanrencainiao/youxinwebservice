@@ -3,13 +3,12 @@ package com.youxin.app.service.impl;
 import java.util.List;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.youxin.app.entity.PublicPermission;
-import com.youxin.app.repository.PublicPermissionRepository;
+import com.youxin.app.repository.PPSRepository;
 import com.youxin.app.service.PublicPermissionService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.PageResult;
@@ -19,12 +18,12 @@ import jodd.util.StringUtil;
 public class PublicPermissionServiceImpl implements PublicPermissionService {
 
 	@Autowired
-	private PublicPermissionRepository pository;
+	private PPSRepository ppr;
 	@Override
 	public PageResult<PublicPermission> pageList() {
-		Query<PublicPermission> q = pository.createQuery();
-		List<PublicPermission> pplist = pository.find().asList();
-		return new PageResult<>(pplist, pository.count());
+		Query<PublicPermission> q = ppr.createQuery();
+		List<PublicPermission> pplist = ppr.find().asList();
+		return new PageResult<>(pplist, ppr.count());
 	}
 
 	@Override
@@ -35,32 +34,35 @@ public class PublicPermissionServiceImpl implements PublicPermissionService {
 			pp.setCreateTime(DateUtil.currentTimeSeconds());
 			pp.setUpdateTime(DateUtil.currentTimeSeconds());
 		}else {
-			PublicPermission rpp = pository.findOne("_id", new ObjectId(pp.getSid()));
+			PublicPermission rpp = ppr.findOne("_id", new ObjectId(pp.getSid()));
+			pp.setId(new ObjectId(pp.getSid()));
 			pp.setUpdateTime(DateUtil.currentTimeSeconds());
 			pp.setCreateTime(rpp.getCreateTime());
 		}
 			
-		pository.save(pp);
+		ppr.save(pp);
 	}
 
 	@Override
 	public PublicPermission getPP(String id) {
-		return pository.findOne("_id", new ObjectId(id));
+		return ppr.findOne("_id", new ObjectId(id));
 	}
 
 	@Override
 	public void delPP(String id) {
-		pository.deleteById(new ObjectId(id));
+		ppr.deleteById(new ObjectId(id));
 	}
 
 	@Override
 	public List<PublicPermission> getPPlist(PublicPermission pp) {
-		Query<PublicPermission> q = pository.createQuery();
-		if(StringUtil.isEmpty(pp.getToObj()))
+		Query<PublicPermission> q = ppr.createQuery();
+		if(!StringUtil.isEmpty(pp.getToObj()))
 			q.field("toObj").equal(pp.getToObj());
-		if(StringUtil.isEmpty(pp.getUrl()))
+		if(!StringUtil.isEmpty(pp.getUrl()))
 			q.field("url").equal(pp.getUrl());
-		return pository.find().asList();
+		if(pp.getState()!=0)
+			q.field("state").equal(pp.getState());
+		return ppr.find(q).asList();
 	}
 
 }

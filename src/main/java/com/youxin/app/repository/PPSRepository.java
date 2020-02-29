@@ -13,10 +13,10 @@ import com.youxin.app.entity.PublicPermission;
 
 
 @Repository
-public class PublicPermissionRepository  extends BasicDAO<PublicPermission, ObjectId>{
+public class PPSRepository extends BasicDAO<PublicPermission, ObjectId>{
 	
 	@Autowired
-	public PublicPermissionRepository(@Qualifier("get") Datastore ds) {
+	public PPSRepository(@Qualifier("get") Datastore ds) {
 		super(ds);
 	}
 	

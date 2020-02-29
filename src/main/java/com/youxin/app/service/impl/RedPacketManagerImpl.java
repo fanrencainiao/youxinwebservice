@@ -130,10 +130,13 @@ public class RedPacketManagerImpl{
 			// 判断当前用户是否领过该红包
 			//
 			if (null == packet.getUserIds() || !packet.getUserIds().contains(userId)) {
+				long s=DateUtil.currentTimeMilliSeconds();
 				RedPacket packets = openRedPacket(userId, packet);
 				
 				map.put("packet", packets);
 				map.put("list", getRedReceivesByRedId(packet.getId()));
+				long e=DateUtil.currentTimeMilliSeconds();
+				System.out.println("领取红包耗时："+(e-s));
 				if(packets==null) 
 					return Result.error("支付宝红包异常");
 				else

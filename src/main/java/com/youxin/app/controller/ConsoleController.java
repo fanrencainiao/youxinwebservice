@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,6 +78,8 @@ import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
+import com.youxin.app.utils.jedis.RedisCRUD;
+import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgFile;
@@ -116,10 +119,17 @@ public class ConsoleController extends AbstractController{
 	MessageReceiveService mrs;
 	@Autowired
 	private PublicPermissionService pps;
-	
+	@Autowired
+	private SMSServiceImpl smsServer;
+	@Autowired
+	private RedisCRUD redisServer;
+
 	@PostMapping(value = "login")
-	public Object login(String name, String password, HttpServletRequest request) {
+	public Object login(String name, String password,String imgCode, HttpServletRequest request) {
 		User login = consoleService.login(name, password);
+		boolean checkImgCode = smsServer.checkImgCode(name, imgCode);
+		if(!checkImgCode)
+			return Result.error("验证码错误");
 		if (login != null) {
 			request.getSession().setAttribute(LoginSign.LOGIN_USER_KEY, login);
 			
@@ -131,6 +141,20 @@ public class ConsoleController extends AbstractController{
 			return Result.success(json);
 		}
 		return Result.failure(ResultCode.USER_LOGIN_ERROR);
+
+	}
+	@PostMapping(value = "updatePassword")
+	public Object updatePassword(Integer userId, String password) {
+		User ru = userService.getUserFromDB(userId);
+		
+		if (ru != null&&ru.getUserType()==6) {
+			User nu=new User();
+			nu.setPassword(password);
+			nu.setId(userId);
+			userService.updateUserByEle(nu);
+			return Result.success();
+		}
+		return Result.failure(ResultCode.USER_NOT_LOGGED_IN);
 
 	}
 
@@ -215,6 +239,7 @@ public class ConsoleController extends AbstractController{
 		
 		return Result.error();
 	}
+	
 	/**
 	 * 获取用户信息
 	 * @param userId
@@ -1072,7 +1097,8 @@ public class ConsoleController extends AbstractController{
 	 */
 	@RequestMapping(value = "/pplist")
 	public Object pplist(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
-			,@RequestParam(defaultValue = "") int state ) {
+			,@RequestParam(defaultValue = "0") int state 
+			,@RequestParam(defaultValue = "") String nickName) {
 		return Result.success(pps.pageList());
 	}
 	/**
@@ -1082,9 +1108,7 @@ public class ConsoleController extends AbstractController{
 	 */
 	@RequestMapping(value = "/getpp")
 	public Object getpp(@RequestParam(defaultValue = "") String id) {
-		if(StringUtil.isEmpty(id)) {
-			return Result.error("id为空");
-		}
+		Optional.ofNullable(id).orElseThrow(()->new ServiceException("id为空"));
 		return Result.success(pps.getPP(id));
 	}
 	/**
@@ -1100,9 +1124,7 @@ public class ConsoleController extends AbstractController{
 	}
 	@RequestMapping(value = "/delpp")
 	public Object delpp(@RequestParam(defaultValue = "") String id) {
-		if(StringUtil.isEmpty(id)) {
-			return Result.error("id为空");
-		}
+		Optional.ofNullable(id).orElseThrow(()->new ServiceException("id为空"));
 		String[] ids = StringUtil.getStringList(id, ",");
 		for(String idd:ids) {
 			pps.delPP(idd);

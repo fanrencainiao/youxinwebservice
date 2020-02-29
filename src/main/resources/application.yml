@@ -48,6 +48,9 @@ authorizationfilter:
   requestUriList[7]: /user/getOpenids
   requestUriList[8]: /wxpay/callBack
   requestUriList[9]: /alipay/callBack
+  requestUriList[10]: /other/getImgCode
+  requestUriList[11]: /pp/isPermission
+  
 
 youxin:
   apiKey: youxin 
