@@ -1,25 +1,33 @@
 package com.youxin.app.controller;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Maps;
 import com.youxin.app.entity.ConsumeRecord;
+import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.CodePayService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
+import com.youxin.app.service.impl.RedPacketManagerImpl;
 import com.youxin.app.utils.AuthServiceUtils;
+import com.youxin.app.utils.CollectionUtil;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.NumberUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.ReqUtil;
@@ -51,6 +59,8 @@ public class UserConsumeController extends AbstractController {
 	private ConsumeRecordManagerImpl consumeRecordServer;
 	@Autowired
 	private CodePayService payService;
+	@Autowired
+	RedPacketManagerImpl redServer;
 
 	@ApiOperation(value = "用户充值", response = Result.class)
 	@ApiImplicitParams({
@@ -105,11 +115,20 @@ public class UserConsumeController extends AbstractController {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "payType", value = "红包类型（1支付宝红包）", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "price", value = "红包金额", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "count", value = "红包个数", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "greetings", value = "祝福语", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "toUserId", value = "发送给某人", required = false, paramType = "query"),
+			@ApiImplicitParam(name = "roomJid", value = "发送给某群", required = false, paramType = "query"),
 			@ApiImplicitParam(name = "time", value = "发送时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
 	@PostMapping(value = "/sendAliCoupon")
-	public Object sendAliCoupon(@RequestParam int payType, @RequestParam String price,
+	public Object sendAliCoupon(@RequestParam int payType, @RequestParam String price,@RequestParam(defaultValue = "1") long count,
+			@RequestParam(defaultValue = "") String greetings,
+			@RequestParam(defaultValue = "") String toUserId,
+			@RequestParam(defaultValue = "") String roomJid,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		if(true) 
+			return Result.error("红包已升级，请更新app至最新版本！");
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
 		if(Double.valueOf(price) < 0.01 || 20000 < Double.valueOf(price)){
@@ -133,7 +152,78 @@ public class UserConsumeController extends AbstractController {
 			entity.setTradeNo(orderNo);
 			entity.setPayType(payType);
 			entity.setMoney(new Double(price));
+			entity.setCount(count);
 			if (KConstants.PayType.ALIPAY == payType) {
+				orderInfo = AliPayUtil.getOrderInfoByCoupon("支付宝红包", "支付宝红包", price, orderNo);
+				consumeRecordServer.saveConsumeRecord(entity);
+				map.put("orderInfo", orderInfo);
+				System.out.println("orderInfo>>>>>" + URLDecoder.decode(orderInfo));
+				System.out.println("orderInfo>>>>>" + orderInfo);
+				return Result.success(map);
+			} 
+
+		}
+		return Result.errorMsg("没有选择支付类型");
+	}
+	@ApiOperation(value = "用户发送支付宝红包v1", response = Result.class)
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "price", value = "红包金额", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "time", value = "发送时间", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
+	@PostMapping(value = "/sendAliCouponv1")
+	public Object sendAliCouponv1(
+			@RequestBody RedPacket packet,@RequestParam(defaultValue = "") String price,
+			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		String token = getAccess_token();
+		Integer userId = ReqUtil.getUserId();
+		if(Double.valueOf(packet.getMoney()) < 0.01 || 20000 < Double.valueOf(packet.getMoney())){
+			return Result.error("红包金额在0.01~20000之间哦!");
+		}else if((packet.getMoney()/packet.getCount()) < 0.01){
+			return Result.error("每人最少 0.01元 !");
+		}else if(packet.getType()==4&&CollectionUtil.isEmpty(packet.getToUserIds())){
+			return Result.error("定向红包请选择指定领取人!");
+		}
+		// 充值接口授权
+		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
+			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
+			return Result.errorMsg("权限验证失败!");
+		}
+		//支付宝红包
+		if(packet.getPayType()==1) {
+			BigDecimal money = NumberUtil.getBigDecimalForDouble(packet.getMoney());
+			BigDecimal count = NumberUtil.getBigDecimalForDouble(packet.getCount());
+			//单个红包金额
+			double divideMoney = money.divide(count,2,BigDecimal.ROUND_HALF_UP).doubleValue();
+			log.debug("money:"+money+"count:"+count+"=divideMoney:"+divideMoney);
+			if(divideMoney>200)
+				return Result.error("单个红包不能超过200元");
+			Double sendTotalMoney = redServer.sendBill(userId);
+			if(NumberUtil.add(sendTotalMoney, packet.getMoney(), null)>20000) 
+				return Result.error("每日发送总金额不能超过20000,您24小时内已经发送了"+sendTotalMoney+"元红包");
+		}
+		
+		Map<String, String> map = Maps.newLinkedHashMap();
+		String orderInfo = "";
+		if (0 < packet.getPayType()) {
+			String orderNo = AliPayUtil.getOutTradeNo();
+			ConsumeRecord entity = new ConsumeRecord();
+			entity.setUserId(ReqUtil.getUserId());
+			entity.setTime(DateUtil.currentTimeSeconds());
+			entity.setType(KConstants.ConsumeType.ALI_COUPON);
+			entity.setDesc("支付宝红包");
+			entity.setStatus(KConstants.OrderStatus.CREATE);
+			entity.setTradeNo(orderNo);
+			entity.setPayType(packet.getPayType());
+			entity.setMoney(new Double(price));
+			if(packet.getToUserId()!=null)
+				entity.setToUserId(String.valueOf(packet.getToUserId()));
+			entity.setRoomJid(String.valueOf(packet.getRoomJid()));
+			entity.setCount(packet.getCount());
+			entity.setRedType(packet.getType());
+			entity.setGreetings(packet.getGreetings());
+			entity.setUserName(packet.getUserName());
+			entity.setToUserIds(packet.getToUserIds()==null?new ArrayList<Integer>():packet.getToUserIds());
+			if (KConstants.PayType.ALIPAY == packet.getPayType()) {
 				orderInfo = AliPayUtil.getOrderInfoByCoupon("支付宝红包", "支付宝红包", price, orderNo);
 				consumeRecordServer.saveConsumeRecord(entity);
 				map.put("orderInfo", orderInfo);

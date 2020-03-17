@@ -352,11 +352,8 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			record.setDesc("支付宝红包退款");
 			String backTransUni = AliPayUtil.backTransUni("支付宝红包超时退款",aliPayNo, money+"", payNo);
 			log.debug("支付宝红包超时退款信息"+backTransUni);
-//			JSONObject btu = JSON.parseObject(backTransUni);
-//			log.debug(btu);
-//			if(!"SUCCESS".equalsIgnoreCase(btu.getString("status"))) {
-//				return;
-//			}
+			if(!StringUtil.isEmpty(backTransUni))
+				record.setStatus(KConstants.OrderStatus.END);
 		}else {
 			record.setType(KConstants.ConsumeType.REFUND_REDPACKET);
 			record.setPayType(KConstants.PayType.BALANCEAY);
@@ -364,33 +361,33 @@ public class CommTask implements ApplicationListener<ApplicationContextEvent>{
 			record.setDesc("红包退款");
 			recordManager.saveConsumeRecord(record);
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
+			User toUser=userManager.getUser(toUserId);
+			
+			MsgRequest messageBean = new MsgRequest();
+			messageBean.setType(100);// 自定义
+//			messageBean.setType(0);// 文字
+			messageBean.setOpe(0);// 个人消息
+			if (toUser!=null) {
+				messageBean.setFrom(Md5Util.md5HexToAccid(toUserId+""));
+			}else {
+				messageBean.setFrom(Md5Util.md5HexToAccid("1100"));
+			}
+			messageBean.setTo(Md5Util.md5HexToAccid(userId+""));
+			ID ids=new ID();
+			ids.setId(id.toString());
+			messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, ids)));
+//			String notice="退款通知。退款方式：发送红包时使用的支付宝账户。红包发送时间："+sendTime+"。退款金额："+money+"元。退款原因：红包超过24小时未被领取。备注：你可以打开支付宝APP，在账单中搜索\"红包\"，查看红包相关记录。";
+//			messageBean.setBody("{\"msg\":\""+notice+"\"}");
+			try {
+				JSONObject json=SDKService.sendMsg(messageBean);
+				if(json.getInteger("code")!=200) 
+					log.debug("红包领取 sdk消息发送失败");
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.debug("红包领取 sdk消息发送失败"+e.getMessage());
+			}
 		}
-		
-		User toUser=userManager.getUser(toUserId);
-	
-		MsgRequest messageBean = new MsgRequest();
-		messageBean.setType(100);// 自定义
-//		messageBean.setType(0);// 文字
-		messageBean.setOpe(0);// 个人消息
-		if (toUser!=null) {
-			messageBean.setFrom(Md5Util.md5HexToAccid(toUserId+""));
-		}else {
-			messageBean.setFrom(Md5Util.md5HexToAccid("1100"));
-		}
-		messageBean.setTo(Md5Util.md5HexToAccid(userId+""));
-		ID ids=new ID();
-		ids.setId(id.toString());
-		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.BACKREDPACKET, ids)));
-//		String notice="退款通知。退款方式：发送红包时使用的支付宝账户。红包发送时间："+sendTime+"。退款金额："+money+"元。退款原因：红包超过24小时未被领取。备注：你可以打开支付宝APP，在账单中搜索\"红包\"，查看红包相关记录。";
-//		messageBean.setBody("{\"msg\":\""+notice+"\"}");
-		try {
-			JSONObject json=SDKService.sendMsg(messageBean);
-			if(json.getInteger("code")!=200) 
-				log.debug("红包领取 sdk消息发送失败");
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.debug("红包领取 sdk消息发送失败"+e.getMessage());
-		}
+
 		
 		
 		log.debug(userId+"  发出的红包,剩余金额   "+money+"  未领取  退回余额!");

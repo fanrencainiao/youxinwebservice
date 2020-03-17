@@ -1,8 +1,12 @@
 package com.youxin.app.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mongodb.morphia.annotations.Entity;
 
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.NotSaved;
 
 import com.alibaba.fastjson.JSON;
 
@@ -13,7 +17,11 @@ import lombok.Setter;
 @Entity(value = "Config",noClassnameStored=true)
 public class Config {
 	
+	
 	private @Id long id=10000;
+	
+	@NotSaved
+	private HelpCenter add=new HelpCenter();
 	
 	/**
 	 * 开启swagger 0否，1是

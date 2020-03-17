@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
@@ -473,11 +474,24 @@ public class UserServiceImpl implements UserService {
 			log.debug("信息同步更新失败");
 		Query<User> q = repository.createQuery();
 		q.field("_id").equal(bean.getId());
-		UpdateOperations<User> ops = repository.createUpdateOperations();
+		User user = q.get();
 		if(bean.getDisableUser()==-1 || bean.getDisableUser()==1) {
-			ops.set("disableUser", bean.getDisableUser());
+			user.setDisableUser(bean.getDisableUser());
 		}
-		repository.update(q, ops);
+		user.setExs();
+		com.youxin.app.yx.request.User.User yuser=new com.youxin.app.yx.request.User.User();
+		BeanUtils.copyProperties(user, yuser);
+		JSONObject json = SDKService.updateUinfo(yuser);
+		if(json.getIntValue("code")==200) {
+			Key<User> save = repository.save(user);
+			//维护数据
+			KSessionUtil.deleteUserByUserId(bean.getId());
+			log.debug(save);
+			log.info("修改用户disableuser更新到云信成功"+save);
+		}else
+			throw new ServiceException(0, "修改disableuser更新到云信失败");
+		
+		
 	}
 	
 
@@ -496,16 +510,23 @@ public class UserServiceImpl implements UserService {
 		if(getUserByAccount(account)!=null) {
 			throw new ServiceException(0, "友讯号已存在");
 		}
-		Query<User> q = repository.createQuery();
-		q.field("_id").equal(userId);
-		
-		UpdateOperations<User> ops = repository.createUpdateOperations();
-		ops.set("account", account+"毛主席");
-		
-		UpdateResults update = repository.update(q, ops);
-		log.debug(update);
-		
-		
+//		Query<User> q = repository.createQuery();
+//		q.field("_id").equal(userId);
+//		
+//		UpdateOperations<User> ops = repository.createUpdateOperations();
+//		ops.set("account", account+"毛主席");
+		user.setAccount(account+"毛主席");
+		user.setExs();
+		com.youxin.app.yx.request.User.User yuser=new com.youxin.app.yx.request.User.User();
+		BeanUtils.copyProperties(user, yuser);
+		JSONObject json = SDKService.updateUinfo(yuser);
+		if(json.getIntValue("code")==200) {
+			Key<User> save = repository.save(user);
+			log.debug(save);
+			log.info("修改友讯号更新到云信成功"+save);
+		}else
+			throw new ServiceException(0, "修改友讯号更新到云信失败");
+//		UpdateResults update = repository.update(q, ops);
 		User user2 = getUser(userId);
 		user2.setAccount(account+"毛主席");
 		KSessionUtil.saveUserByUserId(userId, user2);

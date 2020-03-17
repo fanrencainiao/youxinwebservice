@@ -11,6 +11,7 @@ import org.mongodb.morphia.annotations.NotSaved;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 ///红包实体
 @ApiModel(value = "红包")
@@ -65,6 +66,36 @@ public class RedPacket {
 	private List<Integer> userIds=new ArrayList<Integer>(); 
 	@ApiModelProperty(value="指定领取该红包的 userId")
 	private List<Integer> toUserIds=new ArrayList<Integer>(); 
+	
+	@Data
+	public static class SendRedPacket{
+		String redId;
+		String greeting;
+		int redType;
+		String accId;
+		int redGetType;
+		String redMoney;
+		
+		public SendRedPacket() {
+			super();
+		}
+		public SendRedPacket(String redId, String greeting, int redType, String accId, int redGetType,
+				String redMoney) {
+			super();
+			this.redId = redId;
+			this.greeting = greeting;
+			this.redType = redType;
+			this.accId = accId;
+			this.redGetType = redGetType;
+			this.redMoney = redMoney;
+		}
+
+		
+
+	
+		
+	}
+	
 	
 	public ObjectId getId() {
 		return id;

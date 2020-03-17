@@ -58,8 +58,6 @@ public class PublicPermisionController extends AbstractController{
 	})
 	@PostMapping(value = "isPermission")
 	public Object pplist(@RequestBody Perp cpp) {
-		System.out.println("pp url:"+cpp.getUrl());
-		System.out.println("pp toObj:"+cpp.getToObj());
 		if(StringUtil.isEmpty(cpp.getToObj())) 
 			return Result.error("未授权对象");
 		PublicPermission pp=new PublicPermission();

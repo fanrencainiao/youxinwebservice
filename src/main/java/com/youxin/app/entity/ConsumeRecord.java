@@ -1,12 +1,15 @@
 package com.youxin.app.entity;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.NotSaved;
+import org.springframework.web.bind.annotation.RequestParam;
 
 //消费记录实体
 @Entity(value = "ConsumeRecord", noClassnameStored = true)
@@ -36,8 +39,16 @@ public class ConsumeRecord {
 	
 	private @Indexed int status; //交易状态 0：创建  1：支付完成  2：交易完成  -1：交易关闭
 	
-	@NotSaved
+
+	
+	/*==================解决现金红包  扩展字段==================*/
+	private long count; //标识红包个数
+	private String greetings;//祝福语
+	private String toUserId;//对方用户id
+	private String roomJid;//群id
+	private int redType;//红包类型
 	private String userName;// 用户昵称
+	private List<Integer> toUserIds=new ArrayList<Integer>(); 
 
 	public ObjectId getId() {
 		return id;
@@ -125,5 +136,41 @@ public class ConsumeRecord {
 	}
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+	public long getCount() {
+		return count;
+	}
+	public void setCount(long count) {
+		this.count = count;
+	}
+	public String getGreetings() {
+		return greetings;
+	}
+	public void setGreetings(String greetings) {
+		this.greetings = greetings;
+	}
+	public String getToUserId() {
+		return toUserId;
+	}
+	public void setToUserId(String toUserId) {
+		this.toUserId = toUserId;
+	}
+	public String getRoomJid() {
+		return roomJid;
+	}
+	public void setRoomJid(String roomJid) {
+		this.roomJid = roomJid;
+	}
+	public int getRedType() {
+		return redType;
+	}
+	public void setRedType(int redType) {
+		this.redType = redType;
+	}
+	public List<Integer> getToUserIds() {
+		return toUserIds;
+	}
+	public void setToUserIds(List<Integer> toUserIds) {
+		this.toUserIds = toUserIds;
 	}
 }

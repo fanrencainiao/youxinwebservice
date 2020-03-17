@@ -1,13 +1,19 @@
 package com.youxin.app.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.youxin.app.entity.Config;
+import com.youxin.app.entity.HelpCenter;
 import com.youxin.app.service.ConfigService;
 import com.youxin.app.utils.IpSearch;
 import com.youxin.app.utils.NetworkUtil;
@@ -22,6 +28,9 @@ import io.swagger.annotations.ApiOperation;
 public class ConfigController extends AbstractController{
 	@Autowired
 	private ConfigService cs;
+	@Autowired
+	@Qualifier("get")
+	private Datastore dfds;
 	@ApiOperation(value = "获取客户端信息-未登录",response=Result.class)
 	@GetMapping(value = "/get")
 	public Object getConfig(HttpServletRequest request) {
@@ -31,6 +40,12 @@ public class ConfigController extends AbstractController{
 		Config config = new Config(cs.getConfig());
 		config.setIpAddress(ip);
 		config.setArea(area);
+		
+		 Query<HelpCenter> q = dfds.createQuery(HelpCenter.class);
+		 q.field("type").equal(8);
+		 List<HelpCenter> asList = q.asList();
+		 if(asList.size()>0)
+			 config.setAdd(asList.get(0));
 		return Result.success(config);
 	}
 	@ApiOperation(value = "获取客户端信息-登录",response=Result.class)

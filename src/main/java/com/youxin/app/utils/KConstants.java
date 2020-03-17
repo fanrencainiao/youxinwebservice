@@ -238,6 +238,7 @@ public class KConstants {
 		}
 		//消息类型
 		public interface MsgType {
+			public static final int SENDREDPACKET = 8;// 打开红包
 			public static final int OPENREDPACKET = 10;// 打开红包
 			public static final int BACKREDPACKET = 11;// 超时退回红包
 			public static final int TRANSFERRECIEVE = 13;// 转账收钱

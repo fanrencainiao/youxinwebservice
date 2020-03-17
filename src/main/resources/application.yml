@@ -50,6 +50,7 @@ authorizationfilter:
   requestUriList[9]: /alipay/callBack
   requestUriList[10]: /other/getImgCode
   requestUriList[11]: /pp/isPermission
+  requestUriList[12]: /alipay/change
   
 
 youxin:

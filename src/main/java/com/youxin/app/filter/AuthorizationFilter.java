@@ -106,12 +106,14 @@ public class AuthorizationFilter implements Filter {
 				arg2.doFilter(arg0, arg1);
 				return;
 			}
-			if (requestUri.equals("/getImgCode")) {
+			if (requestUri.equals("/other/getImgCode")) {
 				arg2.doFilter(arg0, arg1);
 				return;
 			}
 
 			// 需要登录
+			System.out.println("免登录接口"+request.getRequestURI()+"/n"+requestUriMap);
+			System.out.println(isNeedLogin(request.getRequestURI()));
 			if (isNeedLogin(request.getRequestURI())) {
 				// 请求令牌是否包含
 				if (StringUtil.isEmpty(accessToken)) {
@@ -145,7 +147,7 @@ public class AuthorizationFilter implements Filter {
 				if(requestUriMap.get("/wxpay/callBack").equals(requestUri.trim())||requestUriMap.get("/alipay/callBack").equals(requestUri.trim())) {
 					logger.debug("支付回调："+requestUri.trim());
 				}else if (!AuthServiceUtils.authOpenApiSecret(time, secret)) {
-					renderByError(response, "授权认证失败");
+					renderByError(response, "授权认证失败1");
 					return;
 				}
 				arg2.doFilter(arg0, arg1);

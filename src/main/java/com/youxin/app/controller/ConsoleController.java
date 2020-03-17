@@ -26,6 +26,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
+import com.mongodb.WriteResult;
+import com.youxin.app.entity.Advert;
 import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
@@ -93,10 +96,14 @@ import com.youxin.app.yx.request.team.QueryDetail;
 
 
 
+
 @RestController
 @RequestMapping("/console/")
 public class ConsoleController extends AbstractController{
-
+//	private static String RELURL="D:/pic";
+//	private static String ADPATH="/ad";
+	private static String RELURL="/data/pic";
+	private static String ADPATH="/ad";
 	@Autowired
 	AdminConsoleService consoleService;
 	
@@ -746,6 +753,7 @@ public class ConsoleController extends AbstractController{
 			HelpCenter helpCenter = q.get();
 			hc.setCreateTime(helpCenter.getCreateTime());
 			hc.setUpdateTime(DateUtil.currentTimeSeconds());
+			hc.setId(parse(hcid));
 		}
 		Key<HelpCenter> save = dfds.save(hc);
 		return Result.success(save);
@@ -761,6 +769,108 @@ public class ConsoleController extends AbstractController{
 			dfds.delete(q);
 		}
 		
+		return Result.success();
+	}
+	
+	/**
+	 * 广告列表
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param type
+	 * @param state
+	 * @param nickName
+	 * @return
+	 */
+	@RequestMapping(value = "/adList")
+	public Object adList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "0") int state
+			,@RequestParam(defaultValue = "") String nickName ) {
+		PageResult<Advert> result=new PageResult<>();
+		 Query<Advert> q = dfds.createQuery(Advert.class);
+		 	if(type>0) 
+				q.field("type").equal(type);
+			if(state!=0) 
+				q.field("state").equal(state);
+			if(!StringUtil.isEmpty(nickName))
+				q.field("title").contains(nickName);
+		q.order("-createTime,-updateTime");
+		result.setCount(q.count());
+		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+		return Result.success(result);
+	}
+	/**
+	 * 获取广告实体
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/getAd")
+	public Object getAd(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		Query<Advert> q = dfds.createQuery(Advert.class).field("_id").equal(parse(id));
+		
+		return Result.success(q.get());
+	}
+	/**
+	 * 修改或者保存广告
+	 * @param hcid
+	 * @param hc
+	 * @return
+	 */
+	@RequestMapping(value = "/saveAd")
+	public Object saveAd(@ModelAttribute Advert advert,@RequestParam(value="file",required=false)MultipartFile file,HttpServletRequest request) {
+		if(StringUtil.isEmpty(advert.getCid())) {
+			advert.setCreateTime(DateUtil.currentTimeSeconds());
+//			advert.setState(1);
+		}else {
+			Query<Advert> q = dfds.find(Advert.class);
+			q.field("_id").equal(parse(advert.getCid()));
+			Advert advert1 = q.get();
+			advert.setCreateTime(advert1.getCreateTime());
+			advert.setUpdateTime(DateUtil.currentTimeSeconds());
+			advert.setId(parse(advert.getCid()));
+		}
+		Key<Advert> save = dfds.save(advert);
+		//贷款图标
+		String uploadPicture = FileUtil.uploadPicture(file, RELURL+ADPATH,ADPATH,save.getId().toString(), request);
+		if(uploadPicture!=null) {
+			advert.setImg(uploadPicture);
+			dfds.save(advert);
+			return Result.success();
+		}else  {
+			if(StringUtil.isEmpty(advert.getCid())) {
+				dfds.delete(advert);
+				return Result.error("图片上传失败，请重试");
+			}else
+				return Result.success();
+				
+			
+		}
+			
+			
+		
+	}
+	/**
+	 * 删除广告
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/delAd")
+	public Object delAd(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		String[] ids = StringUtil.getStringList(id, ",");
+		for(String idd:ids) {
+			Advert ad = dfds.createQuery(Advert.class).field("_id").equal(parse(idd)).get();
+			dfds.delete(ad);
+			 //存在url进行图片删除
+			 if(!StringUtil.isEmpty(ad.getImg())) {
+				 String fileF = ad.getImg().substring(ad.getImg().lastIndexOf("."), ad.getImg().length());//文件后缀
+				 FileUtil.delFile(new File(RELURL+ADPATH+"/"+idd+fileF));
+			 }
+		}
 		return Result.success();
 	}
 	

@@ -12,33 +12,15 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         $ = layui.jquery,
         laydate = layui.laydate,
         laytpl = layui.laytpl,
-        table = layui.table,
-		layedit = layui.layedit;
-	   /* layedit.set({
-	    	  uploadImage: {
-	    	    url: 'http://www.baidu.com' //接口url
-	    	    ,type: 'post' //默认post
-	    	  }
-	    	});*/
- 	var lbd=layedit.build('content', {
-         height: 180,
-         uploadImage: {
-             url: "http://youxinruanjian.cn/console/uploadSdkImage"
-         }
-     }); //建立编辑器
+        table = layui.table;
+	 
 
-    //根据系统邀请码类型移除对应邀请码的按钮
-//    if(localStorage.getItem("registerInviteCode")!=2){
-//      $(".create_populer_inviteCode").remove();
-//    }else{
-//     $(".btn_create_register_InviteCode").remove();
-//    }
 
 	  //用户列表
     var baseTable = table.render({
       elem: '#body_list'
       ,toolbar: '#toolbarConfigs'
-      ,url:request("/console/helpCenterList")
+      ,url:request("/console/adList")
       ,id: 'body_list'
       ,page: true
       ,curr: 0
@@ -48,54 +30,27 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
       ,cols: [[ //表头
            {type:'checkbox',fixed:'left'}// 多选
           ,{field: 'id', title: 'ID',sort:'true', width:100}
+          ,{field: 'img', title: '图片',sort:'true', width:200, height:200,templet: function(d){
+              // console.log("log    :"+JSON.stringify(d.loginLog));
+        		if(d.img==undefined||d.img==""){
+        			return "";
+        		}else{
+        			return '<img src="'+d.img+'"/>';
+        		}
+
+        }}
           ,{field: 'title', title: '标题',sort:'true', width:100}
           ,{field: 'content', title: '内容',sort:'true', width:100}
+          ,{field: 'targetUrl', title: '跳转地址',sort:'true', width:100}
+          ,{field: 'des', title: '备注',sort:'true', width:100}
+          ,{field: 'type', title: '类型',sort:'true', width:100}
           ,{field: 'state',title:'状态',width:100,templet: function(d){
         	  if(d.state==1)
-        		  return "已反馈";
+        		  return "生效";
         	  else
-        		  return "未反馈";
+        		  return "未生效";
           }}
-          ,{field: 'noUserIds',title:'未解决人',width:100,templet: function(d){
-        	  if(d.noUserIds){
-        		  return d.noUserIds.join(",");
-        	  }
-              return "";
-          }}
-          ,{field: 'overUserIds',title:'已解决人',width:100,templet: function(d){
-        	  if(d.overUserIds){
-        		  return d.overUserIds.join(",");
-        	  }
-              return "";
-          }}
-          ,{field: 'type',title:'类型',width:100,templet: function(d){
-        	  if(d.type==1){
-        		  return "帮助中心";
-        	  }
-        	  if(d.type==2){
-        		  return "账号问题";
-        	  }
-        	  if(d.type==3){
-        		  return "好友管理";
-        	  }
-        	  if(d.type==4){
-        		  return "聊天功能";
-        	  }
-        	  if(d.type==5){
-        		  return "群聊功能";
-        	  }
-        	  if(d.type==6){
-        		  return "红包功能";
-        	  }
-        	  if(d.type==7){
-        		  return "钱包";
-        	  }
-        	  if(d.type==8){
-        		  return "启动页广告";
-        	  }
-            return "";
-          }}
-          ,{field: 'userId', title: '反馈人id集合',sort:'true', width:100}
+         
           ,{field: 'updateTime',title:'修改时间',width:195,templet: function(d){
               return UI.getLocalTime(d.updateTime);
           }}
@@ -123,34 +78,31 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     });
  /*   $(".nickName").val('');*/
     $(".commit_add").on("click",function(){
-		var content=layedit.getContent(lbd);
-		
-		if($("#title").val()==""){
-			layui.layer.alert("请输入标题");
-			return;
-		}
-		if(!content){
-			layui.layer.alert("请输入内容");
-			return;
-		}
-		if($("#type").val()==""){
-			layui.layer.alert("请选择类型");
-			return;
-		}
-		if($("#state").val()==""){
-			layui.layer.alert("请选择状态");
+    	if( !Number.isInteger(parseInt($("#type").val()))){
+			layui.layer.alert("type应为数字");
 			return;
 		}
 		
+	
+		var myform = new FormData();
+
+        myform.append('cid', $("#id").val());
+        myform.append('title', $("#title").val());
+        myform.append('content',$("#content").val());
+        myform.append('targetUrl',$("#targetUrl").val());
+        myform.append('des',$("#des").val());
+        myform.append('state',$("#state").val());
+        myform.append('type',$("#type").val());
+        myform.append('file', $("#img")[0].files[0]);
+        if($("#imgvo").val()!=""){
+        	myform.append('img', $("#imgvo").val());
+		}
 		$.ajax({
-			url:request('/console/saveCenterList'),
-			data:{
-				hcid:$("#id").val(),
-				title:$("#title").val(),
-				content:content,
-				type:$("#type").val(),
-				state:$("#state").val()
-			},
+			url:'/console/saveAd',
+			type:'post',
+			contentType: false,
+			data:myform,
+			processData: false,
 			dataType:'json',
 			async:false,
 			success:function(result){
@@ -198,11 +150,11 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
   table.on('tool(body_list)', function(obj){
       var layEvent = obj.event,
             data = obj.data;
-      console.log(layedit);  
+     
       if(layEvent === 'delete'){//删除
     	  Base.checkDeletesImpl(data.id,1);
       }else if(layEvent === 'update'){// 修改用户    
-    	  Base.update(obj.data,obj.data.id,layedit,lbd);
+    	  Base.update(obj.data,obj.data.id);
       }
   });
 
@@ -252,145 +204,33 @@ function renderTable(){
 var configTime="";
 
 var Base={
-	list:function(e,pageSize){
-		var html="";
-		if(e==undefined){
-			e=0;
-		}else if(pageSize==undefined){
-			pageSize=10;
-		}
-		$.ajax({
-			type:'POST',
-			url:request('/console/userList'),
-			data:{
-				pageIndex:(e==0?"0":e-1),
-				pageSize:pageSize
-			},
-			dataType:'json',
-			async:false,
-			success:function(result){
-				if(result.data.pageData.length!=0){
-					console.log(result.data.allPageCount);
-					$("#pageCount").val(result.data.allPageCount);
-					for(var i=0;i<result.data.pageData.length;i++){
-							if(result.data.pageData[i].configTime!=0){
-								configTime=UI.getLocalTime(result.data.pageData[i].configTime);
-							}
-					
-					}
-
-			/*		$("#userList_table").empty();
-					$("#userList_table").append(html);*/
-					$("#baseList").show();
-					$("#base_table").show();
-					$("#addConfig").hide();
-				}
-
-			}
-		})
-	},
+	
 
 
 	//  新增
 	add:function(){
 		$("#baseList").hide();
 		$("#addConfig").show();
-        $("#id").val("");
+		$("#id").val("");
+        $("#type").val("");
+        $("#img").val("");
+        $("#imgvo").val("");
+        $("#state").val("");
+        $("#des").val("");
         $("#title").val("");
         $("#content").val("");
-        $("#state").val("-1");
-        $("#type").val("");
+        $("#targetUrl").val("");
      
         // 重新渲染
         layui.form.render();
 		$("#addConfigTitle").empty();
 		$("#addConfigTitle").append("新增用户");
 	},
-	/*// 提交新增用户
-	commit_add:function(){
-		
-		if($("#name").val()==""){
-			layui.layer.alert("请输入昵称");
-			return;
-		}
-		if($("#mobile").val()==""){
-			layui.layer.alert("请输入手机号");
-			return;
-		}else{
-			 var patrn = /^[0-9]*$/;
-             if (patrn.exec($("#mobile").val()) == null || $("#telephone").val() == "") {
-                 layui.layer.alert("请使用手机号注册");
-                 return;
-             }
-		}
-		if($("#password").val()==""){
-			layui.layer.alert("请输入密码");
-			return;
-		}
-		if($("#birth").val()==""){
-			layui.layer.alert("请输入生日");
-			return;
-		}
-		if($("#gender").val()==""){
-			layui.layer.alert("请输入性别");
-			return;
-		}
-		
-		$.ajax({
-			url:request('/console/updateUser'),
-			data:{
-				id:$("#userId").val(),
-				accid:$("#accid").val(),
-				name:$("#name").val(),
-				mobile:$("#mobile").val(),
-				password:$("#password").val(),
-				birth:$("#birth").val(),
-				gender:$("#gender").val(),
-				updateUserId:localStorage.getItem("account")
-			},
-			dataType:'json',
-			async:false,
-			success:function(result){
-				if(result.code==1){
-					if($("#userId").val()==""){
-						layer.alert("添加成功");
-                        $("#baseList").show();
-                        $("#addConfig").hide();
-                        layui.table.reload("body_list",{
-                            page: {
-                                curr: 1 //重新从第 1 页开始
-                            },
-                            where: {
-
-                            }
-                        })
-
-					}else{
-						layer.alert("修改成功");
-                        $("#baseList").show();
-                        $("#addConfig").hide();
-                        renderTable();
-					}
-
-				}else{
-					if(result.data == null){
-						layer.alert(result.msg);
-					}
-					layer.alert(result.data);
-				}
-
-			},
-			error:function(result){
-				if(result.code==0){
-					layer.alert(result.msg);
-				}
-			}
-		})
-	},*/
+	
 	// 修改用户
 	update:function(data,id,layedit,lbd){
 		myFn.invoke({
-			url:request('/console/getCenterList'),
+			url:request('/console/getAd'),
 			data:{
 				id:id
 			},
@@ -400,7 +240,10 @@ var Base={
 					$("#id").val(result.data.id),
 					$("#title").val(result.data.title),
 					$("#content").val(result.data.content),
-					layedit.setContent(lbd, result.data.content, false),
+					$("#des").val(result.data.des),
+					$("#img").val(""),
+					$("#imgvo").val(result.data.img),
+					$("#targetUrl").val(result.data.targetUrl),
 					$("#state").val(result.data.state),
 					$("#type").val(result.data.type)
 				}
@@ -436,7 +279,7 @@ var Base={
     checkDeletesImpl:function(id,checkLength){
         layer.confirm('确定删除吗',{icon:3, title:'提示消息',yes:function () {
                 myFn.invoke({
-                    url:request('/console/delCenterList'),
+                    url:request('/console/delAd'),
                     data:{
                     	id:id
                     },

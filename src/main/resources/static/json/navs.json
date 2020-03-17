@@ -90,6 +90,12 @@
 			"spread": false,
 			"complaint": true
 		},{
+			"title": "广告管理",
+			"icon": "&#xe6b2;",
+			"href": "/templates/console/advert.html",
+			"spread": false,
+			"complaint": true
+		},{
 			"title": "举报管理",
 			"icon": "&#xe6b2;",
 			"href": "/templates/console/complaint.html",

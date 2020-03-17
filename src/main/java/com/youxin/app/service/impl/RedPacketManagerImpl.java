@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
@@ -50,11 +49,9 @@ import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgRequest;
 
-
-
 @Service
-public class RedPacketManagerImpl{
-	protected Log log=LogFactory.getLog("pay");
+public class RedPacketManagerImpl {
+	protected Log log = LogFactory.getLog("pay");
 	@Autowired
 	private UserService userManager;
 	@Autowired
@@ -83,7 +80,7 @@ public class RedPacketManagerImpl{
 		// 判断红包是否超时
 		if (DateUtil.currentTimeSeconds() > packet.getOutTime()) {
 			map.put("list", getRedReceivesByRedId(packet.getId()));
-			return Result.failure(0,"该红包已超过24小时!", map);
+			return Result.failure(0, "该红包已超过24小时!", map);
 		}
 		/*
 		 * if(1==packet.getType()&&packet.getUserId().equals(userId)){ map.put("list",
@@ -97,8 +94,8 @@ public class RedPacketManagerImpl{
 		if (packet.getCount() > packet.getReceiveCount()) {
 			// 判断当前用户是否领过该红包
 			if (null == packet.getUserIds() || !packet.getUserIds().contains(userId)) {
-				if(packet.getStatus()==-1)
-					return  Result.error("红包已过期", map);
+				if (packet.getStatus() == -1)
+					return Result.error("红包已过期", map);
 				map.put("list", redReceivesByRedId);
 				return Result.success(map);
 			} else {
@@ -111,15 +108,26 @@ public class RedPacketManagerImpl{
 		}
 	}
 
+	public RedPacket getRedPacketByPayNo(Integer userId, String payNo) {
+		Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId).field("payNo")
+				.equal(payNo);
+		RedPacket packet = redPacketRepository.findOne(q);
+		return packet;
+	}
+	public RedPacket getRedPacketByAliPayNo(String aliPayNo) {
+		Query<RedPacket> q = redPacketRepository.createQuery().field("aliPayNo").equal(aliPayNo);
+		RedPacket packet = redPacketRepository.findOne(q);
+		return packet;
+	}
+
 	public synchronized Result openRedPacketById(Integer userId, ObjectId id) {
 		RedPacket packet = redPacketRepository.get(id);
-		
+
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("packet", packet);
-		if(packet.getType()==4&&!packet.getToUserIds().contains(userId)) 
-				return Result.error("抱歉，您不在指定红包领取人中!",map);
-			
-		
+		if (packet.getType() == 4 && !packet.getToUserIds().contains(userId))
+			return Result.error("抱歉，您不在指定红包领取人中!", map);
+
 		// 判断红包是否超时
 		if (DateUtil.currentTimeSeconds() > packet.getOutTime()) {
 			map.put("list", getRedReceivesByRedId(packet.getId()));
@@ -130,14 +138,14 @@ public class RedPacketManagerImpl{
 			// 判断当前用户是否领过该红包
 			//
 			if (null == packet.getUserIds() || !packet.getUserIds().contains(userId)) {
-				long s=DateUtil.currentTimeMilliSeconds();
+				long s = DateUtil.currentTimeMilliSeconds();
 				RedPacket packets = openRedPacket(userId, packet);
-				
+
 				map.put("packet", packets);
 				map.put("list", getRedReceivesByRedId(packet.getId()));
-				long e=DateUtil.currentTimeMilliSeconds();
-				System.out.println("领取红包耗时："+(e-s));
-				if(packets==null) 
+				long e = DateUtil.currentTimeMilliSeconds();
+				System.out.println("领取红包耗时：" + (e - s));
+				if (packets == null)
 					return Result.error("支付宝红包异常");
 				else
 					return Result.success(map);
@@ -153,20 +161,20 @@ public class RedPacketManagerImpl{
 
 	private synchronized RedPacket openRedPacket(Integer userId, RedPacket packet) {
 		int overCount = packet.getCount() - packet.getReceiveCount();
-		User user =userManager.getUser(userId);
-		if(StringUtil.isEmpty(user.getAliUserId()))
+		User user = userManager.getUser(userId);
+		if (StringUtil.isEmpty(user.getAliUserId()))
 			throw new ServiceException(-1, "请先绑定支付宝");
 //		Map<String, Object> receiveBill = receiveBill(userId, packet.getUserId());
-		//24小时内超过 总共接收100次，或者接收同一个用户10次
+		// 24小时内超过 总共接收100次，或者接收同一个用户10次
 //		if(Integer.valueOf(receiveBill.get("num").toString())>=100||Integer.valueOf(receiveBill.get("numBysameId").toString())>=10)
 //			throw new ServiceException("一天只能接收100个红包，或者接收同一个人10次红包");
-		
+
 		WalletFour walletFour = getWalletFour(packet.getUserId(), packet.getRoomJid());
 		UserWallet userWallet = getUserWallet(userId);
 		LastWallet lastWallet = getLastWallet(packet.getRoomJid());
 		Double money = 0.0;
 		DecimalFormat df = new DecimalFormat("#.00");
-		if(walletFour != null && walletFour.getIsSetUpMoney()==1) {
+		if (walletFour != null && walletFour.getIsSetUpMoney() == 1) {
 			// 普通红包
 			if (1 == packet.getType()) {
 				if (1 == packet.getCount() - packet.getReceiveCount()) {
@@ -175,8 +183,8 @@ public class RedPacketManagerImpl{
 						money = packet.getOver();
 					} else {
 //						money = walletFour.getListRedPackgeNumber().get(packet.getReceiveCount()).getRedPackgeMoney();
-						money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount()+1));
-						//最后一个红包领取之后设置失效
+						money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount() + 1));
+						// 最后一个红包领取之后设置失效
 						walletFour.setIsSetUpMoney(0);
 						updateUserWallet(walletFour);
 					}
@@ -185,7 +193,7 @@ public class RedPacketManagerImpl{
 						money = packet.getMoney() / packet.getCount();
 					} else {
 //						money = walletFour.getListRedPackgeNumber().get(packet.getReceiveCount()).getRedPackgeMoney();
-						money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount()+1));
+						money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount() + 1));
 					}
 				}
 			} else {
@@ -194,7 +202,7 @@ public class RedPacketManagerImpl{
 					// if(walletFour.getListNumber().get(packet.getReceiveCount()).getRedPackgeId()
 					// == packet.getReceiveCount())
 //					money = walletFour.getListRedPackgeNumber().get(packet.getReceiveCount()).getRedPackgeMoney();
-					money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount()+1));
+					money = walletFour.getListRedPackgeMap().get(String.valueOf(packet.getReceiveCount() + 1));
 					if (1 == packet.getCount() - packet.getReceiveCount()) {
 						walletFour.setIsSetUpMoney(0);
 						updateUserWallet(walletFour);
@@ -203,47 +211,48 @@ public class RedPacketManagerImpl{
 					money = getRandomMoney(overCount, packet.getOver());
 				}
 			}
-			
-		}else if(lastWallet!=null && lastWallet.getRoomJid()!=null && packet.getCount()-1>0 &&
-				NumberUtil.subtract(df.format(packet.getMoney()), df.format(lastWallet.getRedPackgeMoney()))
-				.divide(new BigDecimal(packet.getCount()-1), 2, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal("0.01")) >=0) {
+
+		} else if (lastWallet != null && lastWallet.getRoomJid() != null && packet.getCount() - 1 > 0
+				&& NumberUtil.subtract(df.format(packet.getMoney()), df.format(lastWallet.getRedPackgeMoney()))
+						.divide(new BigDecimal(packet.getCount() - 1), 2, BigDecimal.ROUND_HALF_UP)
+						.compareTo(new BigDecimal("0.01")) >= 0) {
 			// 普通红包
 			if (1 == packet.getType()) {
 				if (1 == packet.getCount() - packet.getReceiveCount()) {
 					// 剩余一个 领取剩余红包
 					money = packet.getOver();
-					//尾包控制领取之后失效
+					// 尾包控制领取之后失效
 					lastWallet.setState(0);
 					updateLastWallet(lastWallet);
 				} else {
-					money = (packet.getMoney()-lastWallet.getRedPackgeMoney()) / (packet.getCount()-1);
+					money = (packet.getMoney() - lastWallet.getRedPackgeMoney()) / (packet.getCount() - 1);
 				}
-			} else{ // 拼手气红包或者口令红包
-				if(packet.getCount() - packet.getReceiveCount()>1) {
-					money = getRandomMoney(overCount-1, packet.getOver()-lastWallet.getRedPackgeMoney());
-				}else {
+			} else { // 拼手气红包或者口令红包
+				if (packet.getCount() - packet.getReceiveCount() > 1) {
+					money = getRandomMoney(overCount - 1, packet.getOver() - lastWallet.getRedPackgeMoney());
+				} else {
 					money = getRandomMoney(overCount, packet.getOver());
-					//尾包控制领取之后失效
+					// 尾包控制领取之后失效
 					lastWallet.setState(0);
 					updateLastWallet(lastWallet);
 				}
-					
+
 			}
-				
-			
-		}else if (userWallet != null&& packet.getCount()-1>0) {
+
+		} else if (userWallet != null && packet.getCount() - 1 > 0) {
 			// 普通红包
 			if (1 == packet.getType()) {
 				if (1 == packet.getCount() - packet.getReceiveCount()) {
 					// 剩余一个 领取剩余红包
 					money = packet.getOver();
-					if(userWallet.getRedPackgeMoney()==money) {
+					if (userWallet.getRedPackgeMoney() == money) {
 						userWallet.setState(0);
 						updateUserWallet(userWallet);
 					}
 				} else {
 					if (NumberUtil.subtract(df.format(packet.getOver()), df.format(userWallet.getRedPackgeMoney()))
-							.divide(new BigDecimal(overCount-1), 2, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal("0.01")) >=0) {
+							.divide(new BigDecimal(overCount - 1), 2, BigDecimal.ROUND_HALF_UP)
+							.compareTo(new BigDecimal("0.01")) >= 0) {
 						money = userWallet.getRedPackgeMoney();
 						userWallet.setState(0);
 						updateUserWallet(userWallet);
@@ -251,23 +260,23 @@ public class RedPacketManagerImpl{
 						money = packet.getMoney() / packet.getCount();
 				}
 			} else { // 拼手气红包或者口令红包
-				
+
 				if (NumberUtil.subtract(df.format(packet.getOver()), df.format(userWallet.getRedPackgeMoney()))
-						.divide(new BigDecimal(overCount-1), 2, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal("0.01")) >=0
-						&& 1 < packet.getCount() - packet.getReceiveCount()) {
+						.divide(new BigDecimal(overCount - 1), 2, BigDecimal.ROUND_HALF_UP)
+						.compareTo(new BigDecimal("0.01")) >= 0 && 1 < packet.getCount() - packet.getReceiveCount()) {
 					money = userWallet.getRedPackgeMoney();
 					userWallet.setState(0);
 					updateUserWallet(userWallet);
-					
+
 				} else {
 					money = getRandomMoney(overCount, packet.getOver());
-					if(userWallet.getRedPackgeMoney()==money) {
+					if (userWallet.getRedPackgeMoney() == money) {
 						userWallet.setState(0);
 						updateUserWallet(userWallet);
 					}
 				}
 			}
-			
+
 		} else {
 			// 普通红包
 			if (1 == packet.getType()) {
@@ -283,11 +292,11 @@ public class RedPacketManagerImpl{
 
 		// 保留两位小数
 		Double over = (packet.getOver() - money);
-		
-		money=Double.valueOf(df.format(money));
+
+		money = Double.valueOf(df.format(money));
 		packet.setOver(Double.valueOf(df.format(over)));
 		packet.getUserIds().add(userId);
-		
+
 		Query<RedPacket> q = redPacketRepository.createQuery();
 		q.field("_id").equal(packet.getId());
 		UpdateOperations<RedPacket> ops = redPacketRepository.createUpdateOperations();
@@ -298,7 +307,6 @@ public class RedPacketManagerImpl{
 			ops.set("status", 2);
 			packet.setStatus(2);
 		}
-		
 
 		// 实例化一个红包接受对象
 		RedReceive receive = new RedReceive();
@@ -310,16 +318,17 @@ public class RedPacketManagerImpl{
 		receive.setTime(DateUtil.currentTimeSeconds());
 		receive.setUserName(userManager.getUser(userId).getName());
 		receive.setSendName(userManager.getUser(packet.getUserId()).getName());
-		
+
 		String tradeNo = AliPayUtil.getOutTradeNo();
-		if(packet.getPayType()!=1) {
+		if (packet.getPayType() != 1) {
 			// 修改金额
 			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
-		}else {
-			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money+"",tradeNo,packet.getAliPayNo(),user.getAliUserId());
-			log.debug("支付宝打款："+transUni);
-			
-			if(transUni==null||!"SUCCESS".equals(transUni))
+		} else {
+			String transUni = AliPayUtil.transUni("领取红包", "领取红包", money + "", tradeNo, packet.getAliPayNo(),
+					user.getAliUserId());
+			log.debug("支付宝打款：" + transUni);
+
+			if (transUni == null || !"SUCCESS".equals(transUni))
 				throw new ServiceException("领取失败");
 		}
 		ObjectId id = (ObjectId) redReceiveRepository.save(receive).getId();
@@ -328,12 +337,12 @@ public class RedPacketManagerImpl{
 		final Double num = money;
 
 		MsgRequest messageBean = new MsgRequest();
-		messageBean.setFrom(Md5Util.md5HexToAccid(userId+""));
+		messageBean.setFrom(Md5Util.md5HexToAccid(userId + ""));
 		messageBean.setType(100);// 文本
 		if (StringUtil.isEmpty(packet.getRoomJid())) {
 			messageBean.setOpe(0);// 个人消息
 			messageBean.setTo(packet.getAccid());
-		}else {
+		} else {
 			messageBean.setOpe(1);// 群消息
 			messageBean.setTo(packet.getRoomJid());
 		}
@@ -342,117 +351,127 @@ public class RedPacketManagerImpl{
 //		messageBean.setBody("{\"type\":"+KConstants.MsgType.OPENREDPACKET+",\"data\":"+JSON.toJSONString(packet)+"}");
 		messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.OPENREDPACKET, packet)));
 		try {
-			JSONObject json=SDKService.sendMsg(messageBean);
-			if(json.getInteger("code")!=200) 
+			JSONObject json = SDKService.sendMsg(messageBean);
+			if (json.getInteger("code") != 200)
 				log.debug("红包领取 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.debug("红包领取 sdk消息发送失败"+e.getMessage());
+			log.debug("红包领取 sdk消息发送失败" + e.getMessage());
 		}
-		
-			// 开启一个线程 添加一条消费记录
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					
-					// 创建领取记录
-					ConsumeRecord record = new ConsumeRecord();
-					record.setUserId(userId);
-					record.setTradeNo(tradeNo);
-					record.setMoney(num);
-					if(packet.getPayType()!=1) {
-						record.setStatus(KConstants.OrderStatus.END);
-						record.setPayType(KConstants.PayType.BALANCEAY); // 余额支付
-						record.setType(KConstants.ConsumeType.RECEIVE_REDPACKET);
-					}else {
-						record.setStatus(KConstants.OrderStatus.CREATE);
-						record.setPayType(KConstants.PayType.ALIPAY); // 支付宝支付
-						record.setType(KConstants.ConsumeType.ALI_RECEIVE_COUPON);
-					}
-					
-					
-					record.setDesc("红包接受");
-					record.setTime(DateUtil.currentTimeSeconds());
-					crmi.saveConsumeRecord(record);
+
+		// 开启一个线程 添加一条消费记录
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+
+				// 创建领取记录
+				ConsumeRecord record = new ConsumeRecord();
+				record.setUserId(userId);
+				record.setTradeNo(tradeNo);
+				record.setMoney(num);
+				if (packet.getPayType() != 1) {
+					record.setStatus(KConstants.OrderStatus.END);
+					record.setPayType(KConstants.PayType.BALANCEAY); // 余额支付
+					record.setType(KConstants.ConsumeType.RECEIVE_REDPACKET);
+				} else {
+					record.setStatus(KConstants.OrderStatus.CREATE);
+					record.setPayType(KConstants.PayType.ALIPAY); // 支付宝支付
+					record.setType(KConstants.ConsumeType.ALI_RECEIVE_COUPON);
 				}
-			}).start();
-	
+
+				record.setDesc("红包接受");
+				record.setTime(DateUtil.currentTimeSeconds());
+				crmi.saveConsumeRecord(record);
+			}
+		}).start();
+
 		return packet;
 	}
-	 private static synchronized Double getRandomMoney(int num,Double moeny) {
-		  Double max=200d;//最大金额
-		  Double min=0.01d;//最小金额
-		  DecimalFormat df = new DecimalFormat("#.00");
-		  df.setRoundingMode(RoundingMode.HALF_EVEN);
-		  Double resultMoney=0.0d;
-		  Random r = new Random();
-		  long currentTimeMilliSeconds = DateUtil.currentTimeMilliSeconds();
-		  if (num == 1) {
-		   System.out.println(moeny);
-		   resultMoney = moeny;
-		  } else {
-		   if (Double.valueOf(df.format(moeny / num)) == max) {
-		    System.out.println(max);
-		    resultMoney = max;
-		   } else if (Double.valueOf(df.format(moeny / num)) == min) {
-		    System.out.println(min);
-		    resultMoney = min;
-		   } else if (Double.valueOf(df.format(moeny / num)) > max || Double.valueOf(df.format(moeny / num)) < min) {
-		    System.out.println("无法分配");
-		   } else {
-			moeny=moeny*2/num;
-		    double nd = r.nextDouble();
-		    Double rmoney = 0.0d;
 
-		    Double lesMoney = Double.valueOf(df.format(moeny - (num - 1) * max));
-		    if (lesMoney > 0) {
-		     rmoney = (max - lesMoney) * nd + lesMoney;
-		     System.out.println("1:" + rmoney);
-		    } else {
-		     // 计算此次最大分配金额，保证此次之后剩余金额与数量足够最小分配
-		     if ((moeny - (num - 1) * min) < max) {
-		      rmoney = (moeny - (num - 1) * min) * nd;
-		      System.out.println("2:" + rmoney);
-		     } else {
-		      rmoney = (max - (num - 1) * min) * nd;
-		      System.out.println("3:" + rmoney);
-		     }
-		    }
-		    rmoney = Double.valueOf(df.format(rmoney));
-		    if (rmoney == 0.0)
-		     rmoney = 0.01;
-		    System.out.println("结果：" + rmoney);
-		    resultMoney = rmoney;
-		   }
-		  }
-		  System.out.println("抢红包耗时："+(DateUtil.currentTimeMilliSeconds() - currentTimeMilliSeconds));
-		  return resultMoney;
-		 }
+//	public static void main(String[] args) {
+//		getRandomMoney(6, 0.1d);
+////		 DecimalFormat df = new DecimalFormat("#.00");
+////		for (int i = 0; i < 100; i++) {
+////			System.out.println(Double.valueOf(df.format(0.04 / 4)) == 0.01d);
+////		}
+//	}
 
-	/*private static synchronized Double getRandomMoney(int remainSize, Double remainMoney) {
-		// remainSize 剩余的红包数量
-		// remainMoney 剩余的钱
-		Double money = 0.0;
-		if (remainSize == 1) {
-			remainSize--;
-			money = (double) Math.round(remainMoney * 100) / 100;
-			System.out.println("=====> " + money);
-			return money;
-		}
-		Random r = new Random();
-		double min = 0.01; //
-//		double max = remainMoney / remainSize * 2;
-		//支付宝红包，单个发送不能超过200，单个领取不超过400,
-		double max = remainMoney / remainSize*2;
-		money = r.nextDouble() * max;
-		money = money <= min ? 0.01 : money;
-		money = Math.floor(money * 100) / 100;
-		System.out.println("=====> " + money);
-		remainSize--;
-		remainMoney -= money;
-		DecimalFormat df = new DecimalFormat("#.00");
-		return Double.valueOf(df.format(money));
-	}*/
+	private static synchronized Double getRandomMoney(int num, Double moeny) {
+		 double max = 200d;// 最大金额
+			double min = 0.01d;// 最小金额
+			double regMaxMoney = 0d;// 最小金额
+			DecimalFormat df = new DecimalFormat("#.00");
+			df.setRoundingMode(RoundingMode.HALF_EVEN);
+			Double resultMoney = 0.0d;
+			Random r = new Random();
+			long currentTimeMilliSeconds = DateUtil.currentTimeMilliSeconds();
+			if (num == 1) {
+				System.out.println(moeny);
+				resultMoney = moeny;
+			} else {
+				if (Double.valueOf(moeny / num) > max || Double.valueOf(moeny / num) < min) {
+					System.out.println("无法分配");
+				} else if (Double.valueOf(moeny / num) == max) {
+					System.out.println(max);
+					resultMoney = max;
+				} else if (Double.valueOf(moeny / num) == min) {
+					System.out.println(min);
+					resultMoney = min;
+				} else {
+				regMaxMoney=moeny;
+					moeny = moeny * 2 / num;
+					double nd = r.nextDouble();
+					Double rmoney = 0.0d;
+					Double lesMoney = Double.valueOf(df.format(regMaxMoney - (num - 1) * max));
+					if (lesMoney > 0) {
+						System.out.println("1:" + (max - lesMoney) * nd );
+						rmoney = (max - lesMoney) * nd + lesMoney;
+						rmoney=Double.valueOf(df.format(rmoney))>=max?(rmoney-0.01):rmoney;
+						System.out.println("1:" + rmoney);
+					}else {
+//						rmoney=moeny* nd;
+						// 计算此次最大分配金额，保证此次之后剩余金额与数量足够最小分配
+						if (moeny < max) {
+//							rmoney = (moeny - (num - 1) * min) * nd;
+							//减去最小分配之后的金额
+							Double nm=regMaxMoney - (num - 1) * min;
+							//若金额小于系数金额，则使用当前金额进行计算,否则用系数金额计算，防止单个金额过大问题
+							if(nm<moeny)
+								rmoney=nm* nd;
+							else
+								rmoney=moeny* nd;
+							if(rmoney<0.02)
+								rmoney=0.01;
+								
+							System.out.println("2:" + rmoney);
+						} else {
+							rmoney = (max - (num - 1) * min) * nd;
+							System.out.println("3:" + rmoney);
+						}
+					}
+					rmoney = Double.valueOf(df.format(rmoney));
+					if (rmoney == 0.0)
+						rmoney = 0.01;
+					System.out.println("结果：" + rmoney);
+					resultMoney = rmoney;
+				}
+			}
+			System.out.println("抢红包耗时：" + (DateUtil.currentTimeMilliSeconds() - currentTimeMilliSeconds));
+			return resultMoney;
+	}
+
+	/*
+	 * private static synchronized Double getRandomMoney(int remainSize, Double
+	 * remainMoney) { // remainSize 剩余的红包数量 // remainMoney 剩余的钱 Double money = 0.0;
+	 * if (remainSize == 1) { remainSize--; money = (double) Math.round(remainMoney
+	 * * 100) / 100; System.out.println("=====> " + money); return money; } Random r
+	 * = new Random(); double min = 0.01; // // double max = remainMoney /
+	 * remainSize * 2; //支付宝红包，单个发送不能超过200，单个领取不超过400, double max = remainMoney /
+	 * remainSize*2; money = r.nextDouble() * max; money = money <= min ? 0.01 :
+	 * money; money = Math.floor(money * 100) / 100; System.out.println("=====> " +
+	 * money); remainSize--; remainMoney -= money; DecimalFormat df = new
+	 * DecimalFormat("#.00"); return Double.valueOf(df.format(money)); }
+	 */
 
 	public void replyRedPacket(String id, String reply) {
 		Integer userId = ReqUtil.getUserId();
@@ -472,66 +491,68 @@ public class RedPacketManagerImpl{
 	}
 
 	// 发送的红包
-public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int pageSize,Map<String, String> param) {
-		
+	public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int pageSize,
+			Map<String, String> param) {
+
 		Query<RedPacket> q = redPacketRepository.createQuery();
 		System.out.println(param);
-		if(param!=null) {
-			if(!StringUtil.isEmpty(param.get("startTime"))) {
+		if (param != null) {
+			if (!StringUtil.isEmpty(param.get("startTime"))) {
 				q.field("sendTime").greaterThanOrEq(Long.valueOf(param.get("startTime")));
 			}
-			if(!StringUtil.isEmpty(param.get("endTime"))) {
-				q.field("sendTime").lessThanOrEq(Long.valueOf(param.get("endTime")));		
+			if (!StringUtil.isEmpty(param.get("endTime"))) {
+				q.field("sendTime").lessThanOrEq(Long.valueOf(param.get("endTime")));
 			}
 			System.out.println(param.get("jid"));
 			System.out.println(!StringUtil.isEmpty(param.get("jid")));
-			if(!StringUtil.isEmpty(param.get("jid"))) {
-				q.field("roomJid").equal(param.get("jid"));	
+			if (!StringUtil.isEmpty(param.get("jid"))) {
+				q.field("roomJid").equal(param.get("jid"));
 			}
-			//红包是否领完
-			if(!StringUtil.isEmpty(param.get("isOver"))) {
+			// 红包是否领完
+			if (!StringUtil.isEmpty(param.get("isOver"))) {
 				if (param.get("isOver").equals("true"))
-					q.field("status").equal(2);	
-				else 
-					q.field("status").equal(1);	
+					q.field("status").equal(2);
+				else
+					q.field("status").equal(1);
 			}
 		}
-		
-		if(userId!=null&&userId>0) 
+
+		if (userId != null && userId > 0)
 			q.field("userId").equal(userId);
-		System.out.println("查询参数:"+q);
+		System.out.println("查询参数:" + q);
 		return q.order("-sendTime").offset(pageIndex * pageSize).limit(pageSize).asList();
 	}
 
 	// 收到的红包
-	public List<RedReceive> getRedReceiveList(Integer userId, int pageIndex, int pageSize,Map<String, String> param) {
-			Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
-			System.out.println(param);
-			if(param!=null) {
-				if(!StringUtil.isEmpty(param.get("startTime"))) {
-					q.field("time").greaterThanOrEq(Long.valueOf(param.get("startTime")));
-				}
-				if(!StringUtil.isEmpty(param.get("endTime"))) {
-					q.field("time").lessThanOrEq(Long.valueOf(param.get("endTime")));		
-				}
+	public List<RedReceive> getRedReceiveList(Integer userId, int pageIndex, int pageSize, Map<String, String> param) {
+		Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
+		System.out.println(param);
+		if (param != null) {
+			if (!StringUtil.isEmpty(param.get("startTime"))) {
+				q.field("time").greaterThanOrEq(Long.valueOf(param.get("startTime")));
 			}
-			
-			return q.order("-time").offset(pageIndex * pageSize).limit(pageSize).asList();
+			if (!StringUtil.isEmpty(param.get("endTime"))) {
+				q.field("time").lessThanOrEq(Long.valueOf(param.get("endTime")));
+			}
 		}
 
+		return q.order("-time").offset(pageIndex * pageSize).limit(pageSize).asList();
+	}
+
 	// 发送的红包
-	public PageResult<RedPacket> getRedPacketList(String userName,int userId,int toUserId, int pageIndex, int pageSize) {
+	public PageResult<RedPacket> getRedPacketList(String userName, int userId, int toUserId, int pageIndex,
+			int pageSize) {
 		PageResult<RedPacket> result = new PageResult<RedPacket>();
 		Query<RedPacket> q = redPacketRepository.createQuery().order("-sendTime");
 		if (!StringUtil.isEmpty(userName))
 			q.field("userName").equal(userName);
-		if(userId>0) {
+		if (userId > 0) {
 			q.field("userId").equal(userId);
 		}
-		if(toUserId>0) {
-			q.or(q.criteria("toUserId").equal(toUserId),q.criteria("userIds").hasThisOne(toUserId));
+		if (toUserId > 0) {
+			q.or(q.criteria("toUserId").equal(toUserId), q.criteria("userIds").hasThisOne(toUserId));
 		}
-		
+
 		result.setCount(q.count());
 		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex, pageSize)));
 		return result;
@@ -546,55 +567,56 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex, pageSize)));
 		return result;
 	}
+
 	// 一天之内发送的红包金额
 	public Double sendBill(Integer userId) {
-			Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId)
-					.field("status").equal(1);
-			long nowTime = DateUtil.currentTimeSeconds();
-			q.field("sendTime").lessThanOrEq(nowTime);
-			q.field("sendTime").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
-			
-			List<RedPacket> asList = q.asList();
-			Double totalMoney=0.0;
-			for (int i = 0; i < asList.size(); i++) {
-				totalMoney=totalMoney+asList.get(0).getMoney();
-			}
-			DecimalFormat df = new DecimalFormat("#.00");
-			
-			return Double.valueOf(df.format(totalMoney));
+		Query<RedPacket> q = redPacketRepository.createQuery().field("userId").equal(userId).field("status").equal(1);
+		long nowTime = DateUtil.currentTimeSeconds();
+		q.field("sendTime").lessThanOrEq(nowTime);
+		q.field("sendTime").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
+
+		List<RedPacket> asList = q.asList();
+		Double totalMoney = 0.0;
+		for (int i = 0; i < asList.size(); i++) {
+			totalMoney = totalMoney + asList.get(0).getMoney();
 		}
-		// 一天之内接收的红包金额,个数
-		public Map<String, Object> receiveBill(Integer userId,Integer sendId) {
-				Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
-				long nowTime = DateUtil.currentTimeSeconds();
-				q.field("time").lessThanOrEq(nowTime);
-				q.field("time").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
-				
-				List<RedReceive> asList = q.asList();
-				Double totalMoney=0.0;
-				for (int i = 0; i < asList.size(); i++) {
-					totalMoney=totalMoney+asList.get(0).getMoney();
-				}
-				DecimalFormat df = new DecimalFormat("#.00");
-				Map<String, Object> result=new HashMap<String, Object>();
-				result.put("totalMoney", Double.valueOf(df.format(totalMoney)));
-				result.put("num", q.count());
-				q.field("sendId").equal(sendId);
-				result.put("numBysameId", q.count());
-				return result;
-			}
-	
-	
+		DecimalFormat df = new DecimalFormat("#.00");
+
+		return Double.valueOf(df.format(totalMoney));
+	}
+
+	// 一天之内接收的红包金额,个数
+	public Map<String, Object> receiveBill(Integer userId, Integer sendId) {
+		Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
+		long nowTime = DateUtil.currentTimeSeconds();
+		q.field("time").lessThanOrEq(nowTime);
+		q.field("time").greaterThanOrEq(DateUtil.getOnedayNextDay(nowTime, 1, 1));
+
+		List<RedReceive> asList = q.asList();
+		Double totalMoney = 0.0;
+		for (int i = 0; i < asList.size(); i++) {
+			totalMoney = totalMoney + asList.get(0).getMoney();
+		}
+		DecimalFormat df = new DecimalFormat("#.00");
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("totalMoney", Double.valueOf(df.format(totalMoney)));
+		result.put("num", q.count());
+		q.field("sendId").equal(sendId);
+		result.put("numBysameId", q.count());
+		return result;
+	}
+
 	/**
 	 * 获取红包固定设置金额信息
+	 * 
 	 * @param userId
 	 * @param jid
 	 * @return
 	 */
 	public WalletFour getWalletFour(Integer userId, String jid) {
 		try {
-			WalletFour query = walletFourRepository.createQuery().field("userId")
-					.equal(userId).field("jid").equal(jid).get();
+			WalletFour query = walletFourRepository.createQuery().field("userId").equal(userId).field("jid").equal(jid)
+					.get();
 
 			return query;
 		} catch (Exception e) {
@@ -602,8 +624,10 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			return null;
 		}
 	}
+
 	/**
 	 * 更新红包固定设置金额信息
+	 * 
 	 * @param w
 	 * @return
 	 */
@@ -612,14 +636,14 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			walletFourRepository.save(w);
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+
 		}
 	}
-	
+
 	public UserWallet getUserWallet(Integer userId) {
 		try {
-			UserWallet query = userWalletRepository.createQuery()
-					.field("userId").equal(userId).field("state").equal(1).get();
+			UserWallet query = userWalletRepository.createQuery().field("userId").equal(userId).field("state").equal(1)
+					.get();
 
 			return query;
 		} catch (Exception e) {
@@ -627,20 +651,20 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			return null;
 		}
 	}
-	
+
 	public void updateUserWallet(UserWallet w) {
 		try {
 			userWalletRepository.save(w);
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+
 		}
 	}
-	
+
 	public LastWallet getLastWallet(String roomJid) {
 		try {
-			LastWallet query = lastWalletRepository.createQuery()
-					.field("roomJid").equal(roomJid).field("state").equal(1).get();
+			LastWallet query = lastWalletRepository.createQuery().field("roomJid").equal(roomJid).field("state")
+					.equal(1).get();
 
 			return query;
 		} catch (Exception e) {
@@ -648,25 +672,27 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			return null;
 		}
 	}
-	
+
 	public void updateLastWallet(LastWallet w) {
 		try {
 			lastWalletRepository.save(w);
 		} catch (Exception e) {
 			e.printStackTrace();
-			
+
 		}
 	}
+
 	/**
 	 * 获取红包固定设置金额信息
+	 * 
 	 * @param userId
 	 * @param jid
 	 * @return
 	 */
 	public WalletFour getUserWallet(Integer userId, String jid) {
 		try {
-			WalletFour query = walletFourRepository.createQuery().field("userId")
-					.equal(userId).field("jid").equal(jid).get();
+			WalletFour query = walletFourRepository.createQuery().field("userId").equal(userId).field("jid").equal(jid)
+					.get();
 
 			return query;
 		} catch (Exception e) {
@@ -674,6 +700,5 @@ public List<RedPacket> getSendRedPacketList(Integer userId, int pageIndex, int p
 			return null;
 		}
 	}
-	
-	
+
 }

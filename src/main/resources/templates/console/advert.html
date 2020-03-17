@@ -13,37 +13,24 @@
 		<div id="baseList" class="layui-col-md10">
 			 <div class="search_div" style="margin-top: 2%"> 
 				 <input type="text" name="" class="layui-input nickName" style="width: 15%;display: inline" placeholder="标题"> 
+				 <input type="text" name="" class="layui-input type" style="width: 15%;display: inline" placeholder="类型  1启动页广告"> 
 				<form class="layui-form" action="" style="float: left">
 					<div class="layui-form-item">
 						<select class="state" class="layui-select">
-							<option value="">请选择反馈状态</option>
-							<option value="1">已反馈</option>
-							<option value="-1">未反馈</option>
+							<option value="">请选择状态</option>
+							<option value="1">生效</option>
+							<option value="-1">失效</option>
 						</select>
 					</div>
 				</form> 
-				<form class="layui-form" action="" style="float: left">
-					<div class="layui-form-item">
-						<select class="type" class="layui-select">
-							<option value="">请选择类型</option>
-							<option value="1">帮助中心</option>
-							<option value="2">账号问题</option>
-							<option value="3">好友管理</option>
-							<option value="4">聊天功能</option>
-							<option value="5">群聊功能</option>
-							<option value="6">红包功能</option>
-							<option value="7">钱包</option>
-							<option value="8">启动页广告</option>
-						</select>
-					</div>
-				</form> 
+				
 				<button class="layui-btn search_base">搜索</button>
 				<button onclick="Base.add()" class="layui-btn btn_add">新增</button>
 				
 			</div>
 
 			<div id="base_table" class="layui-card" style="margin-top: 1%">
-				<div class="layui-card-header"><p>图文列表</p></div>
+				<div class="layui-card-header"><p>列表</p></div>
 				<div class="layui-card-body">
 					<table id="body_list" lay-filter="body_list" style="table-layout:fixed;word-break:break-all;" >
 						
@@ -73,38 +60,36 @@
 			<table class="layui-table">
 				<thead>
 					<tr>
-						<td width="20%">文章信息</td>
-						<td>文章信息</td>
+						<td width="20%">详情</td>
+						<td>详情</td>
 					</tr>
 				</thead>
 				<tbody>
+					<tr>
+						<td>图片</td>
+						<td><input id="imgvo" type="" name="" style="display: none"><input id="img" type="file" name="" class="layui-input"></td>
+					</tr>
+					<tr>
+						<td>跳转地址</td>
+						<td><input id="targetUrl" type="" name="" class="layui-input"></td>
+					</tr>
 					<tr>
 						<td>标题</td>
 						<td><input id="id" type="" name="" style="display: none"><input id="title" type="" name="" class="layui-input" ></td>
 					</tr>
 					<tr>
 						<td>内容</td>
-						<td><textarea id="content" style="display: none;"></textarea></td>
+						<td><input id="content" class="layui-input" type="" name=""></input></td>
+					</tr>
+					<tr>
+						<td>备注</td>
+						<td><input id="des" class="layui-input" type="" name=""></input></td>
 					</tr>
 					
 					<tr>
 						<td>类型</td>
 						<td>
-							<form class="layui-form" action="" style="">
-								<div class="layui-form-item">
-									<select id="type" class="layui-select" style="width: 100%">
-										<option selected="selected" value="">请选择</option>
-										<option value="1">帮助中心</option>
-										<option value="2">账号问题</option>
-										<option value="3">好友管理</option>
-										<option value="4">聊天功能</option>
-										<option value="5">群聊功能</option>
-										<option value="6">红包功能</option>
-										<option value="7">钱包</option>
-										<option value="8">启动页广告</option>
-									</select>
-								</div>
-							</form>
+							<input id="type" class="layui-input" type="number" name=""></input>
 						</td>
 					</tr>
 						<tr>
@@ -114,8 +99,8 @@
 								<div class="layui-form-item">
 									<select id="state" class="layui-select" style="width: 100%">
 										<option selected="selected" value="">请选择</option>
-										<option value="-1">未反馈</option>
-										<option value="1">已反馈</option>
+										<option value="-1">失效</option>
+										<option value="1">生效</option>
 									</select>
 								</div>
 							</form>
@@ -142,7 +127,7 @@
 <script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
 <script type="text/javascript" src="/static/console/js/core.js"></script>
 <script type="text/javascript" src="/static/console/js/tripledes.js"></script>
-<script type="text/javascript" src="/static/console/js/helpCenter.js"></script>
+<script type="text/javascript" src="/static/console/js/advert.js"></script>
 
 <!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
 

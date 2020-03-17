@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.luaj.vm2.lib.PackageLib.require;
+
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
@@ -84,11 +84,11 @@ public class UserController extends AbstractController{
 		if (StringUtil.isEmpty(user.getMobile())) {
 			throw new ServiceException(0, "手机号必填");
 		}
-		if (StringUtil.isEmpty(user.getSmsCode())) {
-			throw new ServiceException(0, "短信验证码必填");
-		}
-		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
-			throw new ServiceException("短信验证码不正确!");
+//		if (StringUtil.isEmpty(user.getSmsCode())) {
+//			throw new ServiceException(0, "短信验证码必填");
+//		}
+//		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
+//			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = userService.mobileCount(user.getMobile());
 		if (mobileCount >= 1) {
 			if(StringUtil.isEmpty(user.getLoginInfo())) {
