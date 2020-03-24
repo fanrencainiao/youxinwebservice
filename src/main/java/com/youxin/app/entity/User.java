@@ -85,6 +85,7 @@ public class User extends BaseExample{
 	 * 用户mobile，最大长度32字符，非中国大陆手机号码需要填写国家代码(如美国：+1-xxxxxxxxxx)或地区代码(如香港：+852-xxxxxxxx)，可设置为空字符串
 	 */
 	@ApiModelProperty(value = "(解密显示：（n-7）/3)用户mobile，最大长度32字符，非中国大陆手机号码需要填写国家代码(如美国：+1-xxxxxxxxxx)或地区代码(如香港：+852-xxxxxxxx)，可设置为空字符串")
+	@Indexed(unique = true)
 	private String mobile;
 	/**
 	 * 用户性别，0表示未知，1表示男，2女表示女，其它会报参数错误

@@ -14,13 +14,20 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.ex.ServiceException;
-
+@Component
 public final class FileUtil {
+	private static String picurl;
+	@Value("${youxin.picurl}")
+	public void setPicUrl(String picurls) {
+		picurl=picurls;
+	}
 
 	public static String readAll(InputStream in) throws Exception {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
@@ -234,7 +241,7 @@ public final class FileUtil {
 			if (fileName != null && fileName != "") {
 //				String returnUrl = request.getScheme() + "://" + request.getServerName() + ":9898"
 //						+ request.getContextPath() + urlPath + "/";// 存储路径
-				String returnUrl="http://pic.youxinruanjian.cn"+urlPath+"/";
+				String returnUrl=picurl+urlPath+"/";
 				String path = ""; // 文件存储位置
 
 //	            	path = "E:\\txt\\loan";

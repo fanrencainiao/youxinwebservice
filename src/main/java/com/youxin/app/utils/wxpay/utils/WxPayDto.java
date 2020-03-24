@@ -9,6 +9,7 @@ public class WxPayDto {
 	private String notifyUrl;//这里notify_url是 支付完成后微信发给该链接信息，可以判断会员是否支付成功，改变订单状态等
 	private String body;// 商品描述根据情况修改
 	private String openId;//微信用户对一个公众号唯一
+	private String tradeType;//交易类型 MWEB APP JSAPI 
 	
 	/**
 	 * @return the orderId
@@ -81,6 +82,12 @@ public class WxPayDto {
 	 */
 	public void setOpenId(String openId) {
 		this.openId = openId;
+	}
+	public String getTradeType() {
+		return tradeType;
+	}
+	public void setTradeType(String tradeType) {
+		this.tradeType = tradeType;
 	}
 	
 }

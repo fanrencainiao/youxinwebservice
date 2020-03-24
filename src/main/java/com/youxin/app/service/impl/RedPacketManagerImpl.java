@@ -162,7 +162,7 @@ public class RedPacketManagerImpl {
 	private synchronized RedPacket openRedPacket(Integer userId, RedPacket packet) {
 		int overCount = packet.getCount() - packet.getReceiveCount();
 		User user = userManager.getUser(userId);
-		if (StringUtil.isEmpty(user.getAliUserId()))
+		if (packet.getPayType()==1 && StringUtil.isEmpty(user.getAliUserId()))
 			throw new ServiceException(-1, "请先绑定支付宝");
 //		Map<String, Object> receiveBill = receiveBill(userId, packet.getUserId());
 		// 24小时内超过 总共接收100次，或者接收同一个用户10次
@@ -374,7 +374,7 @@ public class RedPacketManagerImpl {
 					record.setPayType(KConstants.PayType.BALANCEAY); // 余额支付
 					record.setType(KConstants.ConsumeType.RECEIVE_REDPACKET);
 				} else {
-					record.setStatus(KConstants.OrderStatus.CREATE);
+					record.setStatus(KConstants.OrderStatus.END);
 					record.setPayType(KConstants.PayType.ALIPAY); // 支付宝支付
 					record.setType(KConstants.ConsumeType.ALI_RECEIVE_COUPON);
 				}

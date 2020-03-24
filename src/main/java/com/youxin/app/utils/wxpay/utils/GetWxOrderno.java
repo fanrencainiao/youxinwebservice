@@ -65,6 +65,29 @@ public class GetWxOrderno
 	return prepay_id;
   }
   
+  public static String getMweb(String url,String xmlParam){
+	  DefaultHttpClient client = new DefaultHttpClient();
+	  client.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+	  HttpPost httpost= HttpClientConnectionManager.getPostMethod(url);
+	  String mweb = "";
+     try {
+		 httpost.setEntity(new StringEntity(xmlParam, "UTF-8"));
+		 HttpResponse response = httpclient.execute(httpost);
+	     String jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+	    if(jsonStr.indexOf("FAIL")!=-1){
+	    	System.out.println("签名错误!---------"+jsonStr);
+	    	return mweb;
+	    }
+	    Map map = doXMLParse(jsonStr);
+	   // System.out.println(map);
+	    mweb  = (String) map.get("mweb_url");
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return mweb;
+  }
+  
   /**
    *description:获取扫码支付连接
    *@param url

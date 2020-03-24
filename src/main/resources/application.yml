@@ -63,6 +63,8 @@ youxin:
   redisAddr: redis://127.0.0.1:6379
   #友讯号
   accountTitle: yx
+  #图片服务器地址
+  picurl: http://pic.youxinruanjian.cn
   #是否开启定时任务
   openTask: 0
   #yunxinappkey

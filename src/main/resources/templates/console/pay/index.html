@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>充值</title>
+    <script src="js/mui.min.js"></script>
+     <script src="js/md5.js"></script>
+  <!--     <script src="http://res2.wx.qq.com/open/js/jweixin-1.4.0.js"></script> -->
+    
+    <link href="css/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+      	mui.init();
+    </script>
+</head>
+<style type="text/css">
+	.mui-content{
+		margin-top: 16px;
+	}
+	#pay {
+    padding: 10px;
+    background-color: #2AC845;
+    border-color: #2AC845;
+	}
+	/*#zfbpay {
+    padding: 10px;
+    background-color: #007AFF;
+    border-color: #007AFF;
+	}*/
+	.mui-content-padded{
+		margin-top: 32px;
+	}
+	#money{
+		width: 50%; 
+		border-color: #fff;
+		background-color:  #fff;
+	}
+	.mui-input-row label {
+    font-family: 'Helvetica Neue',Helvetica,sans-serif;
+    line-height: 1.1;
+    float: left;
+    width: 35%;
+    padding: 6px 15px;
+}
+</style>
+<body >
+	
+	<div class="mui-content" id="payMain">
+			<div class="" style="background-color: #fff;">
+				<label style="padding-left: 15px;position: absolute;padding-top: 17px;">请选择充值金额</label>
+				<div class="mui-input" style="padding-top: 50px; padding-left: 10px;padding-right: 10px;">
+					<ul class="mui-table-view mui-grid-view mui-grid-9" id="semoney">
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                    <div class="mui-media-body">10</div></a></li>
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                     <div class="mui-media-body">20</div></a></li>
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                      <div class="mui-media-body">30</div></a></li>
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                     <div class="mui-media-body">50</div></a></li>
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                      <div class="mui-media-body">100</div></a></li>
+			            <li class="mui-table-view-cell mui-media mui-col-xs-4 mui-col-sm-4"><a href="#">
+			                     <div class="mui-media-body">200</div></a></li>
+		      
+		       		 </ul> 
+					
+					<div id="" style="margin-top: 10px;">
+						<span >￥</span> <input id="money" type="number" class="mui-input-clear mui-input" placeholder="请输入充值金额">
+					</div>
+				</div>
+			</div>
+			
+			<div class="mui-card-content" style="padding-top: 10px;">
+				<form class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label><img src="fonts/zfb.jpg" height="25" width="25"></label>
+						<input name="radio1" class="radio1" value="1" type="radio" checked>
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label><img src="fonts/wx.jpg" height="25" width="25"></img></label>
+						<input name="radio1" class="radio1" value="2" type="radio">
+					</div>
+					
+					
+				</form>
+			</div>
+			<div class="mui-content-padded" >
+				<button  class="mui-btn mui-btn-block mui-btn-primary" id="pay">确认支付</button>
+			</div>
+			
+	</div>
+	
+	
+
+</body>
+	<script>
+		(function($, doc) {
+				$.init({
+					statusBarBackground: '#ddd'
+				});
+				
+				
+		    document.getElementById('pay').addEventListener('tap', function(e) {
+		    	var payType=getRadioRes("radio1");
+		    	if(payType==1||payType==2)
+		    		postPay(payType);
+		    	else
+		    		mui.alert("请选择支付方式")
+			
+		    });
+		   mui('#semoney').on('tap','li',function(){
+				//this上下文就是li
+				//业务代码
+				doc.getElementById("money").value=this.textContent.trim()
+//				mui.toast(this.textContent.trim());
+			});
+
+		     
+		     function postPay(type){
+		    	 var patrn = /^(([^0][0-9]+|0)\.([0-9]{1,2})$)|^(([^0][0-9]+|0)$)|^(([1-9]+)\.([0-9]{1,2})$)|^(([1-9]+)$)/;
+			    	var money=doc.getElementById("money").value;
+			    	
+			    	if(patrn.exec(money)==null || patrn.exec(money)==""){
+			    		
+			    		mui.alert("金额输入错误")
+			    	}else{
+			    		if(money<0.01){
+			    			mui.alert("金额必须大于等于0.01")
+			    		}else{
+							var time=Date.parse(new Date())/1000;
+							var access_token=getQueryString("access_token");
+							//var access_token="861f184f8a83432684d587cbed99985d"
+							var payType=type;
+							var price=money;
+							var userid=getQueryString("userid");
+							//var userid=10000196;
+							var secret=getSecret(time,userid,access_token);
+				
+			    			
+			    			
+							//创建预支付单
+			    			$.ajax('/user/consume/recharge',{
+								data:{	
+									time:time,
+									secret:secret,
+									access_token:access_token,
+									payType:payType,
+									price:price,
+									tradeType:"MWEB"
+								},
+							  beforeSend: function(request) {
+								    request.setRequestHeader("access_token", access_token);
+								 },
+								dataType:'jsonp',//服务器返回json格式数据
+								jsonp: "jsoncallback",
+				                  xhrFields:{
+				                    withCredentials:true
+				                },
+								type:'post',//HTTP请求类型
+								timeout:10000,//超时时间设置为10秒；
+								      
+								success:function(data){
+									
+									var datas=JSON.parse(data);
+									if(datas.code==1){
+										if(type==1){//支付宝
+											 const div = document.createElement('div')
+										        /* 此处form就是后台返回接收到的数据 */
+										        div.innerHTML = datas.data.orderInfo
+										        document.body.appendChild(div)
+										        document.forms[1].submit()
+										}else{
+											if(datas.data.mwebUrl){
+												location.href=datas.data.mwebUrl;
+											}else{
+												//location.href='https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id='+datas.data.prepayId+'&package='+datas.data.partnerId+'&redirect_url=http://youxinapp.cn/user/recharge/wxPayCallBack';
+												mui.alert(datas.data);
+											}
+										}
+										
+									}else{
+										mui.alert(datas.msg);
+									}
+									//onBridgeReady(data.app_id,data.timeStamp,data.nonceStr,data.prepayId,"MD5",data.sign)
+									//location.href='https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id='+datas.data.prepayId+'&package='+datas.data.partnerId+'&redirect_url=http://youxinapp.cn/user/recharge/wxPayCallBack';
+									
+									
+								  
+								},
+								error:function(xhr,type,errorThrown){
+								
+									mui.alert(xhr)
+								}
+							});
+			    		}
+			    			
+			    	}
+			    }
+			    
+		     
+		    /**
+		     * 创建与支付单加密
+		     * @param {Object} time
+		     * @param {Object} userid
+		     * @param {Object} access_token
+		     */
+		    function getSecret(time,userid,access_token){
+		    	var apiKey_time="youxin"+time;
+		    	var userid_token=userid+access_token;
+		    	var md5ApiKey_time=hex_md5(apiKey_time);
+		    	var key=md5ApiKey_time+userid_token
+		    	return hex_md5(key);
+		    }
+		    
+        
+        //获取url参数
+         function getQueryString(name) {
+            const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            const urlObj = window.location;
+            var r = urlObj.href.indexOf('#') > -1 ? urlObj.hash.split("?")[1].match(reg) : urlObj.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+		//封装的方法获取单选款的数据 
+	    function getRadioRes(className){ 
+	        var rdsobj = document.getElementsByClassName(className); 
+	        //alert(rdsobj.length); 
+	        var checkVal = null; 
+	        for(i=0; i<rdsobj.length;i++){ 
+	            if(rdsobj[i].checked){ 
+	                checkVal = rdsobj[i].value; 
+	            } 
+	        } 
+	        return checkVal; 
+	    }
+
+		}(mui, document));
+		</script>
+</html>

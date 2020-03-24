@@ -95,7 +95,7 @@ public class AuthorizationFilter implements Filter {
 			// 用户已登录或访问资源目录或访问登录页面
 //			System.out.println(obj);
 //			
-			if ((null != obj&&obj.getId()!=null)||requestUri.startsWith("/console/logout")||requestUri.startsWith("/console/login")||requestUri.startsWith("/templates/console/login.html")||requestUri.startsWith("/static")||requestUri.startsWith("/webjars")||requestUri.startsWith("/v2")|| requestUri.endsWith(".js")|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")||requestUri.startsWith("/swagger-resources")||requestUri.endsWith(".woff")||requestUri.endsWith(".ttf") ||requestUri.startsWith("/swagger-ui")) {
+			if ((null != obj&&obj.getId()!=null)||requestUri.startsWith("/console/logout")||requestUri.startsWith("/console/login")||requestUri.startsWith("/templates/console/pay/index.html")||requestUri.startsWith("/templates/console/login.html")||requestUri.startsWith("/static")||requestUri.startsWith("/webjars")||requestUri.startsWith("/v2")|| requestUri.endsWith(".js")|| requestUri.endsWith(".css") || requestUri.endsWith(".jpg")|| requestUri.endsWith(".png")||requestUri.startsWith("/swagger-resources")||requestUri.endsWith(".woff")||requestUri.endsWith(".ttf") ||requestUri.startsWith("/swagger-ui")) {
 				arg2.doFilter(arg0, arg1);
 				return;
 			} else
@@ -112,8 +112,6 @@ public class AuthorizationFilter implements Filter {
 			}
 
 			// 需要登录
-			System.out.println("免登录接口"+request.getRequestURI()+"/n"+requestUriMap);
-			System.out.println(isNeedLogin(request.getRequestURI()));
 			if (isNeedLogin(request.getRequestURI())) {
 				// 请求令牌是否包含
 				if (StringUtil.isEmpty(accessToken)) {

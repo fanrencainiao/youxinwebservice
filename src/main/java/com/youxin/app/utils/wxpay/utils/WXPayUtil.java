@@ -212,6 +212,9 @@ public class WXPayUtil{
 		contentMap.put("notify_url", wxConfig.getCallBackUrl());
 
 		contentMap.put("trade_type", "APP");
+		if(wxPayDto.getTradeType().equals("MWEB"))
+			contentMap.put("scene_info", "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"http://pay.jiaxinapp.cn\",\"wap_name\": \"佳信充值\"}}");
+		
 		//contentMap.put("openid", openId);
 
 		RequestHandler reqHandler = new RequestHandler(null, null);
@@ -220,7 +223,15 @@ public class WXPayUtil{
 		String sign = reqHandler.createSign(contentMap);
 		contentMap.put("sign", sign);
 		String xml = WXPayUtil.paramsToxmlStr(contentMap);
-		
+		System.out.println("xml:"+xml);
+		if(wxPayDto.getTradeType().equals("MWEB")) {
+			System.out.println("h5支付");
+			SortedMap<String, String> payMap = new TreeMap<String, String>();
+			String mweb = new GetWxOrderno().getMweb(WXPayConfig.PREPAY_ID_URL, xml);
+			payMap.put("mwebUrl", mweb);
+			return payMap;
+		}
+		System.out.println("app支付");
 		String prepay_id = new GetWxOrderno().getPayNo(WXPayConfig.PREPAY_ID_URL, xml);
 		//获取prepay_id后，拼接最后请求支付所需要的package
 		

@@ -69,7 +69,7 @@ public class UserConsumeController extends AbstractController {
 			@ApiImplicitParam(name = "time", value = "充值时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
 	@PostMapping(value = "/recharge")
-	public Object getSign(@RequestParam int payType, @RequestParam String price,
+	public Object getSign(@RequestParam int payType, @RequestParam String price,@RequestParam(defaultValue="APP") String tradeType,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
@@ -92,7 +92,11 @@ public class UserConsumeController extends AbstractController {
 			entity.setPayType(payType);
 			entity.setMoney(new Double(price));
 			if (KConstants.PayType.ALIPAY == payType) {
-				orderInfo = AliPayUtil.getOrderInfo("余额充值", "余额充值", price, orderNo);
+//				orderInfo = AliPayUtil.getOrderInfo("余额充值", "余额充值", price, orderNo);
+				if(tradeType.equals("MWEB"))
+					orderInfo = AliPayUtil.getH5From("余额充值", "余额充值", price, orderNo);
+				else
+					orderInfo = AliPayUtil.getOrderInfo("余额充值", "余额充值", price, orderNo);
 				consumeRecordServer.saveConsumeRecord(entity);
 				map.put("orderInfo", orderInfo);
 				System.out.println("orderInfo>>>>>" + orderInfo);
@@ -104,6 +108,7 @@ public class UserConsumeController extends AbstractController {
 				tpWxPay.setOrderId(orderNo);
 				tpWxPay.setSpbillCreateIp(WXPayConfig.WXSPBILL_CREATE_IP);
 				tpWxPay.setTotalFee(price);
+				tpWxPay.setTradeType(tradeType);
 				consumeRecordServer.saveConsumeRecord(entity);
 				Object data = WXPayUtil.getPackage(tpWxPay);
 				return Result.success(data);

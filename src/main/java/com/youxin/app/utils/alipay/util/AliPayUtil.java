@@ -37,6 +37,7 @@ import com.alipay.api.request.AlipayOpenAuthTokenAppQueryRequest;
 import com.alipay.api.request.AlipayOpenAuthTokenAppRequest;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.request.AlipayTradeAppPayRequest;
+import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.alipay.api.request.AlipayUserInfoAuthRequest;
 import com.alipay.api.request.AlipayUserInfoShareRequest;
 import com.alipay.api.response.AlipayFundCouponOrderAppPayResponse;
@@ -48,6 +49,7 @@ import com.alipay.api.response.AlipayOpenAuthTokenAppQueryResponse;
 import com.alipay.api.response.AlipayOpenAuthTokenAppResponse;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayTradeAppPayResponse;
+import com.alipay.api.response.AlipayTradeWapPayResponse;
 import com.alipay.api.response.AlipayUserInfoAuthResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.youxin.app.entity.User.MyCard;
@@ -105,6 +107,7 @@ public class AliPayUtil {
 	public static String AppCode() {
 		return aliPayConfig.getAppCode();
 	}
+
 	public static String pid() {
 		return aliPayConfig.getPid();
 	}
@@ -113,6 +116,7 @@ public class AliPayUtil {
 
 	/**
 	 * 公钥方式
+	 * 
 	 * @return
 	 */
 	public static AlipayClient getAliPayClient() {
@@ -124,12 +128,14 @@ public class AliPayUtil {
 		}
 		return alipayClient;
 	}
+
 	/**
 	 * 公钥证书方式
+	 * 
 	 * @return
 	 * @throws AlipayApiException
 	 */
-	public  static AlipayClient getAliPalyClientByCert() throws AlipayApiException {
+	public static AlipayClient getAliPalyClientByCert() throws AlipayApiException {
 		CertAlipayRequest certAlipayRequest = new CertAlipayRequest();
 		certAlipayRequest.setServerUrl("https://openapi.alipay.com/gateway.do");
 		certAlipayRequest.setAppId(APP_ID());
@@ -141,7 +147,7 @@ public class AliPayUtil {
 		certAlipayRequest.setAlipayPublicCertPath(pubJobPath());
 		certAlipayRequest.setRootCertPath(rootPath());
 		certAlipayRequest.setPrivateKey(APP_PRIVATE_KEY());
-		alipayClient=new DefaultAlipayClient(certAlipayRequest);
+		alipayClient = new DefaultAlipayClient(certAlipayRequest);
 		System.out.println("APP_ID:" + APP_ID());
 		System.out.println("apppublickkey:" + pubPath());
 		System.out.println("alipayClient:" + JSON.toJSONString(certAlipayRequest));
@@ -155,28 +161,29 @@ public class AliPayUtil {
 		String id = String.valueOf(r1) + String.valueOf(r2) + String.valueOf(now);// 订单ID
 		return id;
 	}
+
 	/**
-	 * 获取支付宝授权  authinfo
+	 * 获取支付宝授权 authinfo
+	 * 
 	 * @return
 	 */
 	public static String getAuthInfoStr() {
-		StringBuilder strInfo=new StringBuilder();
+		StringBuilder strInfo = new StringBuilder();
 		strInfo.append("apiname=com.alipay.account.auth");
-		strInfo.append("&app_id="+APP_ID());
+		strInfo.append("&app_id=" + APP_ID());
 		strInfo.append("&app_name=mc");
 		strInfo.append("&auth_type=AUTHACCOUNT");
 		strInfo.append("&biz_type=openservice");
 		strInfo.append("&method=alipay.open.auth.sdk.code.get");
-		strInfo.append("&pid="+pid());
+		strInfo.append("&pid=" + pid());
 		strInfo.append("&product_id=APP_FAST_LOGIN");
 		strInfo.append("&scope=kuaijie");
 		strInfo.append("&sign_type=RSA2");
-		strInfo.append("&target_id="+AliPayUtil.getOutTradeNo());
+		strInfo.append("&target_id=" + AliPayUtil.getOutTradeNo());
 		String sign = sign(strInfo.toString());
-		strInfo.append("&sign="+sign);
+		strInfo.append("&sign=" + sign);
 		return strInfo.toString();
 	}
-	
 
 	/**
 	 * 获取或者刷新支付宝token
@@ -216,9 +223,9 @@ public class AliPayUtil {
 	 */
 	public static String getAliUserInfo(String token) {
 
-		AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest(); 
+		AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest();
 		try {
-			AlipayUserInfoShareResponse response = getAliPalyClientByCert().certificateExecute(request,token);
+			AlipayUserInfoShareResponse response = getAliPalyClientByCert().certificateExecute(request, token);
 			System.out.println(response.getBody());
 			return response.getUserId();
 		} catch (AlipayApiException e) {
@@ -233,7 +240,7 @@ public class AliPayUtil {
 	 *
 	 */
 	public static String getOrderInfo(String subject, String body, String price, String orderNo) {
-		
+
 		// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
 		AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
 		// SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
@@ -248,12 +255,47 @@ public class AliPayUtil {
 //			model.setGoodsType("0");
 		request.setBizModel(model);
 		request.setNotifyUrl(callBackUrl());
-		System.out.println("request:"+JSON.toJSONString(request));
+		System.out.println("request:" + JSON.toJSONString(request));
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayTradeAppPayResponse response = getAliPalyClientByCert().sdkExecute(request);
-			System.out.println("request:"+JSON.toJSONString(response));
+			System.out.println("request:" + JSON.toJSONString(response));
 //			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
+
+			return response.getBody();
+		} catch (AlipayApiException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+/**
+ * h5预支付
+ * @param subject
+ * @param body
+ * @param price
+ * @param orderNo
+ * @return
+ */
+	public static String getH5From(String subject, String body, String price, String orderNo) {
+
+		// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
+		AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
+		// SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
+		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+
+		model.setBody(body);
+		model.setSubject(subject);
+		model.setOutTradeNo(orderNo);
+		model.setTimeoutExpress("30m");
+		model.setTotalAmount(price);
+		model.setProductCode("QUICK_MSECURITY_PAY");
+//				model.setGoodsType("0");
+		request.setBizModel(model);
+		request.setNotifyUrl(callBackUrl());
+		try {
+			// 这里和普通的接口调用不同，使用的是pageExecute
+			AlipayTradeWapPayResponse response = getAliPayClient().pageExecute(request);
+			System.out.println("返回form  " + response.getBody());//// 调用SDK生成表单
 
 			return response.getBody();
 		} catch (AlipayApiException e) {
@@ -267,7 +309,7 @@ public class AliPayUtil {
 	 *
 	 */
 	public static String getOrderInfoByCoupon(String subject, String body, String price, String orderNo) {
-	
+
 		try {
 			// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
 			AlipayFundTransAppPayRequest request = new AlipayFundTransAppPayRequest();
@@ -284,9 +326,10 @@ public class AliPayUtil {
 //			request.setBizModel(model);
 //			request.setNotifyUrl(callBackUrl());
 			request.setBizContent("{\"out_biz_no\":\"" + orderNo + "\",\"trans_amount\":" + price + ","
-					+ "\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\"PERSONAL_PAY\","
-					+ "\"remark\":\""+body+"\",\"order_title\":\""+subject+"\","
-					+ "\"business_params\":{\"sub_biz_scene\":\"REDPACKET\",\"payer_binded_alipay_uid\":\""+pid()+"\"}}");		
+					+ "\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\"PERSONAL_PAY\"," + "\"remark\":\"" + body
+					+ "\",\"order_title\":\"" + subject + "\","
+					+ "\"business_params\":{\"sub_biz_scene\":\"REDPACKET\",\"payer_binded_alipay_uid\":\"" + pid()
+					+ "\"}}");
 			System.out.println("request:" + JSON.toJSONString(request));
 			System.out.println("request:" + JSON.toJSONString(request));
 			// 这里和普通的接口调用不同，使用的是sdkExecute
@@ -309,7 +352,7 @@ public class AliPayUtil {
 	 * @param orderNo
 	 * @return
 	 */
-	public static String transUni(String subject, String body, String price, String orderNo,String aliNo, String uid) {
+	public static String transUni(String subject, String body, String price, String orderNo, String aliNo, String uid) {
 
 		// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
 		AlipayFundTransUniTransferRequest request = new AlipayFundTransUniTransferRequest();
@@ -333,11 +376,12 @@ public class AliPayUtil {
 		request.setBizModel(model);
 //		request.setNotifyUrl(callBackUrl());
 		try {
-			System.out.println("orderNo==>"+orderNo+"aliNo==>"+aliNo+"uid==>"+uid);
+			System.out.println("orderNo==>" + orderNo + "aliNo==>" + aliNo + "uid==>" + uid);
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransUniTransferResponse response = getAliPalyClientByCert().certificateExecute(request);
-		
-			System.out.println("红包打款: " + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
+
+			System.out.println("红包打款: " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+																								// 可以直接给客户端请求，无需再做处理。
 
 			return response.getStatus();
 		} catch (AlipayApiException e) {
@@ -366,7 +410,8 @@ public class AliPayUtil {
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransRefundResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("红包退回:" + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
+			System.out.println("红包退回:" + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+																								// 可以直接给客户端请求，无需再做处理。
 
 			return response.getOrderId();
 		} catch (AlipayApiException e) {
@@ -382,37 +427,39 @@ public class AliPayUtil {
 	 * @param bizScene PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
 	 * @return
 	 */
-	public static String commonQueryRequest(String orderNo,String aliNo, String bizScene) {
+	public static String commonQueryRequest(String orderNo, String aliNo, String bizScene) {
 
 		// 实例化具体API对应的request类,类名称和接口名称对应,当前调用接口名称：alipay.trade.app.pay
 		AlipayFundTransCommonQueryRequest request = new AlipayFundTransCommonQueryRequest();
 		// SDK已经封装掉了公共参数，这里只需要传入业务参数。以下方法为sdk的model入参方式(model和biz_content同时存在的情况下取biz_content)。
-		/*AlipayFundTransCommonQueryModel model = new AlipayFundTransCommonQueryModel();
-//			 	model.setOrderId(orderId);
-		model.setOutBizNo(orderNo);
-		model.setBizScene(bizScene);// PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
-		model.setProductCode("STD_RED_PACKET");
-		model.setOrderId(aliNo);
-//		扩展参数		model.setExtraParam();
-		request.setBizModel(model);
-//		request.setNotifyUrl(callBackUrl());
-*/		
-		//PERSONAL_PAY，C2C现金红包-发红包 PERSONAL_COLLECTION，C2C现金红包-领红包
-		request.setBizContent("{\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\""+bizScene+"\",\"out_biz_no\":\""+orderNo+"\",\"order_id\":\""+aliNo+"\"}");
+		/*
+		 * AlipayFundTransCommonQueryModel model = new
+		 * AlipayFundTransCommonQueryModel(); // model.setOrderId(orderId);
+		 * model.setOutBizNo(orderNo); model.setBizScene(bizScene);//
+		 * PERSONAL_PAY，C2C现金红包-发红包PERSONAL_COLLECTION，C2C现金红包-领红包
+		 * model.setProductCode("STD_RED_PACKET"); model.setOrderId(aliNo); // 扩展参数
+		 * model.setExtraParam(); request.setBizModel(model); //
+		 * request.setNotifyUrl(callBackUrl());
+		 */
+		// PERSONAL_PAY，C2C现金红包-发红包 PERSONAL_COLLECTION，C2C现金红包-领红包
+		request.setBizContent("{\"product_code\":\"STD_RED_PACKET\",\"biz_scene\":\"" + bizScene
+				+ "\",\"out_biz_no\":\"" + orderNo + "\",\"order_id\":\"" + aliNo + "\"}");
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransCommonQueryResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("红包查询  " + response.getOrderId()+"状态:"+response.getStatus());// 就是orderString 可以直接给客户端请求，无需再做处理。
+			System.out.println("红包查询  " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+																								// 可以直接给客户端请求，无需再做处理。
 			if (response.isSuccess()) {
-	            return response.getOrderId();
-	        }else
-	        	return null;
-			
+				return response.getOrderId();
+			} else
+				return null;
+
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
+
 	public static void main(String[] args) {
 //		JSONObject parseObject = JSON.parseObject("{\"body\":\"alipay_root_cert_sn=687b59193f3f462dd5336e5abf83c5d8_02941eef3187dddf3d3b83462e1dfcf6&alipay_sdk=alipay-sdk-java-4.9.5.ALL&app_cert_sn=a5573f6729d940a9ee439c66032e3146&app_id=2019103168821258&biz_content={\"biz_scene\":\"PERSONAL_PAY\",\"order_id\":\"20200116110075000006820073489855\",\"out_biz_no\":\"251579161719124\",\"product_code\":\"STD_RED_PACKET\"}&charset=utf-8&format=json&method=alipay.fund.trans.common.query&sign=G7tBxQYoorXO/J7CWJRTr7Dkrmdgm7rctX3j8h/eNmyZ36FKLXpvWpKQIaxIl793cs7MpWhjVEswoxOxI1jC2VpSqrbXZEGeWHxXOoI1E4xlrn/EybJmMbdPmY7iS2bpdR1ReqpREMc9ShpprSV5NyW7Y7e3A6zem+RQlawV6FeV5Hpa+dFcvy+6Q6GLOek+zt7CNG4aAIEgAH2NZd/liV2DTNFbi0rgaCQmwxljXd5rCJ4Qj+wl+HpbkoBCPwRJsDNmp8/YO4VnW7afRJMM4ZVqedBrip6z9Ft9/3Y8d6dpGnQdTiK5vsNG/cbfxIOkJoOK3SAbHosSJqaSFf7u2g==&sign_type=RSA2&timestamp=2020-01-16 16:02:40&version=1.0\",\"success\":true}");
 //		System.out.println(parseObject);
