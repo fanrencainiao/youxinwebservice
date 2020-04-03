@@ -154,7 +154,7 @@ public class RedPacketController extends AbstractController {
 			if (packet.getPayType() != 1 && StringUtil.isEmpty(user.getPayPassword())) {
 				return Result.error("请设置支付密码");
 			}
-			if (!AuthServiceUtils.authRedPacketV2(Md5Util.md5Hex("1"), userId + "", token, time, moneyStr, secret)) {
+			if (!AuthServiceUtils.authRedPacketV2(user.getPayPassword(), userId + "", token, time, moneyStr, secret)) {
 				return Result.error("权限验证错误!");
 			}
 			packet.setUserId(userId);

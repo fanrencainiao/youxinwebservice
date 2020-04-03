@@ -3,6 +3,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.MessageReceive;
 import com.youxin.app.entity.User;
+import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.supper.Callback;
@@ -37,6 +38,8 @@ public class ReceiveMsgController {
     @Autowired
 	@Qualifier("get")
 	private Datastore dfds;
+    @Autowired
+   	private UserService userService;
     @RequestMapping(value = {"/receive"}, method = {RequestMethod.POST})
     @ResponseBody
     public JSONObject mockClient(HttpServletRequest request)
@@ -59,13 +62,12 @@ public class ReceiveMsgController {
 //            logger.debug("request headers: ContentType = "+ContentType+", AppKey = "+AppKey+", CurTime = "+CurTime+", " +
 //                    "MD5 = "+MD5+", CheckSum = "+CheckSum+"");
             // 将请求体转成String格式，并打印
-            String requestBodyb = new String(body, "utf-8");
+            String requestBody = new String(body, "utf-8");
 //            logger.info("request body = "+requestBody+"");
         	ThreadUtil.executeInThread(new Callback() {
         		
 				@Override
 				public void execute(Object obj) {
-					String requestBody=(String)obj;
 		            // 获取计算过的md5及checkSum
 		            String verifyMD5 = CheckSumBuilder.getMD5(requestBody);
 		            String verifyChecksum = CheckSumBuilder.getCheckSum(appSecret, verifyMD5, CurTime);
@@ -77,15 +79,23 @@ public class ReceiveMsgController {
 		            	if (mr.getMsgidServer()==null||mr.getMsgidServer()==""||mr.getMsgidServer().equals("0")) {
 							
 						}else {
-							if (mr.getEventType().equals("1")) 
+							if (mr.getEventType().equals("1")&&"PERSON".equals(mr.getConvType())&&"TEAM".equals(mr.getConvType())) {
 								dfds.save(mr);
+							} else if(mr.getEventType().equals("2")) {
+								JSONObject loginObject = JSON.parseObject(requestBody);
+								userService.updateUserOnlineByAccid(loginObject.getString("accid"), 1);
+							}else if(mr.getEventType().equals("3")) {
+								JSONObject logoutObject = JSON.parseObject(requestBody);
+								userService.updateUserOnlineByAccid(logoutObject.getString("accid"), 0);
+							}
+								
 						}
 		            	logger.debug(mr.toString());
 					}else 
 						logger.debug("消息验证失败");
 					
 				}
-			}, requestBodyb);
+			});
            
 
             result.put("code", 200);

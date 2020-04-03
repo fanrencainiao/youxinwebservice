@@ -74,10 +74,7 @@ public class User {
 	 */
 	@ApiModelProperty(value="用户名片扩展字段，最大长度1024字符，用户可自行扩展，建议封装成JSON字符串，也可以设置为空字符串")
 	private String ex;
-	@ApiModelProperty(value="创建时间",hidden=true)
-	private Long createTime;
-	@ApiModelProperty(value="更新时间",hidden=true)
-	private Long updateTime;
+
 
 
 	

@@ -40,7 +40,7 @@ public class MessageReceiveServiceImpl implements MessageReceiveService {
 			q.field("fromAccount").equal(fromAccount);
 		if(!StringUtil.isEmpty(to))
 			q.field("to").equal(to);
-			
+		q.order("-msgTimestamp");
 		List<MessageReceive> mrList = q.asList(MongoUtil.pageFindOption(pageNum, pageSize));
 		long count = q.count();
 		PageResult<MessageReceive> pr=new PageResult<>(mrList, count);

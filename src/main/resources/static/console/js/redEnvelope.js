@@ -28,6 +28,9 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             ,{field: 'type', title: '红包类型',sort:'true', width:110,templet: function(d){
 				       return d.type==1?"普通红包":(d.type==2?"拼手气红包":(d.type==3?"口令红包":"定向红包"));
 				     }}
+		     ,{field: 'payType', title: '红包发送类型',sort:'true', width:110,templet: function(d){
+		       return d.payType==1?"支付宝红包":"零钱红包";
+		     }}
             ,{field: 'money', title: '红包金额',sort: true, width:120}
             ,{field: 'count', title: '红包个数',sort: true, width:120}
             ,{field: 'status', title: '状态',sort: true, width:150, templet : function (d) {

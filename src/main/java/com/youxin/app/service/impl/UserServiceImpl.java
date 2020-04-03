@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +17,9 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -85,6 +89,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ConfigService configService;
+	
+	@Autowired
+	private RedissonClient redissonClient;
 
 	@Value("${youxin.accountTitle}")
 	private String accountTitle;
@@ -345,11 +352,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	// 用户充值 type 1 充值 2 消费
-	public synchronized Double rechargeUserMoeny(Integer userId, Double money, int type) {
+	public  Double rechargeUserMoeny(Integer userId, Double money, int type) {
+		RLock lock = redissonClient.getLock("user:money:"+userId);
 		try {
-
 			Query<User> q = repository.createQuery();
 			q.field("_id").equal(userId);
+			
+			boolean tryLock = lock.tryLock(2, 10, TimeUnit.SECONDS);
+			if(tryLock) {
 			UpdateOperations<User> ops = repository.createUpdateOperations();
 			User user = getUser(userId);
 			User dbUser=q.get();
@@ -374,10 +384,16 @@ public class UserServiceImpl implements UserService {
 			}
 			repository.update(q, ops);
 			KSessionUtil.saveUserByUserId(userId, user);
+			
+			}else {
+				log.debug("金额操作失败 用户id：" +userId+"金额："+money);
+			}
 			return q.get().getBalance();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 0.0;
+		}finally {
+			lock.unlock();
 		}
 	}
 	
@@ -505,7 +521,7 @@ public class UserServiceImpl implements UserService {
 		Integer userId=ReqUtil.getUserId();
 		User user = getUserFromDB(userId);
 		if(!StringUtil.isEmpty(user.getAccount()) && user.getAccount().contains("毛主席")) {
-			throw new ServiceException(0, "友讯号已经修改过或者字段合法");
+			throw new ServiceException(0, "友讯号已经修改过");
 		}
 		if(getUserByAccount(account)!=null) {
 			throw new ServiceException(0, "友讯号已存在");
@@ -733,6 +749,17 @@ public class UserServiceImpl implements UserService {
 		ops.set("online",type);
 		repository.update(q, ops);
 		KSessionUtil.saveUserByUserId(id, q.get());
+	}
+	@Override
+	public void updateUserOnlineByAccid(String accid,int type) {
+			
+		Query<User> q = repository.createQuery();
+		q.field("accid").equal(accid);
+		UpdateOperations<User> ops = repository.createUpdateOperations();
+		ops.set("online",type);
+		repository.update(q, ops);
+		User user = q.get();
+		KSessionUtil.saveUserByUserId(user.getId(), user);
 	}
 	
 	@Override

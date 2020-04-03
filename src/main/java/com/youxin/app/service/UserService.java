@@ -195,6 +195,12 @@ public interface UserService {
 	 * @param counType  统计类型 1: 每个月的数据 2:每天的数据 3.每小时数据 4.每分钟的数据 (小时)
 	 */
 	List<Object> getUserRegisterCount(String startDate, String endDate, short timeUnit);
+	/**
+	 * 根据用户accid更新用户在线状态
+	 * @param accid
+	 * @param type
+	 */
+	void updateUserOnlineByAccid(String accid, int type);
 
 
 }

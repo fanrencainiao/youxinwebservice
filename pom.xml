@@ -201,12 +201,12 @@
 		 <resources>
             <resource>
                 <directory>src/main/resources</directory> 
-             <!-- 排除文件 -->
+             <!-- 排除文件 
                 <excludes>
                 	<exclude>*.p12</exclude>  
                     <exclude>*.yml</exclude>  
                     <exclude>*.crt</exclude>
-                </excludes>
+                </excludes>-->
             </resource>
         </resources>
 		<plugins>

@@ -44,6 +44,9 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'balance', title: '余额',sort:'true', width:80}
           ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:80}
           ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:80}
+          ,{field: 'createTime', title: '注册时间',sort: true, width:200,templet : function (d) {
+              return d.createTime?UI.getLocalTime(d.createTime):"";
+          }}
           ,{fixed: 'right', title:"操作", align:'left',width:140, toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){

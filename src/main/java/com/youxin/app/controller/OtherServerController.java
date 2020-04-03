@@ -103,7 +103,7 @@ public class OtherServerController {
 					String key = String.format(KConstants.Key.IMGCODE, telephone);
 					String cached = redisServer.get(key);
 					System.out.println("ImgCodeError  getImgCode "+cached+"  imgCode "+imgCode);
-					return Result.failure(KConstants.ResultCode.ImgCodeError,language,params);
+					return Result.failure(KConstants.ResultCode.ImgCodeError,"图形验证码错误",params);
 				}
 			}
 		}

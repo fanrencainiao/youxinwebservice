@@ -48,6 +48,8 @@ import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KSessionUtil;
 import com.youxin.app.utils.Md5Util;
+import com.youxin.app.utils.MongoUtil;
+import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
@@ -84,11 +86,11 @@ public class UserController extends AbstractController{
 		if (StringUtil.isEmpty(user.getMobile())) {
 			throw new ServiceException(0, "手机号必填");
 		}
-//		if (StringUtil.isEmpty(user.getSmsCode())) {
-//			throw new ServiceException(0, "短信验证码必填");
-//		}
-//		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
-//			throw new ServiceException("短信验证码不正确!");
+		if (StringUtil.isEmpty(user.getSmsCode())) {
+			throw new ServiceException(0, "短信验证码必填");
+		}
+		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
+			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = userService.mobileCount(user.getMobile());
 		if (mobileCount >= 1) {
 			if(StringUtil.isEmpty(user.getLoginInfo())) {
@@ -838,6 +840,39 @@ public class UserController extends AbstractController{
 		Query<MyTeam> q = dfds.createQuery(MyTeam.class);
 		q.field("_id").equal(ReqUtil.getUserId());
 		return q;
+	}
+	
+	@ApiOperation(value = "获取所有用户",response=Result.class)
+	@ApiImplicitParams({ 
+		 @ApiImplicitParam(name = "keyWorld", value = "姓名，手机号，id",  paramType = "query")
+	})
+	@GetMapping(value = "/getAllUser")
+	public Object getAllUser(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int limit, 
+			@RequestParam(defaultValue = "") String keyWorld) {
+		try {
+			Integer sysuserid = ReqUtil.getUserId();
+			if(sysuserid==null|| sysuserid>10000)
+				return Result.error("非法操作");
+			Query<User> query = repository.createQuery();
+
+			if (!StringUtil.isEmpty(keyWorld)) {
+				Integer userId = null;
+				if (StringUtil.isNumeric(keyWorld)&&keyWorld.length()<10) {
+					userId = Integer.valueOf(keyWorld);
+				}
+				
+				query.or(query.criteria("name").containsIgnoreCase(keyWorld), query.criteria("_id").equal(userId),
+						query.criteria("mobile").containsIgnoreCase(keyWorld));
+			}
+			query.field("_id").greaterThan(10000);
+			// 排序、分页
+			List<User> pageData = query.order("name").asList(MongoUtil.pageFindOption(page, limit));
+			return Result.success(new PageVO(pageData, query.count(), page, limit));
+		} catch (Exception e) {
+			return Result.error("系统繁忙");
+		}
+		
 	}
 
 }

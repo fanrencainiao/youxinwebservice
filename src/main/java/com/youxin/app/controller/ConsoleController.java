@@ -39,6 +39,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.youxin.app.entity.Advert;
 import com.youxin.app.entity.BankRecord;
@@ -171,6 +174,15 @@ public class ConsoleController extends AbstractController{
 		System.out.println(request.getSession().getAttribute(LoginSign.LOGIN_USER_KEY));
 		return Result.success();
 
+	}
+	@RequestMapping(value = { "navs" })
+	public Object get(HttpServletRequest request, HttpServletResponse response) {
+		DBCollection collection = dfds.getDB().getCollection("navs");
+//		BasicDBObject q = new BasicDBObject();
+		DBCursor find = collection.find();
+		List<DBObject> list = find.toArray();
+		DBObject dbObject = list.get(0);
+		return dbObject;
 	}
 	
 	@GetMapping(value = "userList")
@@ -1156,7 +1168,18 @@ public class ConsoleController extends AbstractController{
 		}
 
 	}
-	
+	/**
+	 * 消息抄送集合
+	 * @param fromAccount
+	 * @param to
+	 * @param eventType
+	 * @param convType
+	 * @param page
+	 * @param limit
+	 * @param startTime
+	 * @param endTime
+	 * @return
+	 */
 	@RequestMapping("/getMessageReceiveList")
 	public Object getMessageReceiveList(@RequestParam(defaultValue = "") String fromAccount,@RequestParam(defaultValue = "") String to,
 			@RequestParam(defaultValue = "") String eventType,

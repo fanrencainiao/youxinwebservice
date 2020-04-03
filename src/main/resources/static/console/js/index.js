@@ -12,7 +12,7 @@ layui.use(['bodyTab','form','element','layer','jquery'],function(){
     	layer = parent.layer === undefined ? layui.layer : top.layer;
 		tab = layui.bodyTab({
 			openTabNum : "50",  //最大可打开窗口数量
-			url : "/static/json/navs.json" //获取菜单json地址
+			url : "/console/navs" //获取菜单json地址 "/static/json/navs.json"
 		});
 
 	//右上角显示当前登录管理员账号
