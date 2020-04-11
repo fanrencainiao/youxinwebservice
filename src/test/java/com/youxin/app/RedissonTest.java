@@ -40,11 +40,9 @@
 //
 //					RLock lock = rc.getFairLock("testlock");
 //					try {
-//						System.out.println("获得1");
 //						boolean tryLock = lock.tryLock(5, 30, TimeUnit.SECONDS);
-//						System.out.println("获得2");
 //						if(tryLock) {
-//							System.out.println("获得");
+//							System.out.println("获得"+j);
 //						}else {
 //							System.out.println("失败");
 //						}
@@ -64,7 +62,7 @@
 //		}
 //		System.out.println("循环结束,保持服务启动状态");
 //		try {
-//			Thread.sleep(100);
+//			Thread.sleep(1000);
 //		} catch (InterruptedException e1) {
 //			// TODO Auto-generated catch block
 //			e1.printStackTrace();

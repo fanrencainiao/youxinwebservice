@@ -647,7 +647,13 @@ public class UserServiceImpl implements UserService {
 		if(user.getLoginLog()==null) 
 			user.setLoginLog(new User.LoginLog());
 		// 1=没有设备号、2=设备号一致、3=设备号不一致
-		int serialStatus = null == login ? 1 : (user.getLoginLog().getSerial().equals(login.getSerial()) ? 2 : 3);
+		int serialStatus=1;
+		try {
+			 serialStatus = null == login ? 1 : (user.getLoginLog().getSerial().equals(login.getSerial()) ? 2 : 3);
+		} catch (Exception e) {
+			log.debug("loginInfo"+login);
+		}
+		
 		// 保存登录日志
 		updateUserLoginLog(user.getId(), user);
 		//更新用户在线状态
@@ -970,7 +976,12 @@ public class UserServiceImpl implements UserService {
 					report.setUserName(getUserName((int) report.getUserId()));
 					QueryDetail roomquery=new QueryDetail();
 					roomquery.setTid(report.getRoomId());
-					JSONObject teamQueryDetail = SDKService.teamQueryDetail(roomquery);
+					JSONObject teamQueryDetail=new JSONObject();
+					try {
+						 teamQueryDetail = SDKService.teamQueryDetail(roomquery);
+					} catch (Exception e) {
+						continue;
+					}
 					String tname = teamQueryDetail.getJSONObject("tinfo").getString("tname");
 					report.setRoomName(tname);
 					//创建者与管理员是否被禁言

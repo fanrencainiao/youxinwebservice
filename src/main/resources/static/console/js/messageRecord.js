@@ -190,6 +190,23 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         })
         lock=1;
     });
+    //删除一月之前的消息记录
+    $(".btn_delOneMonth").on("click",function(){
+		$.ajax({
+			type:'POST',
+			url:'/console/delMessageReceive',
+			data:{},
+			dataType:'json',
+			async:false,
+			success:function(result){
+				if(result.code==1){
+					layer.msg("删除成功",{"icon":2});
+				}
+
+			}
+		})
+    	renderTable();
+    });
     
 })
 

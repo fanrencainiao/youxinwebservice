@@ -1,16 +1,21 @@
 package com.youxin.app.controller;
 
 import static org.mongodb.morphia.aggregation.Group.grouping;
+import static org.mongodb.morphia.aggregation.Group.id;
 import static org.mongodb.morphia.aggregation.Group.sum;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +25,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
+import org.mongodb.morphia.aggregation.Accumulator;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -60,6 +66,7 @@ import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.entity.User.UserLoginLog;
+import com.youxin.app.entity.group.TeamGroup;
 import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.filter.LoginSign;
@@ -198,7 +205,9 @@ public class ConsoleController extends AbstractController{
 			}
 			
 			query.or(query.criteria("name").containsIgnoreCase(keyWorld), query.criteria("_id").equal(userId),
-					query.criteria("mobile").containsIgnoreCase(keyWorld));
+					query.criteria("mobile").containsIgnoreCase(keyWorld),
+					query.criteria("accid").containsIgnoreCase(keyWorld),
+					query.criteria("account").containsIgnoreCase(keyWorld));
 		}
 		if (online!=null) {
 			if(online==0||online==1){
@@ -235,7 +244,7 @@ public class ConsoleController extends AbstractController{
 		}
 		User user=new User();
 		if(disableUser==-1)
-			block=SDKService.block(accid, "false");
+			block=SDKService.block(accid, "true");
 		else if(disableUser==1) {
 			User userFromDB = userService.getUserFromDB(accid);
 			Query<User> q = dfds.createQuery(User.class).field("mobile").equal(userFromDB.getMobile())
@@ -307,7 +316,7 @@ public class ConsoleController extends AbstractController{
 			example.setPassword(DigestUtils.md5Hex(example.getPassword()));
 		long mobileCount = userService.mobileCount(example.getMobile());
 		// 保存到数据库
-		if (StringUtil.isEmpty(accid)&&example.getId()<=0) {
+		if (StringUtil.isEmpty(accid)&&(example.getId()==null||example.getId()<=0)) {
 			//验证
 			if (StringUtil.isEmpty(example.getMobile())) {
 				throw new ServiceException(0, "手机号必填");
@@ -633,9 +642,11 @@ public class ConsoleController extends AbstractController{
 	 * @throws IOException
 	 */
 	@RequestMapping(value = "/deleteReport")
-	public Result deleteReport(HttpServletResponse response, @RequestParam String id) throws IOException {
-		BasicDBObject query = new BasicDBObject("_id", parse(id));
-		dfds.getDB().getCollection("Report").remove(query);
+	public Result deleteReport(@RequestParam String id) {
+//		BasicDBObject query = new BasicDBObject("_id", parse(id));
+//		dfds.getDB().getCollection("Report").remove(query);
+		Query<Report> q = dfds.createQuery(Report.class).field("_id").equal(parse(id));
+		dfds.delete(q);
 		return Result.success();
 	}
 	
@@ -1192,6 +1203,63 @@ public class ConsoleController extends AbstractController{
 			return Result.error(e.getErrMessage());
 		}
 	}
+	
+	/**
+	 * 删除一月之前的消息
+	 * @return
+	 */
+	@RequestMapping("/delMessageReceive")
+	public Object delMessageReceive() {
+		try {
+			//一月之前的时间
+			long lastMonth = DateUtil.getLastMonth().getTime();
+			System.out.println(DateUtil.getLastMonth());
+			 mrs.delMessage(null, null,"1",null,0l, lastMonth);
+			return Result.success();
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+	//==============群组管理====================
+	@RequestMapping("/getTeamList")
+	public Object getTeamList(@RequestParam(defaultValue = "") String fromAccount,@RequestParam(defaultValue = "") String to,
+			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int limit,@RequestParam(defaultValue = "")String startTime,@RequestParam(defaultValue = "")String endTime) {
+		try {
+			Query<MessageReceive> q = dfds.createQuery(MessageReceive.class);
+			q.field("convType").equal("TEAM");
+			q.field("to").equal(to);
+			long st = DateUtil.toTimestamp(startTime);
+			long et = DateUtil.toTimestamp(endTime);
+			if(st>0)
+				q.field("msgTimestamp").greaterThanOrEq(startTime);
+			if(et>0)
+				q.field("msgTimestamp").lessThanOrEq(endTime);
+			AggregationPipeline pipeline  = dfds.createAggregation(MessageReceive.class);
+			pipeline.match(q).group(id(grouping("to")));
+//			pipeline.skip(page>1?(page-1)*limit:0);
+//			pipeline.limit(limit);
+			Iterator<TeamGroup> iterator  = pipeline.aggregate(TeamGroup.class);
+			 System.out.println(iterator.hasNext());
+//			 Set<String> tids=new HashSet<>();
+			 List<JSONObject> res=new ArrayList<JSONObject>();
+			 while (iterator.hasNext()) {
+				 TeamGroup ug = iterator.next();
+				 System.out.println(JSON.parseObject(ug.getTo()).getString("to"));
+				 System.out.println(ug.getCount());
+//				 tids.add(JSON.parseObject(ug.getTo()).getString("to"));
+				 com.youxin.app.yx.request.team.QueryDetail tq=new com.youxin.app.yx.request.team.QueryDetail();
+				 tq.setTid(Long.valueOf(JSON.parseObject(ug.getTo()).getString("to")));
+				 res.add(SDKService.teamQueryDetail(tq).getJSONObject("tinfo"));
+	         }
+//			 PageResult<MessageReceive> pr=new PageResult<>(mrList, count);
+			return Result.success(res);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+
 	
 	@RequestMapping("/sendBatchMsg")
 	public Object sendBatchMsg(@RequestParam(defaultValue = "") String text) {

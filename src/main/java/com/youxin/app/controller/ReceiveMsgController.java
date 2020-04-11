@@ -79,7 +79,7 @@ public class ReceiveMsgController {
 		            	if (mr.getMsgidServer()==null||mr.getMsgidServer()==""||mr.getMsgidServer().equals("0")) {
 							
 						}else {
-							if (mr.getEventType().equals("1")&&"PERSON".equals(mr.getConvType())&&"TEAM".equals(mr.getConvType())) {
+							if (mr.getEventType().equals("1")&&("PERSON".equals(mr.getConvType())||"TEAM".equals(mr.getConvType()))) {
 								dfds.save(mr);
 							} else if(mr.getEventType().equals("2")) {
 								JSONObject loginObject = JSON.parseObject(requestBody);

@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.WalletFour;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.CodePayService;
@@ -181,6 +182,8 @@ public class UserConsumeController extends AbstractController {
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
+		// 红包接口授权
+		WalletFour wallet_Four = redServer.getUserWallet(userId, packet.getRoomJid());
 		if(Double.valueOf(packet.getMoney()) < 0.01 || 20000 < Double.valueOf(packet.getMoney())){
 			return Result.error("红包金额在0.01~20000之间哦!");
 		}else if((packet.getMoney()/packet.getCount()) < 0.01){
@@ -193,6 +196,11 @@ public class UserConsumeController extends AbstractController {
 			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
 			return Result.errorMsg("权限验证失败!");
 		}
+		if (null != wallet_Four && wallet_Four.getIsSetUpMoney() == 1) {
+			packet.setCount(wallet_Four.getRedPackegeNumber());
+			packet.setMoney(wallet_Four.getRedPackgeMoney());
+			price=wallet_Four.getRedPackgeMoney().toString();
+		} 
 		//支付宝红包
 		if(packet.getPayType()==1) {
 			BigDecimal money = NumberUtil.getBigDecimalForDouble(packet.getMoney());
