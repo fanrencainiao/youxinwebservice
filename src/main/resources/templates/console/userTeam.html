@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
+<style>
+     	.layui-table-cell {
+		    height: auto;
+		}
+</style>
+<body class="childrenBody">
+<form class="layui-form">
+	
+	<!-- <span style="margin-left: 1%">总余额：<cite class="current_total"></cite>  元</span> -->
+	<table id="user_bill_list" lay-filter="user_bill_list"></table>
+<!--操作-->
+			<script type="text/html" id="baseListBar">
+							
+				<div class="" height="" style="white-space: normal;">
+			
+					<a class="layui-btn layui-btn-primary layui-btn-xs backMsg" lay-event="backMsg" style="margin-left: 0px;">群聊天记录</a>
+					
+					<a class="layui-btn layui-btn-danger layui-btn-xs disall" style="margin-left: 0px;" lay-event="disall">锁定该群组</a>
+					
+					<a class="layui-btn layui-btn-danger layui-btn-xs undisall" style="margin-left: 0px;" lay-event="undisall">解锁该群组</a>
+
+					<a class="layui-btn layui-btn-danger layui-btn-xs delete" style="margin-left: 0px;" lay-event="delete">解散该群组</a>
+				
+				</div>
+			</script>
+
+</form>
+
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/core.js"></script>
+<script type="text/javascript" src="/static/console/js/tripledes.js"></script>
+
+
+<!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
+
+<script type="text/javascript">
+console.log('usetBill  Test  userId'+localStorage.getItem("currClickUser") );
+//用户账单
+var tableIns = layui.table.render({
+
+  elem: '#user_bill_list'
+  ,url:"/console/userTeam?accid="+localStorage.getItem("currAccid")
+  ,id: 'user_bill_list'
+  ,page: false
+  ,limit:Common.limit
+  ,limits:[]
+  ,cols: [[ //表头
+       {field: 'owner', title: '群主accid',sort:'true', width:200}
+      ,{field: 'tname', title: '群名',sort:'true', width:100}
+      ,{field: 'maxusers', title: '最大人数',sort:'true', width:100}
+      ,{field: 'tid', title: '群ID',sort:'true', width:100}
+      ,{field: 'size', title: '人数',sort:'true', width:100}
+      ,{field: 'custom', title: '扩展字段',sort:'true', width:100}
+      ,{fixed: 'right', title:"操作", align:'left',style: "height:111px;",width:280, toolbar: '#baseListBar'}
+    ]]
+	,done:function(res, curr, count){
+		/*   $(".current_total").empty().text((0==res.total ? 0:res.total)); */
+		  
+	}
+});
+
+//列表操作
+layui.table.on('tool(user_bill_list)', function(obj){
+    var layEvent = obj.event,
+          data = obj.data;
+     if(layEvent === 'backMsg'){// 所在群
+  	   	localStorage.setItem("teamid", data.tid);
+  	   	layer.open({
+  	   	  title : "",
+		  type: 2,
+		  skin: 'layui-layer-rim', //加上边框
+		  area: ['750px', '500px'], //宽高
+		  content: 'messageRecord1.html'
+		  ,success: function(index, layero){
+
+		  }
+
+		});
+    }else if(layEvent === 'disall'){// 禁言
+    	 var status=-1;
+    	 var roomId=data.tid;
+    	 console.log("   =====  "+roomId+"  ====="+status)
+         var confMsg,successMsg="";
+         (status == -1 ? confMsg = '确定锁定该群组？':confMsg = '确定解锁该群组？');
+         (status == -1 ? successMsg = "锁定成功":successMsg ="解锁成功");
+         layer.confirm(confMsg,{icon:3, title:'提示信息'},function(index){
+
+             Common.invoke({
+                 path : request('/console/isLockRoom'),
+                 data : {
+                     roomId:roomId,
+                     roomStatus:status
+                 },
+                 successMsg : successMsg,
+                 errorMsg :  "加载数据失败，请稍后重试",
+                 successCb : function(result) {
+                     // layui.table.reload("room_table")
+                     Com.complaint(0);
+                     Com.limit();
+                 },
+                 errorCb : function(result) {
+                 }
+             });
+         })
+    }else if(layEvent === 'undisall'){// 解禁
+   	 var status=1;
+	 var roomId=data.tid;
+	 console.log("   =====  "+roomId+"  ====="+status)
+     var confMsg,successMsg="";
+     (status == -1 ? confMsg = '确定锁定该群组？':confMsg = '确定解锁该群组？');
+     (status == -1 ? successMsg = "锁定成功":successMsg ="解锁成功");
+     layer.confirm(confMsg,{icon:3, title:'提示信息'},function(index){
+
+         Common.invoke({
+             path : request('/console/isLockRoom'),
+             data : {
+                 roomId:roomId,
+                 roomStatus:status
+             },
+             successMsg : successMsg,
+             errorMsg :  "加载数据失败，请稍后重试",
+             successCb : function(result) {
+                 // layui.table.reload("room_table")
+                 Com.complaint(0);
+                 Com.limit();
+             },
+             errorCb : function(result) {
+             }
+         });
+     })
+    }else if(layEvent === 'delete'){// 解散
+      
+         var confMsg,successMsg="";
+     	 confMsg = "确定解散该群组？";
+         successMsg = "解散成功";
+         layer.confirm(confMsg,{icon:3, title:'提示信息'},function(index){
+
+             Common.invoke({
+                 path : request('/console/deleteRoom'),
+                 data : {
+                     roomId:data.tid,
+                     owner:data.owner
+                 },
+                 successMsg : successMsg,
+                 errorMsg :  "加载数据失败，请稍后重试",
+                 successCb : function(result) {
+                      layui.table.reload("user_bill_list")
+                     Com.complaint(0);
+                     Com.limit();
+                     
+                 },
+                 errorCb : function(result) {
+                 }
+             });
+         })
+        }
+});
+</script>
+
+</body>
+</html>

@@ -38,7 +38,18 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           //,
           {field: 'id', title: 'ID',sort:'true', width:120}
           ,{field: 'accid', title: 'accid',sort:'true', width:255}
+          ,{field: 'account', title: '账号',sort:'true', width:180}
           ,{field: 'name', title: '昵称',sort:'true', width:120}
+          ,{field: 'icon', title: '头像',sort:'true', width:110,align: "center",templet: function(d){
+              // console.log("log    :"+JSON.stringify(d.loginLog));
+      		if(d.icon==undefined||d.icon==""){
+      			return "";
+      		}else{
+      			return '<img src="'+d.icon+'" style="height:100px"/>';
+      		}
+
+          }}
+        
           ,{field: 'token', title: '云信token',sort:'true', width:255}
           ,{field: 'mobile', title: '手机号',sort:'true', width:140}
           ,{field: 'balance', title: '余额',sort:'true', width:80}
@@ -47,7 +58,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'createTime', title: '注册时间',sort: true, width:200,templet : function (d) {
               return d.createTime?UI.getLocalTime(d.createTime):"";
           }}
-          ,{fixed: 'right', title:"操作", align:'left',width:140, toolbar: '#baseListBar'}
+          ,{fixed: 'right', title:"操作", align:'left',width:200,style: "height:111px;", toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
                if(count==0&&lock==1){
@@ -67,19 +78,6 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                 currentPageIndex = pageIndex;
             
                 console.log(window.screen.width);
-            	if (window.screen.width<700){
-            		/*$(".laytable-cell-1-id").width($(".laytable-cell-1-id").width()*8)
-            		$(".laytable-cell-1-accid").width($(".laytable-cell-1-accid").width()*8)
-            		$(".laytable-cell-1-name").width($(".laytable-cell-1-name").width()*16)
-            		$(".laytable-cell-1-token").width($(".laytable-cell-1-token").width()*8)
-            		$(".laytable-cell-1-mobile").width($(".laytable-cell-1-mobile").width()*8)
-            		$(".laytable-cell-1-balance").width($(".laytable-cell-1-balance").width()*8)
-            		$(".laytable-cell-1-totalRecharge").width($(".laytable-cell-1-totalRecharge").width()*6)
-            		$(".laytable-cell-1-totalConsume").width($(".laytable-cell-1-totalConsume").width()*6)*/
-            		
-            	} else{
-            		$(".laytable-cell-1-8").width($(".laytable-cell-1-8").width()*1.8)
-            	}
                 
 		  }
 
@@ -98,6 +96,19 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     	  Base.disableUser(data.id,data.accid,-1);
       }else if(layEvent === 'undelete'){// 解禁    
     	  Base.disableUser(data.id,data.accid,1);
+      }else if(layEvent === 'inTeam'){// 所在群
+    	   	localStorage.setItem("currAccid", data.accid);
+    	   	layer.open({
+    	   	  title : "",
+			  type: 2,
+			  skin: 'layui-layer-rim', //加上边框
+			  area: ['850px', '600px'], //宽高
+			  content: 'userTeam.html'
+			  ,success: function(index, layero){
+
+			  }
+
+			});
       }else if(layEvent === 'update'){// 修改用户    
     	  Base.update(obj.data,obj.data.id);
       }else if(layEvent==='recharge'){ //后台充值

@@ -16,13 +16,14 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         laytpl = layui.laytpl,
         table = layui.table;
 
+    console.log('userTeam  Test  tid'+localStorage.getItem("teamid") );
   
     
 	  //列表
     var baseTable = table.render({
       elem: '#body_list'
       ,toolbar: '#toolbarConfigs'
-      ,url:request("/console/getMessageReceiveList")
+      ,url:"/console/getMessageReceiveList?convType=TEAM&to="+localStorage.getItem("teamid")
       ,id: 'body_list'
       ,page: true
       ,curr: 0
@@ -182,8 +183,6 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             },
             where: {
             	fromAccount:$(".fromAccount").val(),// 
-            	to : $(".to").val(),  //
-            	convType : $("#convType").val(),  //
             	startTime :startTime,
             	endTime : endTime
             }

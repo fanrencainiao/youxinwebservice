@@ -98,6 +98,7 @@ public class KConstants {
 		public static final int ALI_COUPON = 17;// 阿里红包
 		public static final int ALI_RECEIVE_COUPON = 18;// 阿里领取红包
 		public static final int ALI_BACK_COUPON = 19;// 阿里退回红包
+		public static final int BUY_SHOP = 20;// 商品购买
 	}
 	
 	

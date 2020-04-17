@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
@@ -97,8 +98,10 @@ import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgFile;
 import com.youxin.app.yx.request.MsgRequest;
+import com.youxin.app.yx.request.team.JoinTeams;
 import com.youxin.app.yx.request.team.MuteTlistAll;
 import com.youxin.app.yx.request.team.QueryDetail;
+import com.youxin.app.yx.request.team.Remove;
 
 
 
@@ -396,6 +399,44 @@ public class ConsoleController extends AbstractController{
 		}
 
 	}
+	/**
+	 * 	 用户所在群
+	 * @param accid
+	 * @param page
+	 * @param limit
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping(value = "userTeam")
+	public Object userTeam(@RequestParam String accid, int page, int limit) throws Exception {
+		try {
+
+			// 核验用户是否存在
+			if (null == userService.getUserFromDB(accid)) {
+				return Result.error("用户不存在!");
+			}
+			JoinTeams joinTeams = new JoinTeams();
+			joinTeams.setAccid(accid);
+			JSONObject ttjson = SDKService.teamJoinTeams(joinTeams);
+			if(ttjson.getIntValue("code")==200) {
+				JSONArray jsonArray = ttjson.getJSONArray("infos");
+//				List<Object> res=new ArrayList<>();
+//				for (int i = 0; i < jsonArray.size(); i++) {
+//					Object object = jsonArray.get(i);
+//					res.add(object);
+//				}
+				  PageResult<Object> pageResult = new PageResult<>(Optional.ofNullable(jsonArray).orElse(new JSONArray()), ttjson.getIntValue("count"));
+				return Result.success(pageResult);
+			}else {
+				return Result.error("sdk查询出错");
+			}
+			
+
+		} catch (Exception e) {
+			return Result.error(e.getMessage());
+		}
+
+	}
 	
 	/**
 	 * 	 用户账单
@@ -612,7 +653,31 @@ public class ConsoleController extends AbstractController{
 //			UpdateOperations<Report> ops = dfds.createUpdateOperations(Report.class);
 //			ops.set("roomStatus", roomStatus);
 //			dfds.update(query, ops);
-			return Result.success();
+			return Result.success(json);
+		}
+		
+		return Result.error("失败");
+	}
+	/**
+	 * 解散群
+	 * @param roomId
+	 * @param owner
+	 * @return
+	 */
+	@RequestMapping("/deleteRoom")
+	public Result deleteRoom(@RequestParam(defaultValue = "") String roomId,
+			@RequestParam(defaultValue = "") String owner) {
+		if (StringUtil.isEmpty(roomId))
+			return Result.error("room is null");
+		if (StringUtil.isEmpty(owner))
+			return Result.error("owner is null");
+		
+		Remove remove=new Remove();
+		remove.setOwner(owner);
+		remove.setTid(roomId);
+		JSONObject json = SDKService.teamRemove(remove);
+		if(json.getIntValue("code")==200) {
+			return Result.success(json);
 		}
 		
 		return Result.error("失败");
@@ -656,12 +721,12 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/opinionList")
-	public Object opinionList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize) {
+	public Object opinionList(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "25") int pageSize) {
 			PageResult<Opinion> result=new PageResult<>();
 			 Query<Opinion> createQuery = dfds.createQuery(Opinion.class);
 			 createQuery.order("state,-createTime");
 			result.setCount(createQuery.count());
-			result.setData(createQuery.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+			result.setData(createQuery.asList(MongoUtil.pageFindOption(page-1, pageSize)));
 			return Result.success(result);
 		
 		
@@ -726,7 +791,7 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/helpCenterList")
-	public Object helpCenterList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+	public Object helpCenterList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
 			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "-2") int state
 			,@RequestParam(defaultValue = "") String nickName ) {
 		PageResult<HelpCenter> result=new PageResult<>();
@@ -742,7 +807,7 @@ public class ConsoleController extends AbstractController{
 				q.field("title").contains(nickName);
 		 q.order("-createTime,-updateTime");
 		result.setCount(q.count());
-		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+		result.setData(q.asList(MongoUtil.pageFindOption(page-1, pageSize)));
 		return Result.success(result);
 	}
 	/**
@@ -805,7 +870,7 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/adList")
-	public Object adList(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+	public Object adList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
 			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "0") int state
 			,@RequestParam(defaultValue = "") String nickName ) {
 		PageResult<Advert> result=new PageResult<>();
@@ -818,7 +883,7 @@ public class ConsoleController extends AbstractController{
 				q.field("title").contains(nickName);
 		q.order("-createTime,-updateTime");
 		result.setCount(q.count());
-		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex-1, pageSize)));
+		result.setData(q.asList(MongoUtil.pageFindOption(page-1, pageSize)));
 		return Result.success(result);
 	}
 	/**

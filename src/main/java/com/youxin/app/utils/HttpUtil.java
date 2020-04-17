@@ -25,6 +25,13 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.JSONSerializer;
@@ -413,7 +420,6 @@ public final class HttpUtil {
 		try {
 			getMethod = new GetMethod(strtTotalURL.toString());
 			getMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=" + enc);
-		
 			int statusCode = client.executeMethod(getMethod);
 			if(statusCode == HttpStatus.SC_OK) {
 				response = getMethod.getResponseBodyAsString();
@@ -503,5 +509,61 @@ public final class HttpUtil {
 		} catch (SSLHandshakeException e) {
 			return spareAddress;
 		}
+	}
+    
+    
+    /**
+	 * 
+	 * @param url
+	 * @param stringParam "{\"username\":\"13800000002\",\"password\":\"123456\"}"
+	 * @param cookie
+	 * @throws Exception
+	 */
+	public static String cookiePostJson(String url,String stringParam,String cookie) throws Exception {
+		org.apache.http.client.HttpClient client = HttpClients.createDefault();
+		final String APPLICATION_JSON = "application/json";
+		final String CONTENT_TYPE_TEXT_JSON = "text/json";
+
+
+		HttpPost httpPost = new HttpPost(url);
+		httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");
+		httpPost.setHeader("cookie",cookie);
+
+		StringEntity se = new StringEntity(stringParam);
+		se.setContentType(CONTENT_TYPE_TEXT_JSON);
+
+		httpPost.setEntity(se);
+		HttpResponse response = null;
+
+		response = client.execute(httpPost);
+
+		// ----------判断是否重定向开始
+		int code = response.getStatusLine().getStatusCode();
+		String newuri = "";
+		if (code == 302) {
+			Header header = response.getFirstHeader("location"); // 跳转的目标地址是在 HTTP-HEAD 中的
+			newuri = header.getValue(); // 这就是跳转后的地址，再向这个地址发出新申请，以便得到跳转后的信息是啥。
+			System.out.println(newuri);
+			System.out.println(code);
+
+			httpPost = new HttpPost(newuri);
+			httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");
+
+			se = new StringEntity(stringParam);
+			se.setContentType(CONTENT_TYPE_TEXT_JSON);
+
+			httpPost.setEntity(se);
+
+			response = client.execute(httpPost);
+			code = response.getStatusLine().getStatusCode();
+			System.out.println("login" + code);
+		}
+
+		// ------------重定向结束
+		HttpEntity entity = null;
+		entity = response.getEntity();
+		String s2 = EntityUtils.toString(entity, "UTF-8");
+		System.out.println("重定向" + s2);
+		return s2;
 	}
 }

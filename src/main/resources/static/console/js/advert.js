@@ -27,15 +27,17 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
       ,limit:Common.limit
       ,limits:Common.limits
       ,groups: 7
+      ,cellMinWidth: 100
+      ,height: 'full-200'
       ,cols: [[ //表头
-           {type:'checkbox',fixed:'left'}// 多选
-          ,{field: 'id', title: 'ID',sort:'true', width:100}
-          ,{field: 'img', title: '图片',sort:'true', width:200, height:200,templet: function(d){
+           {type:'checkbox',fixed:'left',style: "height:110px;"}// 多选
+          ,{field: 'id', title: 'ID',sort:'true',align: "center", width:100}
+          ,{field: 'img', title: '图片',sort:'true',width:110,align: "center",templet: function(d){
               // console.log("log    :"+JSON.stringify(d.loginLog));
         		if(d.img==undefined||d.img==""){
         			return "";
         		}else{
-        			return '<img src="'+d.img+'"/>';
+        			return '<img src="'+d.img+'" style="height:100px"/>';
         		}
 
         }}
@@ -57,7 +59,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'createTime',title:'创建时间',width:195,templet: function(d){
               return UI.getLocalTime(d.createTime);
           }}
-          ,{fixed: 'right', width: 150,title:"操作", align:'left', toolbar: '#baseListBar'}
+          ,{fixed: 'right', width: 150,title:"操作", align:'left',style: "height:110px;", toolbar: '#baseListBar'}
         ]]
 		  ,done:function(res, curr, count){
                if(count==0&&lock==1){
