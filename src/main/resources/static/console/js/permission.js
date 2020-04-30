@@ -50,7 +50,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'id', title: 'ID',sort:'true', width:100}
           ,{field: 'toObj', title: '授权对象',sort:'true', width:100}
           ,{field: 'url', title: '授权url',sort:'true', width:100}
-          ,{field: 'api', title: '授权接口',sort:'true', width:100}
+          ,{field: 'api', title: '授权接口 ip',sort:'true', width:100}
           ,{field: 'uvList',title:'UV',width:100,templet: function(d){
         		  return d.uvList.length;
           }}

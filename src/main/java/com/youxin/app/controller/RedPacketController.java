@@ -22,6 +22,8 @@ import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.WalletFour;
+import com.youxin.app.entity.RedPacket.SendRedPacket;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
@@ -37,6 +39,8 @@ import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.supper.Callback;
+import com.youxin.app.yx.SDKService;
+import com.youxin.app.yx.request.MsgRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -172,9 +176,8 @@ public class RedPacketController extends AbstractController {
 			packet.setSendTime(cuTime);
 			packet.setOutTime(cuTime + KConstants.Expire.DAY1);
 //		packet.setOutTime(cuTime + 60);
-			Object data = null;
 			// 修改金额
-			data = redServer.saveRedPacket(packet);
+			RedPacket data = redServer.saveRedPacket(packet);
 			userService.rechargeUserMoeny(userId, redPackgeMoney, KConstants.MOENY_REDUCE);
 
 			// 开启一个线程 添加一条消费记录
@@ -194,6 +197,37 @@ public class RedPacketController extends AbstractController {
 					record.setDesc("红包发送");
 					record.setTime(DateUtil.currentTimeSeconds());
 					consumeServer.saveConsumeRecord(record);
+					
+					MsgRequest messageBean = new MsgRequest();
+					messageBean.setType(100);// 自定义
+
+					User toUser = userService.getUser(packet.getToUserId());
+					if (toUser != null) {
+						messageBean.setOpe(0);// 个人消息
+						messageBean.setFrom(Md5Util.md5HexToAccid(packet.getUserId() + ""));
+						messageBean.setTo(Md5Util.md5HexToAccid(packet.getToUserId() + ""));
+						log.debug("touserId" + packet.getToUserId());
+					} else {
+						messageBean.setOpe(1);// 个人消息
+						messageBean.setFrom(Md5Util.md5HexToAccid(packet.getUserId() + ""));
+						messageBean.setTo(packet.getRoomJid());
+						log.debug("roomid" + packet.getRoomJid());
+					}
+
+					messageBean.setBody(JSON.toJSONString(new MsgBody(0,
+							KConstants.MsgType.SENDREDPACKET,
+							new SendRedPacket(data.getId().toString(), data.getGreetings(),
+									data.getType(), data.getAccid(), 0,
+									String.valueOf(packet.getMoney()),0))));
+
+					try {
+						JSONObject json = SDKService.sendMsg(messageBean);
+						if (json.getInteger("code") != 200)
+							log.debug("零钱红包发送 sdk消息发送失败");
+					} catch (Exception e) {
+						e.printStackTrace();
+						log.debug("零钱红包发送 sdk消息发送失败" + e.getMessage());
+					}
 				}
 			});
 

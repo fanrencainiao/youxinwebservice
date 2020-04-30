@@ -148,12 +148,12 @@ public class UserServiceImpl implements UserService {
 			public void execute(Object obj) {
 				// 加系统客服好友并发送消息
 				try {
-					Friends friends = new Friends();
-					friends.setAccid(accid);
-					friends.setFaccid(Md5Util.md5HexToAccid("10000"));
-					friends.setType(1);
-					friends.setMsg("加客服好友");
-					SDKService.friendAdd(friends);
+//					Friends friends = new Friends();
+//					friends.setAccid(accid);
+//					friends.setFaccid(Md5Util.md5HexToAccid("10000"));
+//					friends.setType(1);
+//					friends.setMsg("加客服好友");
+//					SDKService.friendAdd(friends);
 					
 					MsgRequest messageBean = new MsgRequest();
 					messageBean.setFrom(Md5Util.md5HexToAccid("10000"));
@@ -274,6 +274,16 @@ public class UserServiceImpl implements UserService {
 	public long mobileCount(String mobile) {
 
 		return repository.count("mobile", mobile);
+	}
+	@Override
+	public long ipCount(String ip) {
+
+		return repository.count("ip", ip);
+	}
+	@Override
+	public long serialCount(String serial) {
+
+		return repository.count("serial", serial);
 	}
 
 	// 获取用户Id

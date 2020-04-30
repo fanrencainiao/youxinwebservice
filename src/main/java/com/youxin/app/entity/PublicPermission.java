@@ -30,10 +30,12 @@ public class PublicPermission {
 	private String userid;
 	@ApiModelProperty("授权对象")
 	private String toObj;
-	@ApiModelProperty("授权接口")
+	@ApiModelProperty("授权接口访问的ip")
 	private String api;
 	@ApiModelProperty("授权访问url")
 	private String url;
+//	@ApiModelProperty("授权ip")
+	private String ip;
 	@ApiModelProperty("授权类型")
 	private int type;
 	@ApiModelProperty("授权状态")
@@ -44,6 +46,8 @@ public class PublicPermission {
 	private Long updateTime;
 	@ApiModelProperty("用户授权集合")
 	private Set<Integer> uvList=new HashSet<Integer>();
+	@ApiModelProperty("平台用户id加密集合")
+	private Set<String> umd5List=new HashSet<String>();
 	@ApiModelProperty("用户访问集合")
 	private List<Integer> pvList=new ArrayList<Integer>();
 

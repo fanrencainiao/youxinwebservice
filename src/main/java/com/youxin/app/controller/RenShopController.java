@@ -139,7 +139,8 @@ public class RenShopController extends AbstractController{
 	        String resContent = HttpUtil.cookiePostJson(dataUrl, "",cookie);
 	        Assert.isTrue(!StringUtil.isEmpty(resContent), "付款成功，下单失败，请联系客服");
 	        try {
-	    	   JSON.parseObject(resContent);
+	    	   JSONObject parseObject = JSON.parseObject(resContent);
+	    	   log.debug(parseObject);
 			} catch (Exception e) {
 				return Result.error("付款成功，下单失败，请联系客服");
 			}

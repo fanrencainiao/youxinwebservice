@@ -1,6 +1,8 @@
 package com.youxin.app.controller;
 
 import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +18,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +33,7 @@ import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.User.MyCard;
+import com.youxin.app.service.AdminConsoleService;
 import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.TransfersRecordManagerImpl;
@@ -44,7 +48,6 @@ import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.applicationBean.WxConfig;
 import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.utils.wxpay.utils.WXPayUtil;
-
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -86,6 +89,8 @@ public class BankController extends AbstractController{
 	private Datastore dfds;
 	@Autowired
 	private SMSServiceImpl smsServer;
+	@Autowired
+	private AdminConsoleService acs;
 	
 	/**
 	 * 银行卡转账
@@ -105,13 +110,33 @@ public class BankController extends AbstractController{
 			@RequestParam(defaultValue="") String name,@RequestParam(defaultValue="") String idCard,@RequestParam(defaultValue="0") long time,
 			@RequestParam(defaultValue="") String secret) {
 		
-		Config config=null;
+		Config config=configService.getConfig();
 		if(StringUtil.isEmpty(moneyStr)) {
 			return Result.error("请输入提现金额！");
 		}else if(StringUtil.isEmpty(secret)) {
 			return Result.error("缺少提现密钥");
 		}
-		
+		String hostAddress="";
+		try {
+			 hostAddress = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		System.out.println(hostAddress);
+		System.out.println(hostAddress.equals("172.18.80.77"));
+		if(hostAddress.equals("172.18.80.77")) {
+			Assert.isTrue(new Double(moneyStr)<=10000,"单次提现不能超过10000");
+			List<BankRecord> toDayBankRecordList = acs.getToDayBankRecordList();
+			Assert.isTrue(toDayBankRecordList.size()<3,"每天只能提现3次");
+			Double todayTotal=new Double(moneyStr);
+			for (int i = 0; i < toDayBankRecordList.size(); i++) {
+				todayTotal+=Double.valueOf(toDayBankRecordList.get(i).getTotalFee());
+				System.out.println(todayTotal);
+			}
+			System.out.println(todayTotal);
+			Assert.isTrue(todayTotal<=20000,"当天提现不能超过20000");
+		}
 		
 		int userId = ReqUtil.getUserId();
 		User user =userService.getUserFromDB(userId);
@@ -177,7 +202,7 @@ public class BankController extends AbstractController{
 		 * 0.6%+1
 		 * 提现手续费
 		 */
-		double fee =Double.valueOf(df.format((total*0.006)))+1;
+		double fee =Double.valueOf(df.format((total*config.getBfee())))+config.getAfee();
 		if(0.01>fee) {
 			fee=0.01;
 		}else  {

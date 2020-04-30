@@ -307,7 +307,7 @@ public class AlipayController {
 											KConstants.MsgType.SENDREDPACKET,
 											new SendRedPacket(saveRed.getId().toString(), saveRed.getGreetings(),
 													saveRed.getType(), saveRed.getAccid(), 0,
-													String.valueOf(packet.getMoney())))));
+													String.valueOf(packet.getMoney()),1))));
 
 									try {
 										JSONObject json = SDKService.sendMsg(messageBean);

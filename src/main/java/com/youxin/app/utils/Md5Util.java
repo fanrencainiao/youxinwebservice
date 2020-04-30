@@ -71,6 +71,8 @@ public final class Md5Util {
     public static void main(String[] args) {
 //    	System.out.println(convertMD5("1100"));
 //    	System.out.println(convertMD5(convertMD5("1100")));]
+    	System.out.println(md5Hex("123456"));
+    	System.out.println(convertMD5(md5Hex("123456")));
     	System.out.println(md5HexToAccid("100").length());
 //    	System.out.println(md5HexToAccid("100000025").substring(0,md5HexToAccid("100000025").length()-"100000025".length()));
 	}

@@ -92,6 +92,14 @@ public class UserController extends AbstractController{
 		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
 			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = userService.mobileCount(user.getMobile());
+		user.setIp(getRequestIp());
+		log.debug(getRequestIp());
+		long ipCount = userService.ipCount(getRequestIp());
+		log.debug(user.getSerial());
+		long serialCount = userService.serialCount(user.getSerial());
+		if(ipCount>5&&serialCount>5)
+			throw new ServiceException(0, "限制注册");
+			
 		if (mobileCount >= 1) {
 			if(StringUtil.isEmpty(user.getLoginInfo())) {
 				throw new ServiceException(0, "手机号已被注册");

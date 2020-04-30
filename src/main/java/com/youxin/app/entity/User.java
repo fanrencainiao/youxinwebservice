@@ -109,6 +109,8 @@ public class User extends BaseExample{
 	private Long createTime;
 	@ApiModelProperty(value = "更新时间", hidden = true)
 	private Long updateTime;
+	@ApiModelProperty(value = "注册ip地址", hidden = true)
+	private String ip;
 	
 	@ApiModelProperty(value = "角色", hidden = true)
 	@NotSaved

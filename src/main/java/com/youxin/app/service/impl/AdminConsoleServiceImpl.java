@@ -16,8 +16,10 @@ import com.youxin.app.entity.User.LoginLog;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
 import com.youxin.app.service.UserService;
+import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.StringUtil;
 
 
@@ -61,6 +63,17 @@ public class AdminConsoleServiceImpl implements AdminConsoleService {
 		return result;
 	}
 	
-	
+	/**
+	 * 今日提现记录
+	 * @return
+	 */
+	@Override
+	public List<BankRecord> getToDayBankRecordList() {
+		Query<BankRecord> q=dfds.createQuery(BankRecord.class);
+		q.field("userId").equal(ReqUtil.getUserId());
+		q.field("createTime").greaterThanOrEq(DateUtil.getTodayMorning().getTime()/1000);
+		q.field("createTime").lessThanOrEq(DateUtil.getTodayNight().getTime()/1000);
+		return q.asList();
+	}
 
 }

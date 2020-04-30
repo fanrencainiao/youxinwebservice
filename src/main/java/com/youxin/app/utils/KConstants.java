@@ -46,6 +46,8 @@ public class KConstants {
 		add("/pay/codeReceipt");// 二维码收款
 		add("/bank/pay");// 银行卡提现
 		add("/redPacket/sendAliCoupon");//发送支付宝红包验证
+		add("/renren/payShopOrder");//发送支付宝红包验证
+		
 		
 
 		
@@ -239,7 +241,7 @@ public class KConstants {
 		}
 		//消息类型
 		public interface MsgType {
-			public static final int SENDREDPACKET = 8;// 打开红包
+			public static final int SENDREDPACKET = 8;// 发送红包
 			public static final int OPENREDPACKET = 10;// 打开红包
 			public static final int BACKREDPACKET = 11;// 超时退回红包
 			public static final int TRANSFERRECIEVE = 13;// 转账收钱

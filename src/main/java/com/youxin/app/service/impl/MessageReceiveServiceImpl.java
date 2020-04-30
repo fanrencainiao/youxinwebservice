@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.mongodb.WriteResult;
 import com.youxin.app.entity.MessageReceive;
+import com.youxin.app.entity.User;
 import com.youxin.app.repository.MessageReceiveRepository;
 import com.youxin.app.service.MessageReceiveService;
+import com.youxin.app.service.UserService;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.PageResult;
 import com.youxin.app.utils.StringUtil;
@@ -22,6 +24,8 @@ public class MessageReceiveServiceImpl implements MessageReceiveService {
 	
 	@Autowired
 	private MessageReceiveRepository mrr;
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public PageResult<MessageReceive> getList(String fromAccount,String to,String eventType,String convType,Integer pageSize, Integer pageNum, Long startTime, Long endTime) {
@@ -43,6 +47,15 @@ public class MessageReceiveServiceImpl implements MessageReceiveService {
 			q.field("to").equal(to);
 		q.order("-msgTimestamp");
 		List<MessageReceive> mrList = q.asList(MongoUtil.pageFindOption(pageNum, pageSize));
+		for(int i=0;i<mrList.size();i++) {
+			String faccid = mrList.get(i).getFromAccount();
+			User userFromDB = userService.getUserFromDB(faccid);
+			if(userFromDB != null) 
+				mrList.get(i).setIcon(userFromDB.getIcon()==null?"":userFromDB.getIcon());
+			else
+				mrList.get(i).setIcon("");
+			
+		}
 		long count = q.count();
 		PageResult<MessageReceive> pr=new PageResult<>(mrList, count);
 		return pr;

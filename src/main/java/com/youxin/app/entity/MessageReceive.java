@@ -2,12 +2,15 @@ package com.youxin.app.entity;
 
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.NotSaved;
 
 import lombok.Data;
 
 @Data
 @Entity(value = "message_receive", noClassnameStored = true)
 public class MessageReceive {
+	@NotSaved
+	private String icon;	
 	private String eventType;		//值为1，表示是会话类型的消息
 	private String convType;//	会话具体类型：PERSON（点对点会话内消息）、TEAM（群聊会话内消息）、CUSTOM_PERSON（点对点自定义系统通知及内置好友系统通知）、CUSTOM_TEAM（群聊自定义系统通知及内置群聊系统通知），字符串类型
 	private String to		;//若convType为PERSON或CUSTOM_PERSON，则to为消息接收者的用户账号，字符串类型；若convType为TEAM或CUSTOM_TEAM，则to为tid，即群id，可转为Long型数据

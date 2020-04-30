@@ -33,29 +33,29 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
            //{type:'checkbox',fixed:'left'}// 多选
           //,
           {field: 'msgidServer', title: 'ID',sort:'true', width:150}
-          ,{field: 'eventType', title: '消息类型',sort: true, width:90,templet : function (d) {
-            if(d.eventType=="1"){
-            	return "会话类型";
-            }
-            else if(d.eventType=="2"){
-            	return "登录事件";
-            }
-            else  if(d.eventType=="3"){
-            	return "登出/离线事件";
-            }
-            else  if(d.eventType=="7"){
-            	return "单聊消息撤回";
-            }
-            else  if(d.eventType=="8"){
-            	return "群聊消息撤回";
-            }
-            else if(d.eventType=="30"){
-            	return "点对点消息已读回执";
-            }else{
-            	return d.eventType;
-            }
-            	
-          }}
+//          ,{field: 'eventType', title: '消息类型',sort: true, width:90,templet : function (d) {
+//            if(d.eventType=="1"){
+//            	return "会话类型";
+//            }
+//            else if(d.eventType=="2"){
+//            	return "登录事件";
+//            }
+//            else  if(d.eventType=="3"){
+//            	return "登出/离线事件";
+//            }
+//            else  if(d.eventType=="7"){
+//            	return "单聊消息撤回";
+//            }
+//            else  if(d.eventType=="8"){
+//            	return "群聊消息撤回";
+//            }
+//            else if(d.eventType=="30"){
+//            	return "点对点消息已读回执";
+//            }else{
+//            	return d.eventType;
+//            }
+//            	
+//          }}
           ,{field: 'convType', title: '消息具体类型',sort:'true', width:70,templet : function (d) {
               if(d.convType=="PERSON"){
               	return "个人";
@@ -75,11 +75,24 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             }}
           ,{field: 'to', title: '接收方id(群或用户ID)',sort:'true', width:125}
           ,{field: 'fromAccount', title: '发送者账号',sort:'true', width:140}
-          ,{field: 'fromClientType', title: '发送客户端类型',sort:'true', width:80}
-          ,{field: 'fromDeviceId', title: '发送设备id',sort:'true', width:80}
+          ,{field: 'icon', title: '头像',sort:'true', width:110,align: "center",templet: function(d){
+              // console.log("log    :"+JSON.stringify(d.loginLog));
+      		if(d.icon==undefined||d.icon==""){
+      			return "";
+      		}else{
+      			return '<img src="'+d.icon+'" style="height:100px"/>';
+      		}
+
+          }}
+          ,{field: 'body', title: '消息内容',sort:'true', width:255,style: "height:111px;",templet : function (d) {
+        	  if(d.msgType=="PICTURE"){
+        		  return '<img src="'+JSON.parse(d.attach).url+'" style="height:100px"/>';
+        	  }
+        	  return d.body=='undefined'?'':d.body;
+          }}
           ,{field: 'fromNick', title: '发送方昵称',sort:'true', width:80}
-          ,{field: 'body', title: '消息内容',sort:'true', width:125}
-          ,{field: 'attach', title: '附加消息',sort:'true', width:255}
+          
+          ,{field: 'attach', title: '附加消息',sort:'true', width:100}
           ,{field: 'msgType', title: '消息内容类型',sort:'true', width:120,templet : function (d) {
               if(d.msgType=="TEXT"){
               	return "文本消息";
@@ -137,6 +150,8 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'antispam', title: '标识是否被反垃圾',sort:'true', width:50}
           ,{field: 'yidunRes', title: '易盾反垃圾的原始处理细节',sort:'true', width:100}
           ,{field: 'blacklist', title: '标识点对点消息是否黑名单',sort:'true', width:50}
+          ,{field: 'fromClientType', title: '发送客户端类型',sort:'true', width:80}
+          ,{field: 'fromDeviceId', title: '发送设备id',sort:'true', width:80}
           ,{field: 'ip', title: '客户端IP地址',sort:'true', width:100}
           ,{field: 'port', title: '客户端端口号',sort:'true', width:50}
         ]]

@@ -201,6 +201,18 @@ public interface UserService {
 	 * @param type
 	 */
 	void updateUserOnlineByAccid(String accid, int type);
+	/**
+	 * ip注册用户数量
+	 * @param ip
+	 * @return
+	 */
+	long ipCount(String ip);
+	/**
+	 * 设备号用户数量
+	 * @param serial
+	 * @return
+	 */
+	long serialCount(String serial);
 
 
 }

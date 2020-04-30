@@ -4,6 +4,7 @@ package com.youxin.app.controller;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,9 +74,16 @@ public class PublicPermisionController extends AbstractController{
 				@Override
 				public void execute(Object obj) {
 					System.out.println("权限obj:"+obj);
+					System.out.println("权限userId:"+userId);
 					List<Integer> pvList = pps.getPvList();
 					pvList.add(userId);
 					pps.setPvList(pvList);
+					Set<Integer> uvList = pps.getUvList();
+					Set<String> umd5List = pps.getUmd5List();
+					uvList.add(userId);
+					umd5List.add(Md5Util.md5Hex(userId+pps.getId().toString()));
+					pps.setUvList(uvList);
+					pps.setUmd5List(umd5List);
 					ppr.save(pps);
 				}
 			}, userId);
@@ -103,8 +112,11 @@ public class PublicPermisionController extends AbstractController{
 				public void execute(Object obj) {
 					System.out.println("权限obj:"+obj);
 					Set<Integer> uvList = pp.getUvList();
+					Set<String> umd5List = pp.getUmd5List();
 					uvList.add(userId);
+					umd5List.add(Md5Util.md5Hex(userId+pp.getId().toString()));
 					pp.setUvList(uvList);
+					pp.setUmd5List(umd5List);
 					ppr.save(pp);
 				}
 			}, userId);
@@ -134,6 +146,21 @@ public class PublicPermisionController extends AbstractController{
 			return Result.error("不存在");
 		
 	}
+	
+	@ApiOperation(value = "验证第三方用户是否存在（是否通过有讯有权进入）",response=Result.class)
+	@ApiImplicitParams({
+	})
+	@PostMapping(value = "invideUser")
+	public Object invideUser(@RequestParam(defaultValue="123") String perid) {
+		Query<PublicPermission> q = ppr.createQuery().field("api").equal(getRequestIp());
+		log.debug("授权请求ip:"+getRequestIp());
+		PublicPermission pp = ppr.findOne(q);
+		Assert.notNull(pp,"地址未授权");
+		Assert.notEmpty(pp.getUmd5List(),"验证失败");
+		Assert.isTrue(pp.getUmd5List().contains(perid),"验证失败");
+		return Result.success("验证成功");
+	}
+	
 	@Getter
 	@Setter
 	public static class Perp{

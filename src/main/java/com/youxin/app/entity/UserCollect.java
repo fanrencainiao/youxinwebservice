@@ -9,9 +9,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 
-import com.youxin.app.entity.User.Loc;
-import com.youxin.app.entity.User.LoginLog;
-import com.youxin.app.entity.User.UserSettings;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

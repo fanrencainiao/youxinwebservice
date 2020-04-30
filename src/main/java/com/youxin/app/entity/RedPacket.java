@@ -75,12 +75,14 @@ public class RedPacket {
 		String accId;
 		int redGetType;
 		String redMoney;
+		//0零钱红包发送，1支付宝红包发送
+		int redPayType;
 		
 		public SendRedPacket() {
 			super();
 		}
 		public SendRedPacket(String redId, String greeting, int redType, String accId, int redGetType,
-				String redMoney) {
+				String redMoney,int redPayType) {
 			super();
 			this.redId = redId;
 			this.greeting = greeting;
@@ -88,6 +90,7 @@ public class RedPacket {
 			this.accId = accId;
 			this.redGetType = redGetType;
 			this.redMoney = redMoney;
+			this.redPayType = redPayType;
 		}
 
 		

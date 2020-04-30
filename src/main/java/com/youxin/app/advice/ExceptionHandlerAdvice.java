@@ -34,10 +34,16 @@ public class ExceptionHandlerAdvice {
 		int resultCode = 60001;
 		String resultMsg = "接口内部异常====>";
 		log.info(request.getRequestURI() + "错误：");
+		
 		if (e instanceof MissingServletRequestParameterException
 				|| e instanceof BindException) {
 			resultCode = 10001;
 			resultMsg = "请求参数验证失败，缺少必填参数或参数错误";
+		} else if (e instanceof IllegalArgumentException) {
+			IllegalArgumentException ex = ((IllegalArgumentException) e);
+
+			resultCode = 0;
+			resultMsg = ex.getMessage();
 		} else if (e instanceof ServiceException) {
 			ServiceException ex = ((ServiceException) e);
 
