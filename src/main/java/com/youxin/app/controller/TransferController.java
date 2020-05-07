@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -149,6 +150,10 @@ public class TransferController extends AbstractController {
 			return Result.error("违法操作，若已经转账，将在24小时内退还到原账户");
 
 		Transfer transfer =dfds.createQuery(Transfer.class).field("_id").equal(tid).get();
+		log.debug(toUserId);
+		log.debug(transfer.getUserId());
+		log.debug(toUserId==transfer.getUserId());
+//		Assert.isTrue(toUserId==transfer.getUserId(),"非法操作");
 		if (transfer.getStatus() == CommTask.TRANSFER_START) {
 			if(df.format(money).compareTo(df.format(transfer.getMoney()))!=0) {
 				return Result.error("金额有误，若已经转账，将在24小时内退还到原账户");
@@ -161,7 +166,7 @@ public class TransferController extends AbstractController {
 			String tradeNo = AliPayUtil.getOutTradeNo();
 			record.setTradeNo(tradeNo);
 			record.setMoney(money);
-			record.setUserId(userId);
+			record.setUserId(transfer.getUserId());
 			record.setType(KConstants.ConsumeType.REFUND_TRANSFER);
 			record.setPayType(KConstants.PayType.BALANCEAY);
 			record.setTime(DateUtil.currentTimeSeconds());
@@ -170,7 +175,7 @@ public class TransferController extends AbstractController {
 
 			recordManager.saveConsumeRecord(record);
 
-			userManager.rechargeUserMoeny(userId, money, KConstants.MOENY_ADD);
+			userManager.rechargeUserMoeny(transfer.getUserId(), money, KConstants.MOENY_ADD);
 
 //			User sysUser = userManager.getUser(1100);
 //			transfer.setId(null);		
