@@ -101,7 +101,7 @@ public class AlipayController {
 				ConsumeRecord entity = cr.getConsumeRecordByNo(tradeNo);
 				long total_amount = new BigDecimal(params.get("total_amount")).multiply(new BigDecimal(100))
 						.longValue();
-				long sys_total_amount = new BigDecimal(entity.getMoney()).multiply(new BigDecimal(100)).longValue();
+				long sys_total_amount = new BigDecimal(entity.getMoney()+"").multiply(new BigDecimal(100)).longValue();
 				log.debug("支付宝支付成功金额：" + total_amount);
 				log.debug("支付宝支付成功本系统中金额：" + entity.getMoney());
 				log.debug("支付宝支付返回订单状态：" + tradeStatus);

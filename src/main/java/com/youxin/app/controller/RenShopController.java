@@ -123,7 +123,9 @@ public class RenShopController extends AbstractController{
 			entity.setTradeNo(orderNo+"order_"+oid);
 			entity.setPayType(3);
 			entity.setMoney(new Double(money));
-			Assert.isTrue(user.getBalance()>=entity.getMoney(), "余额不足");
+			if(user.getBalance()<entity.getMoney()) 
+				return Result.failure(ResultCode.USER_MONEY_NOT);
+			
 			userService.rechargeUserMoeny(userId, entity.getMoney(), KConstants.MOENY_REDUCE);
 			entity.setStatus(KConstants.OrderStatus.END);
 			consumeRecordServer.saveConsumeRecord(entity);

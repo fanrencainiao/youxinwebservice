@@ -83,6 +83,7 @@ public class UserController extends AbstractController{
 	@ApiOperation(value = "注册",notes="若是sdk注册，请携带sdkType和loginInfo值")
 	@PostMapping("register")
 	public Object register(@RequestBody @Valid User user){
+		String requestIp = getRequestIp();
 		if (StringUtil.isEmpty(user.getMobile())) {
 			throw new ServiceException(0, "手机号必填");
 		}
@@ -92,9 +93,9 @@ public class UserController extends AbstractController{
 		if (!sendSms.isAvailable("86" + user.getMobile(), user.getSmsCode()))
 			throw new ServiceException("短信验证码不正确!");
 		long mobileCount = userService.mobileCount(user.getMobile());
-		user.setIp(getRequestIp());
-		log.debug(getRequestIp());
-		long ipCount = userService.ipCount(getRequestIp());
+		user.setIp(requestIp);
+		log.debug(requestIp);
+		long ipCount = userService.ipCount(requestIp);
 		log.debug(user.getSerial());
 		long serialCount = userService.serialCount(user.getSerial());
 		if(ipCount>5&&serialCount>5)
@@ -322,6 +323,7 @@ public class UserController extends AbstractController{
 		user.setSmsCode(smsCode);
 		user.setLoginLog(loginInfo);
 		Map<String, Object> u=userService.login(user);
+		System.out.println("登录成功+"+u);
 		return Result.success(u);
 	}
 	@ApiOperation(value = "修改登录信息",response=Result.class)

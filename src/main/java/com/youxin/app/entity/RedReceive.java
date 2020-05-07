@@ -13,6 +13,8 @@ public class RedReceive {
 	
 	private @Indexed ObjectId redId;//红包Id
 	
+	private @Indexed Integer payType;//0 零钱，1支付宝
+	
 	private @Indexed Integer userId;//接受者用户ID
 	private @Indexed String accid;//接受者用户ID
 	
@@ -31,6 +33,14 @@ public class RedReceive {
 	 */
 	private String reply;
 
+
+	public Integer getPayType() {
+		return payType;
+	}
+
+	public void setPayType(Integer payType) {
+		this.payType = payType;
+	}
 
 	public ObjectId getId() {
 		return id;

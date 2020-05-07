@@ -285,6 +285,8 @@ public class UserConsumeController extends AbstractController {
 	@GetMapping("/user/rechargeRecord")
 	public Object getList(@RequestParam(defaultValue = "0") int pageIndex,
 			@RequestParam(defaultValue = "10") int pageSize) {
+		System.out.println(pageIndex);
+		System.out.println(pageSize);
 		Object data = consumeRecordServer.reChargeList(ReqUtil.getUserId(), pageIndex, pageSize);
 		return Result.success(data);
 	}
@@ -296,6 +298,8 @@ public class UserConsumeController extends AbstractController {
 	public Object consumeRecordList(@RequestParam(defaultValue = "0") int pageIndex,
 			@RequestParam(defaultValue = "10") int pageSize) {
 		try {
+			System.out.println(pageIndex);
+			System.out.println(pageSize);
 			Integer userId = ReqUtil.getUserId();
 			if (userId == null || userId < 0) {
 				return Result.errorMsg("登录过期，请重新登录!");

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
+
+<body>
+	<div class="layui-row">
+		<div class="layui-col-md1">&nbsp;</div>
+		<input id="pageCount" type="" name="" style="display: none">
+		<div id="baseList" class="layui-col-md10">
+			 <div class="search_div" style="margin-top: 2%"> 
+				 <input type="text" name="" class="layui-input nickName" style="width: 15%;display: inline" placeholder="申请对象"> 
+				<form class="layui-form" action="" style="float: left">
+					<div class="layui-form-item">
+						<select class="disable" class="layui-select">
+							<option value="">请选择审核状态</option>
+							<option value="1">禁用</option>
+							<option value="-1">未禁用</option>
+						</select>
+					</div>
+				</form>  
+				
+				<button class="layui-btn search_base">搜索</button>
+				<button onclick="Base.add()" class="layui-btn btn_add">新增</button>
+				
+			</div>
+
+			<div id="base_table" class="layui-card" style="margin-top: 1%">
+				<div class="layui-card-header"><p>图文列表</p></div>
+				<div class="layui-card-body">
+					<table id="body_list" lay-filter="body_list" style="table-layout:fixed;word-break:break-all;" >
+						
+					</table>
+				</div>
+			</div>
+
+			<!-- 多选操作 -->
+			<script type="text/html" id="toolbarConfigs">
+				<div class="layui-btn-container">
+					<button id="checkDeleteIds" class="layui-btn layui-btn-sm checkDeletes" onclick="Base.checkDeletes()" lay-event="delete">多选删除</button>
+				</div>
+			</script>
+	
+			<!--操作-->
+			<script type="text/html" id="baseListBar">	
+			{{#  if(d.disable == -1){ }}
+				<a class="layui-btn layui-btn-primary layui-btn-xs updisable" lay-event="updisable">禁用</a>					
+			{{#  }else{  }}
+				<a class="layui-btn layui-btn-disabled layui-btn-xs overSendBank" lay-event="updisableback">解禁</a>
+			{{#  } }}
+				<a class="layui-btn layui-btn-primary layui-btn-xs update" lay-event="update">修改</a>
+				<a class="layui-btn layui-btn-primary layui-btn-xs delete" lay-event="delete">删除</a>
+			</script>
+
+		</div>
+
+		<!-- 添加 -->
+		<div id="addConfig" class="layui-col-md10" style="display: none">
+			<div id="addConfigTitle" class="layui-card-header">新增</div>
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<td width="20%">ip禁止</td>
+						<td>ip禁止</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>IP</td>
+						<td><input id="id" type="" name="" style="display: none"><input id="cip" type="" name="" class="layui-input" ></td>
+					</tr>
+					
+					<tr>
+						<td>禁用状态</td>
+						<td>
+							<form class="layui-form" action="" style="">
+								<div class="layui-form-item">
+									<select id="disable" class="layui-select" style="width: 100%">
+										
+										<option selected="selected" value="1">禁用</option>
+										<option value="-1">不禁用</option>
+									</select>
+								</div>
+							</form>
+						</td>
+					</tr>
+			
+				</tbody>
+			</table>
+			
+			<div style="display: inline;">
+				<button class="layui-btn commit_add">提交</button>
+				<button onclick="Base.button_back()" class="layui-btn layui-btn-primary layui-btn-sm" style="">&lt;&lt;返回</button>
+			</div>
+		</div>
+
+
+	</div>
+
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/core.js"></script>
+<script type="text/javascript" src="/static/console/js/tripledes.js"></script>
+<script type="text/javascript" src="/static/console/js/ipdisable.js"></script>
+
+<!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
+
+<!-- 日期选择器 -->
+<script>
+	layui.use('laydate', function() {
+		var laydate = layui.laydate;
+        //日期时间选择器
+      /*   laydate.render({
+            elem: '#birth'
+            ,type: 'date'
+			,max: 0 //最大时间
+        }); */
+	})
+
+</script>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.youxin.app.filter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -17,10 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mongodb.morphia.Datastore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.collect.Maps;
+import com.youxin.app.entity.IPDisable;
 import com.youxin.app.entity.User;
 import com.youxin.app.utils.AuthServiceUtils;
 import com.youxin.app.utils.KSessionUtil;
@@ -36,6 +42,10 @@ public class AuthorizationFilter implements Filter {
 	@Autowired
 	@Qualifier(value = "afp")
 	private AuthorizationFilterProperties afp;
+	@Autowired
+	@Qualifier("get")
+	private Datastore dfds;
+	
 	private Log logger = LogFactory.getLog(AuthorizationFilter.class);
 
 	@Override
@@ -71,6 +81,14 @@ public class AuthorizationFilter implements Filter {
 		response.setCharacterEncoding("utf-8");
 		response.setContentType("text/html;charset=utf-8");
 		String accessToken = request.getHeader("access_token");
+		String requestIp = getRequestIp(request);
+		System.out.println("用户请求地址"+requestIp);
+		if(!StringUtil.isEmpty(requestIp)) {
+			long ipCount = dfds.createQuery(IPDisable.class).field("disable").equal(1).field("cip").equal(requestIp).count();
+			Assert.isTrue(ipCount<1, "服务异常");
+		}
+		
+		
 		long time = NumberUtils.toLong(request.getParameter("time"), 0);
 //		long time = 0;
 		String secret = request.getParameter("secret");
@@ -186,5 +204,34 @@ public class AuthorizationFilter implements Filter {
 
 		ResponseUtil.output(response, s);
 	}
+		
+		// 获取ip地址
+		public String getRequestIp(HttpServletRequest request) {
+			String requestIp = request.getHeader("x-forwarded-for");
+
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getHeader("X-Real-IP");
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getHeader("Proxy-Client-IP");
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getHeader("WL-Proxy-Client-IP");
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getHeader("HTTP_CLIENT_IP");
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getHeader("HTTP_X_FORWARDED_FOR");
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getRemoteAddr();
+			}
+			if (requestIp == null || requestIp.isEmpty() || "unknown".equalsIgnoreCase(requestIp)) {
+				requestIp = request.getRemoteHost();
+			}
+
+			return requestIp;
+		}
 
 }

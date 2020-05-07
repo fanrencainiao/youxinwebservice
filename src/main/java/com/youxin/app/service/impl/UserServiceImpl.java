@@ -58,6 +58,7 @@ import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.MongoOperator;
 import com.youxin.app.utils.MongoUtil;
 import com.youxin.app.utils.ReqUtil;
+import com.youxin.app.utils.Result;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.WXUserUtils;
@@ -678,6 +679,16 @@ public class UserServiceImpl implements UserService {
 		data.put("name", user.getName());
 		data.put("birth", user.getBirth());
 		data.put("icon", user.getIcon());
+		try {
+			JSONObject refreshToken = SDKService.refreshToken(Md5Util.md5HexToAccid(user.getId().toString()));
+			if(refreshToken.getIntValue("code")==200) {
+				String token = refreshToken.getJSONObject("info").getString("token");
+				data.put("token1", token);
+				user.setToken(token);
+			}
+		} catch (Exception e) {
+			log.debug(e.getMessage());
+		}
 		data.put("token", user.getToken());
 		data.put("mobile", StringUtil.phoneEncryption(user.getMobile()));
 		data.put("codeSign", user.getCodeSign());

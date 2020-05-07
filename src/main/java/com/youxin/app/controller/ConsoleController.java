@@ -55,6 +55,7 @@ import com.youxin.app.entity.BankRecord;
 import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.HelpCenter;
+import com.youxin.app.entity.IPDisable;
 import com.youxin.app.entity.MessageReceive;
 import com.youxin.app.entity.MongdbGroup;
 import com.youxin.app.entity.Opinion;
@@ -71,9 +72,11 @@ import com.youxin.app.entity.group.TeamGroup;
 import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.filter.LoginSign;
+import com.youxin.app.repository.IPDisableRepository;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.AdminConsoleService;
 import com.youxin.app.service.ConfigService;
+import com.youxin.app.service.IPDisableService;
 import com.youxin.app.service.MessageReceiveService;
 import com.youxin.app.service.PublicPermissionService;
 import com.youxin.app.service.UserService;
@@ -143,6 +146,8 @@ public class ConsoleController extends AbstractController{
 	private SMSServiceImpl smsServer;
 	@Autowired
 	private RedisCRUD redisServer;
+	@Autowired
+	private IPDisableService ipds;
 
 	@PostMapping(value = "login")
 	public Object login(String name, String password,String imgCode, HttpServletRequest request) {
@@ -1362,7 +1367,7 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/pplist")
-	public Object pplist(@RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = "25") int pageSize
+	public Object pplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
 			,@RequestParam(defaultValue = "0") int state 
 			,@RequestParam(defaultValue = "") String nickName) {
 		return Result.success(pps.pageList());
@@ -1394,6 +1399,55 @@ public class ConsoleController extends AbstractController{
 		String[] ids = StringUtil.getStringList(id, ",");
 		for(String idd:ids) {
 			pps.delPP(idd);
+		}
+		return Result.success();
+	}
+	
+	/**
+	 * 获取授权列表
+	 * @param pageIndex
+	 * @param pageSize
+	 * @param state
+	 * @return
+	 */
+	@RequestMapping(value = "/iplist")
+	public Object iplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
+			,@RequestParam(defaultValue = "0") int disable 
+			,@RequestParam(defaultValue = "") String nickName) {
+		return Result.success(ipds.pageList(disable,nickName,page,pageSize));
+	}
+	/**
+	 * 获取授权实体
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/getip")
+	public Object getip(@RequestParam(defaultValue = "") String id) {
+		Optional.ofNullable(id).orElseThrow(()->new ServiceException("id为空"));
+		return Result.success(ipds.getObj(id));
+	}
+	/**
+	 * 修改或者保存授权
+	 * @param hcid
+	 * @param hc
+	 * @return
+	 */
+	@RequestMapping(value = "/saveip")
+	public Object saveip(@ModelAttribute IPDisable ip) {
+		ipds.SaveOrUpdateObj(ip);
+		return Result.success();
+	}
+	@RequestMapping(value = "/updisable")
+	public Object updisable(@ModelAttribute IPDisable ip) {
+		ipds.updisable(ip.getSid(),ip.getDisable());
+		return Result.success();
+	}
+	@RequestMapping(value = "/delip")
+	public Object delip(@RequestParam(defaultValue = "") String id) {
+		Optional.ofNullable(id).orElseThrow(()->new ServiceException("id为空"));
+		String[] ids = StringUtil.getStringList(id, ",");
+		for(String idd:ids) {
+			ipds.delObj(idd);
 		}
 		return Result.success();
 	}

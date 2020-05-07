@@ -18,7 +18,10 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.mongodb.morphia.Datastore;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -49,6 +52,10 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 	
 	@Value("${youxin.isSaveRequestLogs}")
 	int isSaveRequestLogs;
+	
+	@Autowired
+	@Qualifier("get")
+	private Datastore dfds;
 
 	/**
 	 * 
@@ -74,8 +81,8 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 		} catch (Exception e) {
 			log.debug(e.toString(), e);
 		} finally {
-// 			if(!list.isEmpty())
-//			 SKBeanUtils.getDatastore().save(list);
+ 			if(!list.isEmpty())
+ 				dfds.save(list);
 		}
 
 	}

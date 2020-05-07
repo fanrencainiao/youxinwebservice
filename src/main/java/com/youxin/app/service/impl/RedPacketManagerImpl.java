@@ -312,6 +312,8 @@ public class RedPacketManagerImpl {
 		RedReceive receive = new RedReceive();
 		receive.setMoney(money);
 		receive.setUserId(userId);
+		receive.setPayType(packet.getPayType());
+		
 		receive.setAccid(user.getAccid());
 		receive.setSendId(packet.getUserId());
 		receive.setRedId(packet.getId());
