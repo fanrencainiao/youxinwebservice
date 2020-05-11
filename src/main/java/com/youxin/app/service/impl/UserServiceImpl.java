@@ -127,6 +127,9 @@ public class UserServiceImpl implements UserService {
 		bean.setSettings(new UserSettings());
 		bean.setCreateTime(DateUtil.currentTimeSeconds());
 		bean.setUpdateTime(DateUtil.currentTimeSeconds());
+		bean.setBalance(0.0);
+		bean.setTotalConsume(0.0);
+		bean.setTotalRecharge(0.0);
 		// 保存本地数据库
 		repository.save(bean);
 		// 第三方注册绑定信息

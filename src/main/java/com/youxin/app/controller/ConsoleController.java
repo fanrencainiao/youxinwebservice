@@ -459,7 +459,7 @@ public class ConsoleController extends AbstractController{
 			if (null == userService.getUserFromDB(userId)) {
 				return Result.error("用户不存在!");
 			}
-			PageResult<ConsumeRecord> result = crm.consumeRecordList(userId, page-1,
+			PageResult<ConsumeRecord> result = crm.consumeRecordListByBill(userId, page-1,
 					limit);
 			User userFromDB = userService.getUserFromDB(userId);
 			result.setTotal(userFromDB.getBalance());
@@ -478,12 +478,14 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 **/
 	@GetMapping("/redPacketList")
-	public Object getRedPacketList(@RequestParam(defaultValue = "") String userName,
+	public Object getRedPacketList(
+			@RequestParam(defaultValue = "0") int payType,
+			@RequestParam(defaultValue = "") String userName,
 			@RequestParam(defaultValue = "0") int userId,
 			@RequestParam(defaultValue = "0") int toUserId,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) {
 		try {
-			PageResult<RedPacket> result = rpm.getRedPacketList(userName,userId,toUserId, page-1, limit);
+			PageResult<RedPacket> result = rpm.getRedPacketList(payType,userName,userId,toUserId, page-1, limit);
 			return Result.success(result);
 		} catch (ServiceException e) {
 			return Result.error(e.getErrMessage());
@@ -1081,6 +1083,15 @@ public class ConsoleController extends AbstractController{
 			g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
 			//总vip充值提成
 			g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//总商品消费
+			g = getTotalMoney("totalShopping", "money", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//用户总余额
+			g = getTotalMoney("totalBalance1", "balance", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//用户总充值
+			g = getTotalMoney("totalRecharge1", "totalRecharge", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			//用户总消费
+			g = getTotalMoney("totalConsume1", "totalConsume", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			
 			g.setTotalBalance(null);
 			return Result.success(g);
 		} catch (ServiceException e) {
@@ -1099,21 +1110,34 @@ public class ConsoleController extends AbstractController{
 	 */
 	private MongdbGroup getTotalMoney(String total, String sum, int type,Integer[] payType, Integer[] status, MongdbGroup g) {
 		DecimalFormat df = new DecimalFormat("#.00");
-		Query<ConsumeRecord> query = dfds.createQuery(ConsumeRecord.class).order("-time");
-		if(g.getUserId()>0)
-			query.field("userId").equal(g.getUserId());
+		AggregationPipeline pipeline=null;
 		
-		if(g.getStartDate()>0&&g.getEndDate()>0) {
-			query.and(query.criteria("time").greaterThanOrEq(g.getStartDate()),query.criteria("time").lessThanOrEq(g.getEndDate()));
+		if(total.equals("totalBalance1")||total.equals("totalConsume1")||total.equals("totalRecharge1")) {
+			Query<User> query = dfds.createQuery(User.class);
+			if(g.getUserId()>0)
+				query.field("userId").equal(g.getUserId());
+			
+			pipeline = dfds.createAggregation(User.class);
+			pipeline.match(query)
+					.group(grouping(total, sum(sum)));
 		}else {
-			if(g.getStartDate()>0)
-				query.field("time").greaterThanOrEq(g.getStartDate());
-			if(g.getEndDate()>0)
-				query.field("time").lessThanOrEq(g.getEndDate());
+			Query<ConsumeRecord> query = dfds.createQuery(ConsumeRecord.class).order("-time");
+			if(g.getUserId()>0)
+				query.field("userId").equal(g.getUserId());
+			
+			if(g.getStartDate()>0&&g.getEndDate()>0) {
+				query.and(query.criteria("time").greaterThanOrEq(g.getStartDate()),query.criteria("time").lessThanOrEq(g.getEndDate()));
+			}else {
+				if(g.getStartDate()>0)
+					query.field("time").greaterThanOrEq(g.getStartDate());
+				if(g.getEndDate()>0)
+					query.field("time").lessThanOrEq(g.getEndDate());
+			}
+			pipeline = dfds.createAggregation(ConsumeRecord.class);
+			pipeline.match(query.filter("type", type).filter("status in", status).filter("payType in", payType))
+					.group(grouping(total, sum(sum)));
 		}
-		AggregationPipeline pipeline = dfds.createAggregation(ConsumeRecord.class);
-		pipeline.match(query.filter("type", type).filter("status in", status).filter("payType in", payType))
-				.group(grouping(total, sum(sum)));
+		
 		Iterator<MongdbGroup> iterator = pipeline.aggregate(MongdbGroup.class);
 		System.out.println(iterator.hasNext());
 		while (iterator.hasNext()) {
@@ -1173,6 +1197,19 @@ public class ConsoleController extends AbstractController{
 			case "totalVipRechargeProfit":
 				g.setTotalVipRechargeProfit(Double.valueOf(df.format(ug.getTotalVipRechargeProfit())));
 				break;
+			case "totalShopping":
+				g.setTotalShopping(Double.valueOf(df.format(ug.getTotalShopping())));
+				break;
+			case "totalBalance1":
+				g.setTotalBalance1(Double.valueOf(df.format(ug.getTotalBalance1())));
+				break;
+			case "totalConsume1":
+				g.setTotalConsume1(Double.valueOf(df.format(ug.getTotalConsume1())));
+				break;
+			case "totalRecharge1":
+				g.setTotalRecharge1(Double.valueOf(df.format(ug.getTotalRecharge1())));
+				break;
+				
 			default:
 				break;
 			}

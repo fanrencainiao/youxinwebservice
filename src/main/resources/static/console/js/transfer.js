@@ -31,7 +31,17 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                     (d.userName == "" ? userName = "测试用户" : userName = d.userName);
                     return userName;
                 }}
-            ,{field: 'toUserId', title: '收取用户Id',sort: true, width:120}
+            ,{field: 'toUserId', title: '收取用户Id',sort: true, width:120,templet : function (d) {
+            	
+            	var accid=d.toAccid;
+            	var toUserId='';
+    			for (var i = 0; i < 8; i++) {
+    				
+    				toUserId=toUserId+d.toAccid.charAt(2*i+1)
+    			}
+    		
+    			return toUserId;
+            }}
             ,{field: 'money', title: '转账金额',sort: true, width:120}
             ,{field: 'remark', title: '转账说明',sort: true, width:150}
             ,{field: 'status', title: '转账状态',sort: true, width:120,templet : function (d) {

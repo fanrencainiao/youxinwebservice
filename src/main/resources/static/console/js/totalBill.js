@@ -65,6 +65,22 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 					$("#totalGetQRCodePay").html(result.data.totalGetQRCodePay);
 					$("#totalVipRecharge").html(result.data.totalVipRecharge);
 					$("#totalVipRechargeProfit").html(result.data.totalVipRechargeProfit);
+					$("#totalShopping").html(result.data.totalShopping);
+					var data1=result.data;
+					$("#totalBalance1").html(result.data.totalBalance1);
+					$("#totalConsume1").html(result.data.totalConsume1);
+					$("#totalRecharge1").html(result.data.totalRecharge1);
+					var systemMoney=Math.round((data1.totalSendRedPacket-data1.totalGetRedPacket-data1.totalBackRedPacket+data1.totalTransferMoney
+							-data1.totalGetTransferMoney-data1.totalBackTransferMoney+data1.totalCodePay-data1.totalGetCodePay+data1.totalQRCodePay-data1.totalGetQRCodePay-data1.totalShopping)*100)/100;
+					$("#systemMoney").html(systemMoney);
+					var leftsystemMoney=Math.round((data1.totalRecharge-data1.totalCash)*100)/100;
+					$("#leftsystemMoney").html(leftsystemMoney)
+					$("#leftrechargeMoney").html(Math.round((data1.wxTotalRecharge+data1.aliTotalRecharge)*100)/100)
+					
+					$("#outmoney").html(Math.round((result.data.totalBalance1+systemMoney-leftsystemMoney)*100)/100)
+				
+					
+					
 				}
 
 			}

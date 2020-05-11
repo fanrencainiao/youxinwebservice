@@ -542,7 +542,7 @@ public class RedPacketManagerImpl {
 	}
 
 	// 发送的红包
-	public PageResult<RedPacket> getRedPacketList(String userName, int userId, int toUserId, int pageIndex,
+	public PageResult<RedPacket> getRedPacketList(int payType,String userName, int userId, int toUserId, int pageIndex,
 			int pageSize) {
 		PageResult<RedPacket> result = new PageResult<RedPacket>();
 		Query<RedPacket> q = redPacketRepository.createQuery().order("-sendTime");
@@ -551,10 +551,11 @@ public class RedPacketManagerImpl {
 		if (userId > 0) {
 			q.field("userId").equal(userId);
 		}
+		
 		if (toUserId > 0) {
 			q.or(q.criteria("toUserId").equal(toUserId), q.criteria("userIds").hasThisOne(toUserId));
 		}
-
+		q.field("payType").equal(payType);
 		result.setCount(q.count());
 		result.setData(q.asList(MongoUtil.pageFindOption(pageIndex, pageSize)));
 		return result;

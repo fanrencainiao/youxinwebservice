@@ -62,6 +62,22 @@ public class ConsumeRecordManagerImpl {
 			return result;
 	}
 	
+	public PageResult<ConsumeRecord> consumeRecordListByBill(Integer userId,int page,int limit){
+		
+		PageResult<ConsumeRecord>  result = new PageResult<ConsumeRecord>();
+		Query<ConsumeRecord> q = repository.createQuery().order("-time");
+		
+		if(0!=userId)
+			q.filter("userId", userId);
+//			q.field("money").greaterThan(0);
+			q.filter("status", KConstants.OrderStatus.END);
+			q.filter("type in", new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,20});
+			result.setData(q.asList(MongoUtil.pageFindOption(page, limit)));
+			
+			result.setCount(q.count());
+			return result;
+	}
+	
 	public PageResult<ConsumeRecord> consumeRecordListByVip(Integer userId,int page,int limit){
 		
 		PageResult<ConsumeRecord>  result = new PageResult<ConsumeRecord>();

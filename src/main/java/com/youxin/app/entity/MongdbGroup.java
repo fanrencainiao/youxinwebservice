@@ -24,6 +24,8 @@ public class MongdbGroup {
 	 * 用户总充值
 	 */
 	private Double totalRecharge=0.0;
+	private Double totalRecharge1=0.0;
+	private Double totalConsume1=0.0;
 	/**
 	 * 用户总提现
 	 */
@@ -32,6 +34,7 @@ public class MongdbGroup {
 	 * 用户总余额
 	 */
 	private Double totalBalance=0.0;
+	private Double totalBalance1=0.0;
 	/**
 	 * 微信总充值
 	 */
@@ -96,6 +99,10 @@ public class MongdbGroup {
 	 * 总vip充值提成
 	 */
 	private Double totalVipRechargeProfit=0.0;
+	/**
+	 * 总商品消费
+	 */
+	private Double totalShopping=0.0;
 	
 	
 	public Double getTotalRecharge() {
@@ -237,6 +244,30 @@ public class MongdbGroup {
 	}
 	public void setEndDate(long endDate) {
 		this.endDate = endDate;
+	}
+	public Double getTotalShopping() {
+		return totalShopping;
+	}
+	public void setTotalShopping(Double totalShopping) {
+		this.totalShopping = totalShopping;
+	}
+	public Double getTotalBalance1() {
+		return totalBalance1;
+	}
+	public void setTotalBalance1(Double totalBalance1) {
+		this.totalBalance1 = totalBalance1;
+	}
+	public Double getTotalRecharge1() {
+		return totalRecharge1;
+	}
+	public void setTotalRecharge1(Double totalRecharge1) {
+		this.totalRecharge1 = totalRecharge1;
+	}
+	public Double getTotalConsume1() {
+		return totalConsume1;
+	}
+	public void setTotalConsume1(Double totalConsume1) {
+		this.totalConsume1 = totalConsume1;
 	}
 
 	

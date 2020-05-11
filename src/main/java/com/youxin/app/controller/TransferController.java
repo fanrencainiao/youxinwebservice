@@ -152,7 +152,7 @@ public class TransferController extends AbstractController {
 		Transfer transfer =dfds.createQuery(Transfer.class).field("_id").equal(tid).get();
 		log.debug(toUserId);
 		log.debug(transfer.getUserId());
-		log.debug(toUserId==transfer.getUserId());
+		log.debug(transfer.getUserId().equals(toUserId));
 //		Assert.isTrue(toUserId==transfer.getUserId(),"非法操作");
 		if (transfer.getStatus() == CommTask.TRANSFER_START) {
 			if(df.format(money).compareTo(df.format(transfer.getMoney()))!=0) {

@@ -103,7 +103,8 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             where: {
                 userName : $("#toUserName").val(),  //搜索的关键字
                 userId : $("#userId").val(),  //搜索的发送人id
-                toUserId : $("#toUserId").val()  //搜索的接收人id
+                toUserId : $("#toUserId").val(),  //搜索的接收人id
+                payType :$("#payType").val() //红包支付类型  零钱或者支付宝
             },
             page: {
                 curr: 1 //重新从第 1 页开始
@@ -122,9 +123,10 @@ function renderTable(){
    // table.reload("user_list");
    table.reload("redEnvelope_table",{
        where: {
-                 userName : $("#toUserName").val(),  //搜索的关键字
+                userName : $("#toUserName").val(),  //搜索的关键字
                 userId : $("#userId").val(),  //搜索的发送人id
-                toUserId : $("#toUserId").val()  //搜索的接收人id
+                toUserId : $("#toUserId").val(),  //搜索的接收人id
+                payType :$("#payType").val() //红包支付类型  零钱或者支付宝
             },
             page: {
                 curr: 1 //重新从第 1 页开始
