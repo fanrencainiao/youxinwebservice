@@ -36,7 +36,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             ,{field: 'desc', title: '备注',sort: true, width:120}
             ,{field: 'payType', title: '支付方式',sort: true, width:120,templet : function (d) {
                     var payTypeMsg;
-                    (d.payType == 1 ? payTypeMsg = "支付宝支付" : (d.payType == 2) ? payTypeMsg = "微信支付" : (d.payType == 3) ? payTypeMsg = "余额支付" : (d.payType == 4) ? payTypeMsg = "系统支付": payTypeMsg = "其他方式支付")
+                    (d.payType == 1 ? payTypeMsg = "支付宝支付" : (d.payType == 2) ? payTypeMsg = "微信支付" : (d.payType == 3) ? payTypeMsg = "余额支付" :  (d.payType == 6) ? payTypeMsg = "易宝支付" :payTypeMsg = "其他方式支付")
                     return payTypeMsg;
                 }}
             ,{field: 'status', title: '交易状态',sort: true, width:120,templet : function (d) {

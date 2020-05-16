@@ -154,24 +154,24 @@ public class BankController extends AbstractController{
 		if(myCard==null) {
 			return Result.error("请勿非法操作");
 		}
-		//当日零点
-		long mtime=DateUtil.getTodayMorning().getTime()/1000;
-		//当日24点
-		long ntime=DateUtil.getTodayNight().getTime()/1000;
-		//当日已经提取金额
-		BigDecimal todayMoney=BigDecimal.ZERO;
-		List<BankRecord> todayRecords = dfds.createQuery(BankRecord.class).field("payTime").greaterThan(mtime)
-		.field("payTime").lessThan(ntime).asList();
-		if(!CollectionUtil.isEmpty(todayRecords)) {
-			for (BankRecord bankRecord : todayRecords) {
-				todayMoney=todayMoney.add(new BigDecimal(bankRecord.getTotalFee()));
-			}
-			//加本次提现总提取金额
-			BigDecimal todayMoneyTotal=todayMoney.add(new BigDecimal(moneyStr));
-			if(todayMoneyTotal.compareTo(new BigDecimal("20000"))>0) {
-				return Result.error("今日已经提现"+todayMoney+"元,已超过当日最高额度20000元");
-			}
-		}
+//		//当日零点
+//		long mtime=DateUtil.getTodayMorning().getTime()/1000;
+//		//当日24点
+//		long ntime=DateUtil.getTodayNight().getTime()/1000;
+//		//当日已经提取金额
+//		BigDecimal todayMoney=BigDecimal.ZERO;
+//		List<BankRecord> todayRecords = dfds.createQuery(BankRecord.class).field("payTime").greaterThan(mtime)
+//		.field("payTime").lessThan(ntime).asList();
+//		if(!CollectionUtil.isEmpty(todayRecords)) {
+//			for (BankRecord bankRecord : todayRecords) {
+//				todayMoney=todayMoney.add(new BigDecimal(bankRecord.getTotalFee()));
+//			}
+//			//加本次提现总提取金额
+//			BigDecimal todayMoneyTotal=todayMoney.add(new BigDecimal(moneyStr));
+//			if(todayMoneyTotal.compareTo(new BigDecimal("20000"))>0) {
+//				return Result.error("今日已经提现"+todayMoney+"元,已超过当日最高额度20000元");
+//			}
+//		}
 		
 		
 

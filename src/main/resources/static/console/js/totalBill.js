@@ -48,6 +48,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 				if(result.code==1){
 					$("#totalRecharge").html(result.data.totalRecharge);
 					$("#totalCash").html(result.data.totalCash);
+					$("#totalCash1").html(result.data.totalCash1);
 					$("#totalBalance").html(result.data.totalBalance);
 					$("#wxTotalRecharge").html(result.data.wxTotalRecharge);
 					$("#aliTotalRecharge").html(result.data.aliTotalRecharge);

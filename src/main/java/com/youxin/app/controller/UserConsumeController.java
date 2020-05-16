@@ -1,11 +1,14 @@
 package com.youxin.app.controller;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,7 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.yeepay.g3.sdk.yop.client.YopRequest;
+import com.yeepay.g3.sdk.yop.client.YopResponse;
+import com.yeepay.g3.sdk.yop.client.YopRsaClient;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
@@ -39,6 +47,7 @@ import com.youxin.app.utils.sms.SMSServiceImpl;
 import com.youxin.app.utils.wxpay.utils.WXPayConfig;
 import com.youxin.app.utils.wxpay.utils.WXPayUtil;
 import com.youxin.app.utils.wxpay.utils.WxPayDto;
+import com.youxin.app.utils.yoppay.YeePayUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -65,7 +74,7 @@ public class UserConsumeController extends AbstractController {
 
 	@ApiOperation(value = "用户充值", response = Result.class)
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "payType", value = "充值类型（1支付宝，2微信）", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "payType", value = "充值类型（1支付宝，2微信,3易宝充值）", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "price", value = "充值金额", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "time", value = "充值时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
@@ -77,7 +86,7 @@ public class UserConsumeController extends AbstractController {
 		// 充值接口授权
 		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
 			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
-			return Result.errorMsg("权限验证失败!");
+			return Result.errorMsg("密码错误!");
 		}
 		Map<String, String> map = Maps.newLinkedHashMap();
 		String orderInfo = "";
@@ -102,7 +111,14 @@ public class UserConsumeController extends AbstractController {
 				map.put("orderInfo", orderInfo);
 				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
-			} else {
+			} else if(KConstants.PayType.YEEPAY==payType){
+				String order = YeePayUtil.getOrder(orderNo,price);
+				Assert.notNull(order,"创建订单失败");
+				String otoken = JSON.parseObject(order).getString("token");
+				String url = YeePayUtil.getUrl(otoken);
+				consumeRecordServer.saveConsumeRecord(entity);
+				return Result.success(url);
+			}else {
 				WxPayDto tpWxPay = new WxPayDto();
 				// tpWxPay.setOpenId(openId);
 				tpWxPay.setBody("余额充值");

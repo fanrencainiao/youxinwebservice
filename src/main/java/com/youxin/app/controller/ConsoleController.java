@@ -1051,6 +1051,8 @@ public class ConsoleController extends AbstractController{
 			g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4}, new Integer[] { 1, 2}, g);
 			//用户总提现
 			g = getTotalMoney("totalCash", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
+			//用户总提现 手续费
+			g = getTotalMoney("totalCash1", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
 			//微信总充值
 			g = getTotalMoney("wxTotalRecharge", "money", 1, new Integer[] {2},new Integer[] { 1, 2}, g);
 			//支付宝总充值
@@ -1115,7 +1117,7 @@ public class ConsoleController extends AbstractController{
 		if(total.equals("totalBalance1")||total.equals("totalConsume1")||total.equals("totalRecharge1")) {
 			Query<User> query = dfds.createQuery(User.class);
 			if(g.getUserId()>0)
-				query.field("userId").equal(g.getUserId());
+				query.field("_id").equal(g.getUserId());
 			
 			pipeline = dfds.createAggregation(User.class);
 			pipeline.match(query)
@@ -1133,6 +1135,9 @@ public class ConsoleController extends AbstractController{
 				if(g.getEndDate()>0)
 					query.field("time").lessThanOrEq(g.getEndDate());
 			}
+			if(total.equals("totalCash1")) {
+				query.field("desc").equal("提现手续费");
+			}
 			pipeline = dfds.createAggregation(ConsumeRecord.class);
 			pipeline.match(query.filter("type", type).filter("status in", status).filter("payType in", payType))
 					.group(grouping(total, sum(sum)));
@@ -1148,6 +1153,9 @@ public class ConsoleController extends AbstractController{
 				break;
 			case "totalCash":
 				g.setTotalCash(Double.valueOf(df.format(ug.getTotalCash())));
+				break;
+			case "totalCash1":
+				g.setTotalCash1(Double.valueOf(df.format(ug.getTotalCash1())));
 				break;
 			case "wxTotalRecharge":
 				g.setWxTotalRecharge(Double.valueOf(df.format(ug.getWxTotalRecharge())));

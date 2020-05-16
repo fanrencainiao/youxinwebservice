@@ -160,7 +160,7 @@ public class AuthorizationFilter implements Filter {
 				 * 校验没有登陆的接口
 				 */
 				logger.debug("访问："+requestUri.trim());
-				if(requestUriMap.get("/wxpay/callBack").equals(requestUri.trim())||requestUriMap.get("/alipay/callBack").equals(requestUri.trim())) {
+				if(requestUriMap.get("/yeepay/callBack").equals(requestUri.trim())||requestUriMap.get("/wxpay/callBack").equals(requestUri.trim())||requestUriMap.get("/alipay/callBack").equals(requestUri.trim())) {
 					logger.debug("支付回调："+requestUri.trim());
 				}else if (!AuthServiceUtils.authOpenApiSecret(time, secret)) {
 					renderByError(response, "授权认证失败1");

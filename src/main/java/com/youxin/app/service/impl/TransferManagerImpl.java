@@ -235,7 +235,7 @@ public class TransferManagerImpl{
 		if(!StringUtil.isEmpty(keyword))
 			query.field("userId").equal(Integer.valueOf(keyword));
 		if(toUserId>0)
-			query.field("toUserId").equal(toUserId);
+			query.field("toAccid").equal(Md5Util.md5HexToAccid(toUserId+""));
 		if(!StringUtil.isEmpty(startDate) && !StringUtil.isEmpty(endDate)){
 			long startTime = 0; //开始时间（秒）
 			long endTime = 0; //结束时间（秒）,默认为当前时间

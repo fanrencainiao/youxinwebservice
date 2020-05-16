@@ -42,7 +42,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
              ,{field: 'createTime',title:'创建时间',width:195,templet: function(d){
                     return UI.getLocalTime(d.createTime);
                 }}
-            ,{fixed: 'right', width: 250,title:"操作", align:'left', toolbar: '#bankListBar'}
+            ,{fixed: 'right', width: 120,title:"操作", align:'left', toolbar: '#bankListBar'}
         ]]
         ,done:function(res, curr, count){
             if(count==0&&lock==1){

@@ -238,6 +238,7 @@ public class KConstants {
 			public static final int BALANCEAY = 3;// 余额支付
 			public static final int SYSTEMPAY = 4;// 系统支付
 			public static final int IOSINBUY = 5;// ios内购
+			public static final int YEEPAY = 6;// 易宝支付
 		}
 		//消息类型
 		public interface MsgType {

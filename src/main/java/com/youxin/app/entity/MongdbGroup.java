@@ -31,6 +31,10 @@ public class MongdbGroup {
 	 */
 	private Double totalCash=0.0;
 	/**
+	 * 用户总提现手续费
+	 */
+	private Double totalCash1=0.0;
+	/**
 	 * 用户总余额
 	 */
 	private Double totalBalance=0.0;
@@ -268,6 +272,12 @@ public class MongdbGroup {
 	}
 	public void setTotalConsume1(Double totalConsume1) {
 		this.totalConsume1 = totalConsume1;
+	}
+	public Double getTotalCash1() {
+		return totalCash1;
+	}
+	public void setTotalCash1(Double totalCash1) {
+		this.totalCash1 = totalCash1;
 	}
 
 	
