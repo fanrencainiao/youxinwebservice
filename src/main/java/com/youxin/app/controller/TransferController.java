@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.TransferManagerImpl;
@@ -56,6 +58,8 @@ public class TransferController extends AbstractController {
 	@Autowired
 	private UserService userManager;
 	@Autowired
+	private ConfigService cs;
+	@Autowired
 	private TransferManagerImpl tm;
 	@Autowired
 	@Qualifier("get")
@@ -77,6 +81,8 @@ public class TransferController extends AbstractController {
 	@PostMapping(value = "/sendTransfer")
 	public Result sendTransfer(@RequestBody Transfer transfer, @RequestParam(defaultValue = "") String moneyStr,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getBankState()<1, JSON.toJSONString(Result.error("转账功能暂不可用", config)));
 		Integer userId = ReqUtil.getUserId();
 		String token = getAccess_token();
 
@@ -153,12 +159,13 @@ public class TransferController extends AbstractController {
 		log.debug(toUserId);
 		log.debug(transfer.getUserId());
 		log.debug(transfer.getUserId().equals(toUserId));
-//		Assert.isTrue(toUserId==transfer.getUserId(),"非法操作");
+//		Assert.isTrue(transfer.getUserId().equals(toUserId),"非法操作");
 		if (transfer.getStatus() == CommTask.TRANSFER_START) {
 			if(df.format(money).compareTo(df.format(transfer.getMoney()))!=0) {
 				return Result.error("金额有误，若已经转账，将在24小时内退还到原账户");
 			}
-			// 更新状态
+			// 接收退回时间
+			transfer.setReceiptTime(DateUtil.currentTimeSeconds());
 			transfer.setStatus(CommTask.TRANSFER_RECEDE);
 			dfds.save(transfer);
 			

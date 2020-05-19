@@ -37,6 +37,18 @@ function fillParameter(data){
     $(".isOpenSwagger").val(data.isOpenSwagger);
     $(".authApi").val(data.isAuthApi);
     $(".bankMsgState").val(data.bankMsgState);//是否开启银行手机通知
+    /*=======零钱相关===========*/
+    $(".aliState").val(data.aliState);//
+    $(".wxState").val(data.wxState);//
+    $(".yeeState").val(data.yeeState);//
+    $(".redPacketState").val(data.redPacketState);//
+    $(".aliRedPacketState").val(data.aliRedPacketState);//
+    $(".transferState").val(data.transferState);//
+    $(".bankState").val(data.bankState);//
+    $(".rrShopState").val(data.rrShopState);//
+    $(".moneyState").val(data.moneyState);//
+    $(".aliCodeState").val(data.aliCodeState);//
+    
 //    $(".isHideFinance").val(data.isHideFinance);//是否隐藏app零钱相关功能
     $(".sendPhone").val(nullData(data.sendPhone));  
     
@@ -113,6 +125,17 @@ layui.use(['form','jquery',"layer"],function() {
         systemConfig.isOpenSwagger = $(".isOpenSwagger").val();
         
         systemConfig.bankMsgState = $(".bankMsgState").val();
+        
+        systemConfig.aliState = $(".aliState").val();
+        systemConfig.wxState = $(".wxState").val();
+        systemConfig.yeeState = $(".yeeState").val();
+        systemConfig.redPacketState = $(".redPacketState").val();
+        systemConfig.aliRedPacketState = $(".aliRedPacketState").val();
+        systemConfig.transferState = $(".transferState").val();
+        systemConfig.bankState = $(".bankState").val();
+        systemConfig.rrShopState = $(".rrShopState").val();
+        systemConfig.moneyState = $(".moneyState").val();
+        systemConfig.aliCodeState = $(".aliCodeState").val();
         
 //        systemConfig.isHideFinance = $(".isHideFinance").val();
         

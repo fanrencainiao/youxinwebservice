@@ -66,6 +66,7 @@ import com.youxin.app.entity.Report;
 import com.youxin.app.entity.Role;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.RedPacket.SendRedPacket;
 import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.entity.User.UserLoginLog;
 import com.youxin.app.entity.group.TeamGroup;
@@ -94,9 +95,11 @@ import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.ResultCode;
 import com.youxin.app.utils.StringUtil;
+import com.youxin.app.utils.ThreadUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.utils.jedis.RedisCRUD;
 import com.youxin.app.utils.sms.SMSServiceImpl;
+import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.request.Msg;
 import com.youxin.app.yx.request.MsgFile;
@@ -508,11 +511,39 @@ public class ConsoleController extends AbstractController{
 		Config config = cs.getConfig();
 		return Result.success(config);
 	}
-	// 设置服务端配置
+	// 设置配置
 	@RequestMapping(value = "/config/set", method = RequestMethod.POST)
 	public Object setConfig(@ModelAttribute Config config) throws Exception {
 		try {
-			cs.setConfig(config);
+				cs.setConfig(config);
+				Config config2 = cs.getConfig();
+				Query<User> q = ur.createQuery();
+				q.field("disableUser").notEqual(-1).field("isDelUser").notEqual(1);
+				Double count = (double) q.count();
+				int ceil = (int) Math.ceil(count/500.00);
+				//分页查询用户进行消息发送
+				for (int i = 0; i < ceil; i++) {
+					List<User> asList = q.asList(MongoUtil.pageFindOption(i, 500));
+					List<String> accids=asList.stream().map(User::getAccid).collect(Collectors.toList());
+					Msg msg=new Msg();
+					msg.setBody(JSON.toJSONString(new MsgBody(0,
+							KConstants.MsgType.MONEYCONFIG,
+							config2)));
+					msg.setFrom(Md5Util.md5HexToAccid("10000"));
+					msg.setTo(JSON.toJSONString(accids));
+					msg.setType(100);//文本
+					int j=i;
+					ThreadUtil.executeInThread(new Callback() {
+						@Override
+						public void execute(Object obj) {
+							JSONObject json = SDKService.sendBatchMsg(msg);
+							if(json.getIntValue("code")==200) {
+								log.debug("配置更改消息发送成功，第"+(j+1)+"页");
+							}
+						}
+					});
+				}
+				log.debug("总计"+count+"人");
 			return Result.success();
 		} catch (Exception e) {
 			return Result.error(e.getMessage());
@@ -1048,7 +1079,7 @@ public class ConsoleController extends AbstractController{
 			g.setEndDate(endTime);
 			
 			//用户总充值
-			g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4}, new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4,6}, new Integer[] { 1, 2}, g);
 			//用户总提现
 			g = getTotalMoney("totalCash", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
 			//用户总提现 手续费
@@ -1062,37 +1093,37 @@ public class ConsoleController extends AbstractController{
 			//后台总扣除
 			g = getTotalMoney("sysTotalReduce", "money", 16, new Integer[] {4},new Integer[] { 1, 2}, g);
 			//红包总发送
-			g = getTotalMoney("totalSendRedPacket", "money", 4, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalSendRedPacket", "money", 4, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//红包总领取
-			g = getTotalMoney("totalGetRedPacket", "money", 5, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalGetRedPacket", "money", 5, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//红包总退款
-			g = getTotalMoney("totalBackRedPacket", "money", 6, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalBackRedPacket", "money", 6, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总转账
-			g = getTotalMoney("totalTransferMoney", "money", 7, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalTransferMoney", "money", 7, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总接受转账
-			g = getTotalMoney("totalGetTransferMoney", "money", 8, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalGetTransferMoney", "money", 8, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总退回转账
-			g = getTotalMoney("totalBackTransferMoney", "money", 9, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalBackTransferMoney", "money", 9, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总付款码付款
-			g = getTotalMoney("totalCodePay", "money", 10, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalCodePay", "money", 10, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总付款码到账
-			g = getTotalMoney("totalGetCodePay", "money", 11, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalGetCodePay", "money", 11, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总二维码付款
-			g = getTotalMoney("totalQRCodePay", "money", 12, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalQRCodePay", "money", 12, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总二维码到账
-			g = getTotalMoney("totalGetQRCodePay", "money", 13, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalGetQRCodePay", "money", 13, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总vip充值
-			g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总vip充值提成
-			g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//总商品消费
-			g = getTotalMoney("totalShopping", "money", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalShopping", "money", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//用户总余额
-			g = getTotalMoney("totalBalance1", "balance", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalBalance1", "balance", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//用户总充值
-			g = getTotalMoney("totalRecharge1", "totalRecharge", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalRecharge1", "totalRecharge", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			//用户总消费
-			g = getTotalMoney("totalConsume1", "totalConsume", 20, new Integer[] {1,2,3,4},new Integer[] { 1, 2}, g);
+			g = getTotalMoney("totalConsume1", "totalConsume", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
 			
 			g.setTotalBalance(null);
 			return Result.success(g);

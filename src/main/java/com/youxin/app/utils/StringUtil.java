@@ -12,6 +12,9 @@ import java.util.regex.Pattern;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+
 
 public final class StringUtil {
 
@@ -507,4 +510,21 @@ public final class StringUtil {
 			return "";
 		}
 	}
+	/**
+	 * 是否是json字符串
+	 * @param jsonString  null "" 都返回true
+	 * @return
+	 */
+	 public final static boolean isJSONValid(String jsonString) {
+	        try {
+	            JSONObject.parseObject(jsonString);
+	        } catch (JSONException ex) {
+	            try {
+	                JSONObject.parseArray(jsonString);
+	            } catch (JSONException ex1) {
+	                return false;
+	            }
+	        }
+	        return true;
+	    }
 }

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import com.youxin.app.entity.BankRecord;
@@ -111,6 +112,8 @@ public class BankController extends AbstractController{
 			@RequestParam(defaultValue="") String secret) {
 		
 		Config config=configService.getConfig();
+		Assert.isTrue(config.getBankState()<1, JSON.toJSONString(Result.error("提现功能暂不可用", config)));
+		
 		if(StringUtil.isEmpty(moneyStr)) {
 			return Result.error("请输入提现金额！");
 		}else if(StringUtil.isEmpty(secret)) {

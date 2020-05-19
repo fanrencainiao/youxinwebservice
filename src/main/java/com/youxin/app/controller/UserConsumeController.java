@@ -22,6 +22,7 @@ import com.google.common.collect.Maps;
 import com.yeepay.g3.sdk.yop.client.YopRequest;
 import com.yeepay.g3.sdk.yop.client.YopResponse;
 import com.yeepay.g3.sdk.yop.client.YopRsaClient;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
@@ -29,6 +30,7 @@ import com.youxin.app.entity.WalletFour;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
 import com.youxin.app.service.CodePayService;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
@@ -71,10 +73,43 @@ public class UserConsumeController extends AbstractController {
 	private CodePayService payService;
 	@Autowired
 	RedPacketManagerImpl redServer;
+	@Autowired
+	ConfigService cs;
+	/**
+	 * 人人商城小程序支付订单
+	 * @param price
+	 * @param nonceStr
+	 * @param time
+	 * @param secret
+	 * @return
+	 */
+	@PostMapping(value = "/rrorder")
+	public Object RenrenOrder(@RequestParam(defaultValue="") String openid,@RequestParam(defaultValue="") String price,@RequestParam(defaultValue="") String nonceStr) {
+		System.out.println("openid"+openid);
+		System.out.println("price"+price);
+		System.out.println("nonceStr"+nonceStr);
+//		ConsumeRecord entity = new ConsumeRecord();
+//		entity.setUserId("");
+//		entity.setTime(DateUtil.currentTimeSeconds());
+//		entity.setType(KConstants.ConsumeType.BUY_SHOP);
+//		entity.setDesc("人人商城小程序支付");
+//		entity.setStatus(KConstants.OrderStatus.CREATE);
+//		entity.setTradeNo(nonceStr);
+//		entity.setPayType(6);
+//		entity.setMoney(new Double(price));
+		
+		String order = YeePayUtil.getOrderXCX(nonceStr,price,"小程序商品","测试商品");
+		Assert.notNull(order,"创建订单失败");
+		String otoken = JSON.parseObject(order).getString("token");
+		String url = YeePayUtil.getXCXUrl(openid,otoken,getRequestIp());
+//		consumeRecordServer.saveConsumeRecord(entity);
+		return Result.success(url);
+		
+	}
 
 	@ApiOperation(value = "用户充值", response = Result.class)
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "payType", value = "充值类型（1支付宝，2微信,3易宝充值）", required = true, paramType = "query"),
+			@ApiImplicitParam(name = "payType", value = "充值类型（1支付宝，2微信,6易宝充值）", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "price", value = "充值金额", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "time", value = "充值时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "安全加密 md5( md5(apikey+time) +userid+token)", required = true, paramType = "query") })
@@ -83,6 +118,7 @@ public class UserConsumeController extends AbstractController {
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
+		Config config = cs.getConfig();
 		// 充值接口授权
 		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
 			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
@@ -91,6 +127,7 @@ public class UserConsumeController extends AbstractController {
 		Map<String, String> map = Maps.newLinkedHashMap();
 		String orderInfo = "";
 		if (0 < payType) {
+			Assert.isTrue(config.getAliState()<1, JSON.toJSONString(Result.error("支付宝充值暂不可用", config)));
 			String orderNo = AliPayUtil.getOutTradeNo();
 			ConsumeRecord entity = new ConsumeRecord();
 			entity.setUserId(ReqUtil.getUserId());
@@ -112,6 +149,7 @@ public class UserConsumeController extends AbstractController {
 				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
 			} else if(KConstants.PayType.YEEPAY==payType){
+				Assert.isTrue(config.getYeeState()<1, JSON.toJSONString(Result.error("易宝充值暂不可用", config)));
 				String order = YeePayUtil.getOrder(orderNo,price);
 				Assert.notNull(order,"创建订单失败");
 				String otoken = JSON.parseObject(order).getString("token");
@@ -119,6 +157,7 @@ public class UserConsumeController extends AbstractController {
 				consumeRecordServer.saveConsumeRecord(entity);
 				return Result.success(url);
 			}else {
+				Assert.isTrue(config.getWxState()<1, JSON.toJSONString(Result.error("微信充值暂不可用", config)));
 				WxPayDto tpWxPay = new WxPayDto();
 				// tpWxPay.setOpenId(openId);
 				tpWxPay.setBody("余额充值");
@@ -196,6 +235,9 @@ public class UserConsumeController extends AbstractController {
 	public Object sendAliCouponv1(
 			@RequestBody RedPacket packet,@RequestParam(defaultValue = "") String price,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getAliRedPacketState()<1, JSON.toJSONString(Result.error("支付宝红包暂不可用", config)));
+		
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
 		// 红包接口授权

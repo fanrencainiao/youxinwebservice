@@ -19,6 +19,7 @@ import com.yeepay.g3.sdk.yop.encrypt.CertTypeEnum;
 import com.yeepay.g3.sdk.yop.encrypt.DigestAlgEnum;
 import com.yeepay.g3.sdk.yop.encrypt.DigitalSignatureDTO;
 import com.yeepay.g3.sdk.yop.utils.DigitalEnvelopeUtils;
+import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
 import com.youxin.app.utils.applicationBean.YeePayConfig;
 
@@ -31,6 +32,92 @@ public class YeePayUtil {
 	public YeePayUtil(YeePayConfig yeePayConfig) {
 		YeePayUtil.yeePayConfig = yeePayConfig;
 	}
+	/**
+	 * 聚合收银台 小程序
+	 * @return
+	 */
+	public static String getXCXUrl(String openid,String token,String userIp) {
+		
+		//secretKey:商户私钥（字符串形式）
+		String OPRkey = yeePayConfig.getYeePrivateKey();
+		//step1  生成yop请求对象
+		//arg0:appkey（举例授权扣款是SQKK+商户编号，亿企通是OPR:+商户编号，具体是什么请参考自己开通产品的手册。
+		//arg1:商户私钥字符串
+		YopRequest request = new YopRequest(yeePayConfig.getAppkey(),OPRkey);
+		
+		//step2 配置参数
+	    //arg0:参数名
+	    //arg1:参数值
+		request.addParam("payTool", "MINI_PROGRAM");
+		request.addParam("payType", "WECHAT");
+		request.addParam("token",token);
+		request.addParam("appId", "wx36dd3be68d69406e");
+		request.addParam("openId", openid);
+		request.addParam("userIp", userIp);
+		request.addParam("extParamMap", "{\"reportFee\":\"XIANSHANG\" }");
+		
+		//request.addParam("fundProcessType", "");
+		//request.addParam("divideDetail", "");
+		
+		 YopResponse response;
+			try {
+				response = YopRsaClient.post("/rest/v1.0/nccashierapi/api/pay", request);
+				System.out.println("获取order"+response);
+				System.out.println("获取order"+response.getStringResult());
+				return response.getStringResult();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+	}
+	
+	public static String getOrderXCX(String orderNo,String orderAmount,String goodsName,String des) {
+//		System.out.println("appkey:"+yeePayConfig.getAppkey());
+		
+		//secretKey:商户私钥（字符串形式）
+		String OPRkey = yeePayConfig.getYeePrivateKey();
+//		String OPRkey = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqSVrBTiEEDKZukFScaTRIX80IMgMg6gpCC5KM5MdMIw6fWmIponUo66seRS7MglNYYjNNz/9lDE8mjvAoPoPYdjI5eToGPQ7M63x4EQB2HICxB4l2Kqat9r4sUIj9/ANpM+yJR2zfZY7EsR0heMfJkQfYLgEfKI3as/4GgaDorVprKk0y/iK30e7NmDbVE4i68FiT/B5XezBq+orOatZlLIaHQqXUHS3Cj7M+E39WNvDNWp9/9ZZUaipIyun7MwKhlhRnW5mo/3qecutkO5g/b7wFWwQoqwq5ZN3m3z9gsvcxAY+yeOQCxTYgQgNUcrURp/s/gsXH3Mz8c2deNQ59AgMBAAECggEADp4Is1U7PPdqW01Pu17F2nyWw2BU/RX6AXIFh3X6rEzKFuBm/Wnw+AKa3W3/jBXtL5tmX1npHh8bYD+e2pAwjdE/kx1r31iNv7DAg3ykzH66hqJoqK2/7Gj6KXWpp3ENnec+I7PvjZGl2rkqu1J8ho9I3BlphpIwSG4bnSqyyaY2pwsNNlqhEtxtG+NxmMW5NKpaqahuhun3qGsx2GX5WSMFzIWXRdcSDskqOnN1ROJLsuaTl8bBmeIVN1zgqwsKF9zLfXNTPy1k0ChHjONVyO0U3VHxut8/BM3QpnvW53TpgTLUi2navN1rbQwjaxJyIudFdQ8USIFBHyE7hTYzhQKBgQDSa1nh8eF0ktO+hk2IQ51UGzDqM9RyjDrjSoX8m1oz5EBFSgGhmN0HsHM/VF8DgQw9aT0R8ByD3BflJ0KwBMsJ/ONYVvCWWw2bk9vrTvUZ1iF8gBGkl26cpOAhbEk4bgkCx7SQcFpvX4mikeV0bT99kajXH6GbfI02vtLGsFWFkwKBgQDPLHf9XrKtj5rxJdHjPSPm4e7g8XsTG0Xyw+NhVY0mY6k2cd8Fj9SAgycCbIh2S7a9prko+mvuqILZt5sQeubZpKxFneN3FBfSzjrZcO3ZLvFtDbixdKT2K5jzUJeh7UmTTA5Bo9ja9mEyRiIrGXmTBsQakYdGnh87NjloAR2lrwKBgHNPFOB2tsA1PggofRBxTSQsCnAtmvxy0EqCKk61q4bITFgsKBywMl/mWCGaUL8Q1u5IX4kW9elkkUuoaikfV0zP4p4kdo9OsnRRYLDggfx4lb0uSXzS53C8AX8PYkikNBfr7I1CpKxnxHrsTLuyqppbWhUZZmxYouIfTE5Jj3Q1AoGAM2w7QEWgHhp2AAM+LKRBZA6SZ30o6l4rp41dxAwjI/M6zgvHqq6/tUJYjW55FLvIWRyn+vblkXB8QiQjthx7bmxEYmdFTYpMO4P68XvpXa4cONBeFpX4WC4MIeDQMl4elBQducc8jWT4TS1BT+db2NWmGV4j8LBQ2jakWx9jx3sCgYEAuM2tnYZ076ob5lVRDhSTEND2yYT+wuFbx8Wh/KTvwjFtWCSy9Q/s7B6+PnCI6sL7CQr3Vh64RoQDkpk7REI/gWALFz7rIvx0mq4eqpADaqHhdOyfv99ppFjWo5gfuV+JyDWsasXLqZoP0S+HBVZgEPYzUmSyM5yUW/x/bxjet4c=";
+		//step1  生成yop请求对象
+		//arg0:appkey（举例授权扣款是SQKK+商户编号，亿企通是OPR:+商户编号，具体是什么请参考自己开通产品的手册。
+		//arg1:商户私钥字符串
+		System.out.println("appkey:"+yeePayConfig.getAppkey()+"oprkey:"+yeePayConfig.getOprkey());
+		YopRequest request = new YopRequest(yeePayConfig.getAppkey(),OPRkey);
+		
+		//step2 配置参数
+	    //arg0:参数名
+	    //arg1:参数值
+		request.addParam("parentMerchantNo", yeePayConfig.getOprkey());
+		request.addParam("merchantNo", yeePayConfig.getOprkey());
+		request.addParam("orderId",orderNo);
+		request.addParam("orderAmount", orderAmount);
+		request.addParam("notifyUrl", yeePayConfig.getCallBackUrlxcx());
+//		request.addParam("goodsParamExt", "{\"goodsParamExt\":\""+goodsName+"\" ,\"goodsDesc\" : \""+des+"\" }");
+		request.addParam("goodsParamExt", "{\"goodsName\":\""+goodsName+"\" ,\"goodsDesc\" : \""+des+"\" }");
+		//request.addParam("fundProcessType", "");
+		//request.addParam("divideDetail", "");
+		
+	
+	    //step3 发起请求
+		//arg0:接口的uri（参见手册）
+		//arg1:配置好参数的请求对象
+		System.out.println(request.getParams().toString());
+	    YopResponse response;
+		try {
+			response = YopRsaClient.post("/rest/v1.0/std/trade/order", request);
+			System.out.println("获取order"+response.getStringResult());
+			return response.getStringResult();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	/**
+	 * app获取 收银台url
+	 * @param token
+	 * @return
+	 */
 	public static String getUrl(String token) {
 		// TODO Auto-generated method stub
 		String appkey = yeePayConfig.getAppkey();
@@ -46,8 +133,8 @@ public class YeePayUtil {
 		stringBuilder.append("&" + "timestamp=" + String.valueOf(System.currentTimeMillis()/1000) );
 		stringBuilder.append("&" + "directPayType=" + "" );	
 		stringBuilder.append("&" + "cardType=" + "" );	
-		stringBuilder.append("&" + "userNo=" + "xk001" );
-		stringBuilder.append("&" + "userType=" + "USER_ID" );
+		stringBuilder.append("&" + "userNo=" + ReqUtil.getUserId() );
+		stringBuilder.append("&" + "userType=" + ReqUtil.getUserId() );
 		stringBuilder.append("&" + "ext=" + "{\"appId\":\"\",\"openId\":\"\",\"clientId\":\"\"}" );
 
 		String sign = getSign(stringBuilder.toString(),appkey);
@@ -88,8 +175,6 @@ public class YeePayUtil {
 	    YopResponse response;
 		try {
 			response = YopRsaClient.post("/rest/v1.0/std/trade/order", request);
-			System.out.println("获取order"+response);
-			System.out.println("获取order"+response.toString());
 			System.out.println("获取order"+response.getStringResult());
 			return response.getStringResult();
 		} catch (IOException e) {

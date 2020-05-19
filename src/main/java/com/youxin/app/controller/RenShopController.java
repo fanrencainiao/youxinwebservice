@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.Account;
 import com.mongodb.DBObject;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.HelpCenter;
 import com.youxin.app.entity.NearbyUser;
@@ -49,6 +50,7 @@ import com.youxin.app.entity.exam.BaseExample;
 import com.youxin.app.entity.exam.UserExample;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.UserRepository;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.utils.AuthServiceUtils;
@@ -92,7 +94,7 @@ public class RenShopController extends AbstractController{
 	@Autowired
 	private UserRepository repository;
 	@Autowired
-	private SMSServiceImpl sendSms;
+	private ConfigService cs;
 	@Autowired
 	private ConsumeRecordManagerImpl consumeRecordServer;
 	@Autowired
@@ -106,6 +108,8 @@ public class RenShopController extends AbstractController{
 	})
 	@PostMapping(value = "/payShopOrder")
 	public Object payShopOrder(@RequestParam(defaultValue = "0") int oid,String money,Long time,String secret) throws Exception {
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getRrShopState()<1, JSON.toJSONString(Result.error("商城服务暂不可用", config)));
 		log.debug("订单开始"+oid);
 		Integer userId=ReqUtil.getUserId();
 		String token = getAccess_token();

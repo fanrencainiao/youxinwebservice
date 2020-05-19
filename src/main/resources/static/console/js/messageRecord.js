@@ -88,7 +88,11 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         	  if(d.msgType=="PICTURE"){
         		  return '<img src="'+JSON.parse(d.attach).url+'" style="height:100px"/>';
         	  }
-        	  return d.body=='undefined'?'':d.body;
+        	  if(d.msgType=="VIDEO"){
+        		  return '<video src="'+JSON.parse(d.attach).url+'" style="height:100px" controls="controls"> your browser does not support the video tag</video>';
+        	  }
+   
+        	  return (d.body==undefined||d.body==""||!d.body)?'':d.body;
           }}
           ,{field: 'fromNick', title: '发送方昵称',sort:'true', width:80}
           

@@ -249,6 +249,7 @@ public class KConstants {
 			public static final int TRANSFERBACK = 14;// 转账退回
 			public static final int BANKOVERMONEY = 15;// 处理银行卡转账
 			public static final int HELLOBODY = 16;// 注册通知
+			public static final int MONEYCONFIG = 21;// config通知
 		}
 
 

@@ -1,6 +1,7 @@
 package com.youxin.app.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,6 +60,16 @@ public class ConfigController extends AbstractController{
 		config.setIpAddress(ip);
 		config.setArea(area);
 		return Result.success(config);
+	}
+	@ApiOperation(value = "获取零钱相关信息-登录",response=Result.class)
+	@GetMapping(value = "/getPConfig")
+	public Object getPConfig(HttpServletRequest request) {
+		String ip=NetworkUtil.getIpAddress(request);
+		String area=IpSearch.getArea(ip);
+		log.info("==Client-IP===>  {"+ip+"}  ===Address==>  {"+area+"} ");
+		Config config = cs.getConfig();
+		Map<String, Object> mConfig = config.getMoneyConfig(config);
+		return Result.success(mConfig);
 	}
 
 }

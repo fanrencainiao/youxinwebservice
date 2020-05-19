@@ -14,11 +14,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.utils.ResponseUtil;
 import com.youxin.app.utils.Result;
+import com.youxin.app.utils.StringUtil;
 
 
 
@@ -33,6 +35,7 @@ public class ExceptionHandlerAdvice {
 
 		int resultCode = 60001;
 		String resultMsg = "接口内部异常====>";
+		Object resultData="";
 		log.info(request.getRequestURI() + "错误：");
 		
 		if (e instanceof MissingServletRequestParameterException
@@ -41,9 +44,18 @@ public class ExceptionHandlerAdvice {
 			resultMsg = "请求参数验证失败，缺少必填参数或参数错误";
 		} else if (e instanceof IllegalArgumentException) {
 			IllegalArgumentException ex = ((IllegalArgumentException) e);
-
-			resultCode = 0;
-			resultMsg = ex.getMessage();
+			boolean jsonValid = StringUtil.isJSONValid(ex.getMessage());
+			if(jsonValid) {
+				Result result=JSON.parseObject(ex.getMessage(),Result.class);
+				resultCode = result.getCode();
+				resultMsg = result.getMsg();
+				resultData = result.getData();
+			}else {
+				resultCode = 0;
+				resultMsg = ex.getMessage();
+			}
+				
+			
 		} else if (e instanceof ServiceException) {
 			ServiceException ex = ((ServiceException) e);
 
@@ -68,9 +80,16 @@ public class ExceptionHandlerAdvice {
 		Result map=new Result();
 		map.setCode(resultCode);
 		map.setMsg(resultMsg);
+		map.setData(resultData);
 		String text = JSONObject.toJSONString(map);
 
 		ResponseUtil.output(response, text);
 	}
-
+//	public static void main(String[] args) {
+//		String s="";
+//		Object resultDat = "";
+//		System.out.println("resultData"+resultDat);
+//		boolean jsonValid = StringUtil.isJSONValid(s);
+//		System.out.println(jsonValid);
+//	}
 }

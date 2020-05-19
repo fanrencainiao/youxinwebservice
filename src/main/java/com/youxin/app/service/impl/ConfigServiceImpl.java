@@ -25,6 +25,7 @@ public class ConfigServiceImpl implements ConfigService {
 		try {
 			config=KSessionUtil.getConfig();
 			if(null==config){
+				log.debug("数据库config");
 				config = cr.createQuery().field("_id").notEqual(null).get();
 				if(null==config)
 					config=initConfig();

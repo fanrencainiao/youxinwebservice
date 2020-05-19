@@ -21,5 +21,6 @@ public class YeePayConfig {
 	private String yeePrivateKey;
 	private String yeePublicKey;
 	private String callBackUrl;
+	private String callBackUrlxcx;
 
 }

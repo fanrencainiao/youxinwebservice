@@ -46,7 +46,7 @@ public class YeepayController {
 	private Datastore dfds;
 
 	@RequestMapping("/callBack")
-	public String payCheck(HttpServletRequest request, HttpServletResponse response) {
+	public String callBack(HttpServletRequest request, HttpServletResponse response) {
 		log.debug("yeepay回调开始");
 		String responseMsg = request.getParameter("response");
 		
@@ -93,6 +93,57 @@ public class YeepayController {
 			log.debug("易宝支付失败"+e.getMessage());
 			return "failure";
 		}
+		return "SUCCESS";
+	}
+	
+	@RequestMapping("/callBackXCX")
+	public String callBackXCX(HttpServletRequest request, HttpServletResponse response) {
+		log.debug("yeepay XCX回调开始");
+		String responseMsg = request.getParameter("response");
+		
+		PrivateKey privateKey = YeePayUtil.getPrivateKey();
+		PublicKey publicKey = YeePayUtil.getPubKey();
+//		try {
+			// 开始解密
+			DigitalEnvelopeDTO dto = new DigitalEnvelopeDTO();
+			dto.setCipherText(responseMsg);
+			//解密验签
+			dto = DigitalEnvelopeUtils.decrypt(dto, privateKey, publicKey);
+			System.out.println("DTo结果："+JSON.toJSONString(dto));
+			String plainText = dto.getPlainText();			
+			System.out.println("解密结果:" + plainText);
+			YeeCallBackPram yee=JSON.parseObject(plainText, YeeCallBackPram.class);
+			System.out.println("yee"+yee);
+	
+//			ConsumeRecord entity = cr.getConsumeRecordByNo(yee.getOrderId());
+//			//系统订单金额
+//			long sys_amount = new BigDecimal(entity.getMoney()+"").multiply(new BigDecimal(100)).longValue();
+//			//yee实付金额
+//			long yee_payAmount = new BigDecimal(yee.getPayAmount()).multiply(new BigDecimal(100)).longValue();
+//			//yee订单金额
+//			long yee_orderAmount = new BigDecimal(yee.getOrderAmount()+"").multiply(new BigDecimal(100)).longValue();
+//			
+//			if(entity.getStatus() != KConstants.OrderStatus.END
+//					&&sys_amount==yee_payAmount&&sys_amount==yee_orderAmount
+//					&&"SUCCESS".equals(yee.getStatus())) {
+//				
+//				entity.setStatus(KConstants.OrderStatus.END);
+//				yee.setUserid(entity.getUserId());
+//				Key<ConsumeRecord> save = crpository.save(entity);
+//				log.debug("易宝返回保存消费记录："+save.getId());
+//				Double rechargeUserMoeny = userService.rechargeUserMoeny(entity.getUserId(), entity.getMoney(), KConstants.MOENY_ADD);
+//				log.debug("易宝进行金额处理："+rechargeUserMoeny);
+//				Key<YeeCallBackPram> save2 = dfds.save(yee);
+//				log.debug("易宝返回保存易宝消费记录："+save2.getId());
+//			
+//			}else {
+//				log.debug("易宝支付失败"+yee.getStatus());
+//				return "failure";
+//			}
+//		} catch (Exception e) {
+//			log.debug("易宝支付失败"+e.getMessage());
+//			return "failure";
+//		}
 		return "SUCCESS";
 	}
 }

@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,12 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.WalletFour;
 import com.youxin.app.entity.RedPacket.SendRedPacket;
 import com.youxin.app.entity.msgbody.MsgBody;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.service.impl.ConsumeRecordManagerImpl;
 import com.youxin.app.service.impl.RedPacketManagerImpl;
@@ -59,7 +62,9 @@ public class RedPacketController extends AbstractController {
 	RedPacketManagerImpl redServer;
 	@Autowired
 	ConsumeRecordManagerImpl consumeServer;
-
+	
+	@Autowired
+	ConfigService cs;
 //	@SuppressWarnings("static-access")
 //	@RequestMapping("/redPacket/sendRedPacket")
 //	public Result sendRedPacket(RedPacket packet,
@@ -134,6 +139,8 @@ public class RedPacketController extends AbstractController {
 	public Result sendRedPacketV1(@RequestBody RedPacket packet, @RequestParam(defaultValue = "0") long time,
 			@RequestParam(defaultValue = "") String moneyStr, @RequestParam(defaultValue = "") String secret) {
 		try {
+			Config config = cs.getConfig();
+			Assert.isTrue(config.getRedPacketState()<1, JSON.toJSONString(Result.error("零钱红包功能暂不可用", config)));
 			// 支付宝红包
 			if (packet.getPayType() == 1)
 				return Result.error("支付宝红包 调取错误");
