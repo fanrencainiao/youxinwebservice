@@ -131,9 +131,10 @@ public class Config {
 	private int transferState = 0;// 转账功能 0正常，1维护，2关闭
 	private int bankState = 0;// 提现功能 0正常，1维护，2关闭
 	private int rrShopState = 0;// 人人商城购物 0正常，1维护，2关闭
+	private int codeReceiveState = 0;// 零钱二维码收款功能 0正常，1维护，2关闭
 	private int moneyState = 0;// 零钱显示 0正常，2关闭
 	private int aliCodeState = 0;// 支付宝码显示 0正常，2关闭
-
+	
 	public Map<String, Object> getMoneyConfig(Config config) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("aliState", config.getAliState());
@@ -142,6 +143,7 @@ public class Config {
 		result.put("redPacketState", config.getRedPacketState());
 		result.put("aliRedPacketState", config.getAliRedPacketState());
 		result.put("transferState", config.getTransferState());
+		result.put("codeReceiveState", config.getCodeReceiveState());
 		result.put("bankState", config.getBankState());
 		result.put("rrShopState", config.getRrShopState());
 		result.put("moneyState", config.getMoneyState());

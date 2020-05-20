@@ -48,6 +48,8 @@ function fillParameter(data){
     $(".rrShopState").val(data.rrShopState);//
     $(".moneyState").val(data.moneyState);//
     $(".aliCodeState").val(data.aliCodeState);//
+    $(".codeReceiveState").val(data.codeReceiveState);//
+    
     
 //    $(".isHideFinance").val(data.isHideFinance);//是否隐藏app零钱相关功能
     $(".sendPhone").val(nullData(data.sendPhone));  
@@ -136,6 +138,8 @@ layui.use(['form','jquery',"layer"],function() {
         systemConfig.rrShopState = $(".rrShopState").val();
         systemConfig.moneyState = $(".moneyState").val();
         systemConfig.aliCodeState = $(".aliCodeState").val();
+        systemConfig.codeReceiveState = $(".codeReceiveState").val();
+        
         
 //        systemConfig.isHideFinance = $(".isHideFinance").val();
         

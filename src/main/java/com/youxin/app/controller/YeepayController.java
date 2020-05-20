@@ -53,7 +53,7 @@ public class YeepayController {
 		PrivateKey privateKey = YeePayUtil.getPrivateKey();
 		PublicKey publicKey = YeePayUtil.getPubKey();
 		try {
-			// 开始解密
+			//开始解密
 			DigitalEnvelopeDTO dto = new DigitalEnvelopeDTO();
 			dto.setCipherText(responseMsg);
 			//解密验签

@@ -122,7 +122,7 @@ public class OtherServerController {
 		} catch (ServiceException e) {
 			e.printStackTrace();
 			if(null==e.getResultCode())
-				return Result.errorMsg(e.getErrMessage());
+				return Result.errorMsg("发送失败"); 
 			return Result.failure(e.getResultCode(), e.getErrMessage(), null);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
