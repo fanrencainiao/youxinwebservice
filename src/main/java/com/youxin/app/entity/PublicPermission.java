@@ -34,8 +34,8 @@ public class PublicPermission {
 	private String api;
 	@ApiModelProperty("授权访问url")
 	private String url;
-//	@ApiModelProperty("授权ip")
-	private String ip;
+	@ApiModelProperty("备注")
+	private String des;
 	@ApiModelProperty("授权类型")
 	private int type;
 	@ApiModelProperty("授权状态")

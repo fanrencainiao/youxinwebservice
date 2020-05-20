@@ -63,7 +63,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         	  else
         		  return "未通过";
           }}
-          
+          ,{field: 'des', title: '备注', width:200}
           ,{field: 'updateTime',title:'修改时间',width:195,templet: function(d){
               return UI.getLocalTime(d.updateTime);
           }}
@@ -112,6 +112,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 			data:{
 				sid:$("#id").val(),
 				toObj:$("#toObj").val(),
+				des:$("#des").val(),
 				api:$("#api").val(),
 				url:$("#url").val(),
 				state:$("#state").val()
@@ -227,7 +228,7 @@ var Base={
         $("#api").val("");
         $("#state").val("");
         $("#url").val("");
-     
+        $("#des").val("");
         // 重新渲染
         layui.form.render();
 		$("#addConfigTitle").empty();
@@ -327,6 +328,7 @@ var Base={
 					$("#id").val(result.data.id),
 					$("#toObj").val(result.data.toObj),
 					$("#api").val(result.data.api),
+					$("#des").val(result.data.des),
 					$("#state").val(result.data.state),
 					$("#url").val(result.data.url)
 				}
