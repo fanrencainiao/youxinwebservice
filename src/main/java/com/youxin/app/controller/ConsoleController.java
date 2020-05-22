@@ -64,6 +64,7 @@ import com.youxin.app.entity.RedPacket;
 import com.youxin.app.entity.RedReceive;
 import com.youxin.app.entity.Report;
 import com.youxin.app.entity.Role;
+import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
 import com.youxin.app.entity.RedPacket.SendRedPacket;
@@ -1527,6 +1528,34 @@ public class ConsoleController extends AbstractController{
 		}
 		return Result.success();
 	}
+	/**
+	 * 接口访问列表
+	 * @param userId
+	 * @param apiId
+	 * @param page
+	 * @param limit
+	 * @return
+	 */
+	@RequestMapping(value = "/sysapiList")
+	public Object sysapiList(@RequestParam(defaultValue = "") String userId,@RequestParam(defaultValue = "") String apiId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "15") int limit) {
+		Query<SysApiLog> q = dfds.createQuery(SysApiLog.class);
+		if(!StringUtil.isEmpty(apiId))
+			q.field("apiId").containsIgnoreCase(apiId);
+		q.order("-time");
+		return Result.success(new PageResult<>(q.asList(MongoUtil.pageFindOption(page-1, limit)), q.count()));
+	}
+	/**
+	 * 删除七日前的接口日志
+	 * @return
+	 */
+	@RequestMapping(value = "/delsysapi")
+	public Object delsysapi() {
+		Query<SysApiLog> q = dfds.createQuery(SysApiLog.class);
+		q.field("time").lessThanOrEq(DateUtil.getOnedayNextDay(DateUtil.currentTimeSeconds(), 7, 1));
+		dfds.delete(q);
+		return Result.success();
+	}
 	
-
+	
 }

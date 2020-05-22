@@ -5,16 +5,20 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.CodePay;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.RedPacket.SendRedPacket;
+import com.youxin.app.entity.msgbody.MsgBody;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.repository.CodePayRepository;
 import com.youxin.app.service.CodePayService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
+import com.youxin.app.utils.Md5Util;
 import com.youxin.app.utils.StringUtil;
 import com.youxin.app.utils.alipay.util.AliPayUtil;
 import com.youxin.app.yx.SDKService;
@@ -256,26 +260,28 @@ public class CodePayServiceImpl implements CodePayService {
 		consumeRecordManager.saveConsumeRecord(lessRecord);
 		
 		User sysUser=userService.getUser(1100);
-		Msg message = new Msg();
-		message.setFrom(sysUser.getId().toString());
-		message.setMsgtype(0);//点对点
-		message.setOpe(0);
-		message.setTo(userId.toString());
-		message.setAttach("");//自定义内容 json
-		message.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
-//		message.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
-//		message.setSound("");//声音
-		message.setSave(2);//会存离线
-//		message.setOption("");
+		
+		MsgRequest messageBean = new MsgRequest();
+		messageBean.setType(100);// 自定义
+
+			messageBean.setOpe(0);// 个人消息
+			messageBean.setFrom(Md5Util.md5HexToAccid(sysUser.getId().toString()));
+			messageBean.setTo(Md5Util.md5HexToAccid(userId + ""));
+			log.debug("userId" + userId);
+
+		messageBean.setBody(JSON.toJSONString(new MsgBody(0,
+				KConstants.MsgType.CODEREDUCE,
+				codePay)));
 
 		try {
-			JSONObject sendAttachMsg = SDKService.sendAttachMsg(message);
-			if(sendAttachMsg.getInteger("code")!=200) 
-				log.debug("收款 sdk消息发送失败");
+			JSONObject json = SDKService.sendMsg(messageBean);
+			if (json.getInteger("code") != 200)
+				log.debug("二维码扣款发送 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.debug(e.getMessage());
+			log.debug("二维码扣款发送 sdk消息发送失败" + e.getMessage());
 		}
+
 		
 		// 加钱
 		userService.rechargeUserMoeny(fromUserId, Double.valueOf(money), KConstants.MOENY_ADD);
@@ -293,25 +299,25 @@ public class CodePayServiceImpl implements CodePayService {
 		consumeRecordManager.saveConsumeRecord(addRecord);
 		
 		// 发送xmpp通知收款成功
-		Msg messageBean = new Msg();
-		messageBean.setFrom(sysUser.getId().toString());
-		messageBean.setMsgtype(0);//点对点
-		messageBean.setOpe(0);
-		messageBean.setTo(fromUserId.toString());
-		messageBean.setAttach("");//自定义内容 json
-		messageBean.setPushcontent(JSONObject.toJSONString(codePay));//推送文案，android以此为推送显示文案；ios若未填写payload，显示文案以pushcontent为准。超过500字符后，会对文本进行截断。
-//		messageBean.setPayload("");//ios 推送对应的payload,必须是JSON,不能超过2k字符
-//		messageBean.setSound("");//声音
-		messageBean.setSave(2);//会存离线
-//		messageBean.setOption("");
+		MsgRequest messageBean1 = new MsgRequest();
+		messageBean1.setType(100);// 自定义
+
+		messageBean1.setOpe(0);// 个人消息
+		messageBean1.setFrom(Md5Util.md5HexToAccid(sysUser.getId().toString()));
+		messageBean1.setTo(Md5Util.md5HexToAccid(fromUserId + ""));
+			log.debug("userId" + userId);
+
+			messageBean1.setBody(JSON.toJSONString(new MsgBody(0,
+				KConstants.MsgType.CODEADD,
+				codePay)));
 
 		try {
-			JSONObject sendAttachMsg = SDKService.sendAttachMsg(messageBean);
-			if(sendAttachMsg.getInteger("code")!=200) 
-				log.debug("收款 sdk消息发送失败");
+			JSONObject json = SDKService.sendMsg(messageBean1);
+			if (json.getInteger("code") != 200)
+				log.debug("二维码收款发送 sdk消息发送失败");
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.debug(e.getMessage());
+			log.debug("二维码收款发送 sdk消息发送失败" + e.getMessage());
 		}
 	}
 	@Override

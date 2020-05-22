@@ -134,7 +134,7 @@ public class YeePayUtil {
 		stringBuilder.append("&" + "directPayType=" + "" );	
 		stringBuilder.append("&" + "cardType=" + "" );	
 		stringBuilder.append("&" + "userNo=" + ReqUtil.getUserId() );
-		stringBuilder.append("&" + "userType=" + ReqUtil.getUserId() );
+		stringBuilder.append("&" + "userType=USER_ID");
 		stringBuilder.append("&" + "ext=" + "{\"appId\":\"\",\"openId\":\"\",\"clientId\":\"\"}" );
 
 		String sign = getSign(stringBuilder.toString(),appkey);

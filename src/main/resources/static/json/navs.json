@@ -122,6 +122,12 @@
 				}
 			]
 			
+		},{
+			"title": "接口日志",
+			"icon": "&#xe6b2;",
+			"href": "/templates/console/sysapilog.html",
+			"spread": false,
+			"complaint": true
 		}
 
 	]

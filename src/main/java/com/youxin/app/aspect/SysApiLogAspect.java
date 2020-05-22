@@ -87,7 +87,7 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 
 	}
 
-	@Pointcut("execution(* com.youxin.app.controller.*.* (..))")
+	@Pointcut("execution(* com.youxin.app.controller.*.* (..)) && !execution(* com.youxin.app.controller.ReceiveMsgController.*(..)) \"")
 	public void apiLogAspect() {
 
 	}
@@ -131,7 +131,6 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 
 	@Around("apiLogAspect()")
 	public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-
 		Object response = null;// 定义返回信息
 		String stackTrace = null;
 		Exception exception = null;

@@ -73,8 +73,10 @@ public class RedPacketManagerImpl {
 		return entity;
 	}
 
-	public synchronized Result getRedPacketById(Integer userId, ObjectId id) {
+	public Result getRedPacketById(Integer userId, ObjectId id) {
+		long stime = DateUtil.currentTimeMilliSeconds();
 		RedPacket packet = redPacketRepository.get(id);
+		System.out.println("步骤1:"+(DateUtil.currentTimeMilliSeconds()-stime));
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("packet", packet);
 		// 判断红包是否超时
@@ -87,9 +89,10 @@ public class RedPacketManagerImpl {
 		 * getRedReceivesByRedId(packet.getId())); return
 		 * JSONMessage.failureAndData(null, map); //你已经领过了 ! }
 		 */
-
+		System.out.println("步骤2:"+(DateUtil.currentTimeMilliSeconds()-stime));
 		// 判断红包是否已领完
 		List<RedReceive> redReceivesByRedId = getRedReceivesByRedId(packet.getId());
+		System.out.println("步骤3:"+(DateUtil.currentTimeMilliSeconds()-stime));
 //		Collections.reverse(redReceivesByRedId);
 		if (packet.getCount() > packet.getReceiveCount()) {
 			// 判断当前用户是否领过该红包
@@ -97,15 +100,19 @@ public class RedPacketManagerImpl {
 				if (packet.getStatus() == -1)
 					return Result.error("红包已过期", map);
 				map.put("list", redReceivesByRedId);
+				System.out.println("步骤4:"+(DateUtil.currentTimeMilliSeconds()-stime));
 				return Result.success(map);
 			} else {
 				map.put("list", redReceivesByRedId);
+				System.out.println("步骤5:"+(DateUtil.currentTimeMilliSeconds()-stime));
 				return Result.error("你已经领过了", map); // 你已经领过了 !
 			}
 		} else {// 红包已经领完了
 			map.put("list", redReceivesByRedId);
+			System.out.println("步骤6:"+(DateUtil.currentTimeMilliSeconds()-stime));
 			return Result.error("红包已经领完了", map);
 		}
+		
 	}
 
 	public RedPacket getRedPacketByPayNo(Integer userId, String payNo) {
@@ -485,7 +492,7 @@ public class RedPacketManagerImpl {
 	}
 
 	// 根据红包Id 获取该红包的领取记录
-	public synchronized List<RedReceive> getRedReceivesByRedId(ObjectId redId) {
+	public  List<RedReceive> getRedReceivesByRedId(ObjectId redId) {
 		List<RedReceive> redReceivesByRedId = redReceiveRepository.createQuery().field("redId").equal(redId).asList();
 //				(List<RedReceive>) getEntityListsByKey(RedReceive.class, "redId", redId, null);
 		Collections.reverse(redReceivesByRedId);

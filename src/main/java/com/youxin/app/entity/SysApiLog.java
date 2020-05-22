@@ -1,9 +1,10 @@
 package com.youxin.app.entity;
 
-//import org.bson.types.ObjectId;
-//import org.mongodb.morphia.annotations.Entity;
-//import org.mongodb.morphia.annotations.Id;
-//import org.mongodb.morphia.annotations.Indexed;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
 import lombok.Data;
 
@@ -13,15 +14,14 @@ import lombok.Data;
  */
 
 @Data
-//@Entity(value="SysApiLog",noClassnameStored=true)
+@Entity(value="SysApiLog",noClassnameStored=true)
 public class SysApiLog {
-//	@Id
-//	private ObjectId id;
-	private String id;
+	@Id
+	private ObjectId id;
 	/**
 	 * 接口id className+methodName
 	 */
-//	@Indexed
+	@Indexed
 	private String apiId;
 	
 	/**
@@ -32,7 +32,7 @@ public class SysApiLog {
 	/**
 	 * 请求时间
 	 */
-//	@Indexed
+	@Indexed
 	private long time;
 	
 	/**

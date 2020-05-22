@@ -3,11 +3,14 @@ package com.youxin.app.controller;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,7 +65,8 @@ public class RedPacketController extends AbstractController {
 	RedPacketManagerImpl redServer;
 	@Autowired
 	ConsumeRecordManagerImpl consumeServer;
-	
+	@Autowired
+	private RedissonClient redissonClient;
 	@Autowired
 	ConfigService cs;
 //	@SuppressWarnings("static-access")
@@ -140,7 +144,7 @@ public class RedPacketController extends AbstractController {
 			@RequestParam(defaultValue = "") String moneyStr, @RequestParam(defaultValue = "") String secret) {
 		try {
 			Config config = cs.getConfig();
-			Assert.isTrue(config.getRedPacketState()<1, JSON.toJSONString(Result.error("零钱红包功能暂不可用", config)));
+			Assert.isTrue(config.getRedPacketState() < 1, JSON.toJSONString(Result.error("零钱红包功能暂不可用", config)));
 			// 支付宝红包
 			if (packet.getPayType() == 1)
 				return Result.error("支付宝红包 调取错误");
@@ -204,7 +208,7 @@ public class RedPacketController extends AbstractController {
 					record.setDesc("红包发送");
 					record.setTime(DateUtil.currentTimeSeconds());
 					consumeServer.saveConsumeRecord(record);
-					
+
 					MsgRequest messageBean = new MsgRequest();
 					messageBean.setType(100);// 自定义
 
@@ -221,11 +225,9 @@ public class RedPacketController extends AbstractController {
 						log.debug("roomid" + packet.getRoomJid());
 					}
 
-					messageBean.setBody(JSON.toJSONString(new MsgBody(0,
-							KConstants.MsgType.SENDREDPACKET,
-							new SendRedPacket(data.getId().toString(), data.getGreetings(),
-									data.getType(), data.getAccid(), 0,
-									String.valueOf(packet.getMoney()),0))));
+					messageBean.setBody(JSON.toJSONString(new MsgBody(0, KConstants.MsgType.SENDREDPACKET,
+							new SendRedPacket(data.getId().toString(), data.getGreetings(), data.getType(),
+									data.getAccid(), 0, String.valueOf(packet.getMoney()), 0))));
 
 					try {
 						JSONObject json = SDKService.sendMsg(messageBean);
@@ -250,9 +252,26 @@ public class RedPacketController extends AbstractController {
 	@ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "红包id", required = true, paramType = "query") })
 	@GetMapping("getRedPacket")
 	public Result getRedPacket(String id) {
-		Result result = redServer.getRedPacketById(ReqUtil.getUserId(), ReqUtil.parseId(id));
-		// System.out.println("获取红包 ====> "+result);
-		return result;
+		Long stime = DateUtil.currentTimeMilliSeconds();
+		Result result = new Result();
+		RLock lock = redissonClient.getLock("get:redpacket:" + id);
+		try {
+			boolean tryLock = lock.tryLock(2, 10, TimeUnit.SECONDS);
+			if (tryLock) {
+				result = redServer.getRedPacketById(ReqUtil.getUserId(), ReqUtil.parseId(id));
+			}else {
+				return Result.error("网络繁忙，请重试！");
+			}
+			System.out.println("总计：" + (DateUtil.currentTimeMilliSeconds() - stime));
+			// System.out.println("获取红包 ====> "+result);
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Result.error("网络繁忙，请重试！");
+		}finally {
+			lock.unlock();
+		}
+
 	}
 
 	// 回复红包
