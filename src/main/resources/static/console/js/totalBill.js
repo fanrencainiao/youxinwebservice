@@ -13,7 +13,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     layui.laydate.render({
         elem: '#totalBillDate'
         ,range: "~"
-        ,done: function(value, date, endDate){  // choose end
+        ,done: function(value, date, eDate){  // choose end
             //console.log("date callBack====>>>"+value); //得到日期生成的值，如：2017-08-18
              startDate = value.split("~")[0];
              endDate = value.split("~")[1];
@@ -32,6 +32,35 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     	gettotal();
 //    	layui.layer.alert("搜索完成");
     });
+    $(".checkUserBill").on("click",function(){
+    	checkUserBill();
+    });
+    
+    function checkUserBill(){
+    	$.ajax({
+			type:'POST',
+			url:request('/console/checkUserBill'),
+			data:{
+				
+			},
+			timeout:200000,
+			dataType:'json',
+			async:false,
+			success:function(result){
+				if(result.code==1){
+					if(result.data.length>0){
+						$("#checkCount").html(result.data[0].count);
+						$("#userData").html(result.data);
+					}else{
+						$("#userData").html("无异常用户");
+					}
+					
+				
+				}
+
+			}
+		})
+    }
     
     function gettotal(){
     	$.ajax({
@@ -52,6 +81,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 					$("#totalBalance").html(result.data.totalBalance);
 					$("#wxTotalRecharge").html(result.data.wxTotalRecharge);
 					$("#aliTotalRecharge").html(result.data.aliTotalRecharge);
+					$("#yeeTotalRecharge").html(result.data.yeeTotalRecharge);
 					$("#sysTotalRecharge").html(result.data.sysTotalRecharge);
 					$("#sysTotalReduce").html(result.data.sysTotalReduce);
 					$("#totalSendRedPacket").html(result.data.totalSendRedPacket);
@@ -72,13 +102,13 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 					$("#totalConsume1").html(result.data.totalConsume1);
 					$("#totalRecharge1").html(result.data.totalRecharge1);
 					var systemMoney=Math.round((data1.totalSendRedPacket-data1.totalGetRedPacket-data1.totalBackRedPacket+data1.totalTransferMoney
-							-data1.totalGetTransferMoney-data1.totalBackTransferMoney+data1.totalCodePay-data1.totalGetCodePay+data1.totalQRCodePay-data1.totalGetQRCodePay-data1.totalShopping)*100)/100;
+							-data1.totalGetTransferMoney-data1.totalBackTransferMoney+data1.totalCodePay-data1.totalGetCodePay+data1.totalQRCodePay-data1.totalGetQRCodePay)*100)/100;
 					$("#systemMoney").html(systemMoney);
 					var leftsystemMoney=Math.round((data1.totalRecharge-data1.totalCash)*100)/100;
 					$("#leftsystemMoney").html(leftsystemMoney)
-					$("#leftrechargeMoney").html(Math.round((data1.wxTotalRecharge+data1.aliTotalRecharge)*100)/100)
+					$("#leftrechargeMoney").html(Math.round((data1.wxTotalRecharge+data1.aliTotalRecharge+data1.yeeTotalRecharge)*100)/100)
 					
-					$("#outmoney").html(Math.round((result.data.totalBalance1+systemMoney-leftsystemMoney)*100)/100)
+					$("#outmoney").html(Math.round((result.data.totalBalance1+systemMoney+data1.totalShopping-leftsystemMoney)*100)/100)
 				
 					
 					

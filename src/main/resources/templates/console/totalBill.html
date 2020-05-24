@@ -17,6 +17,8 @@ p {
 	<div class="" style="text-align: center;">
 		<input type="text" name="" class="layui-input userId" style="width: 30%;display: inline" placeholder="用户id">
 		<button class="layui-btn search_bill">搜索</button>
+		<button class="layui-btn checkUserBill">检查最近充值异常用户</button>
+		
 			<div class="layui-form-item timeComponent" style="display: inline">
 				<div class="layui-inline">
 					<label class="layui-form-label" style="padding: 9px 8px;width: 150px">统计时间范围</label>
@@ -40,6 +42,7 @@ p {
 			<!-- <p><span>用户总余额：</span><strong id="totalBalance" style="color:red"></strong></p> -->
 			<p><span>微信总充值：</span><strong id="wxTotalRecharge" style="color:red"></strong></p>
 			<p><span>支付宝总充值：</span><strong id="aliTotalRecharge" style="color:red"></strong></p>
+			<p><span>银行卡总充值：</span><strong id="yeeTotalRecharge" style="color:red"></strong></p>
 			<p><span>后台总充值：</span><strong id="sysTotalRecharge" style="color:red"></strong></p>
 			<p><span>后台总扣除：</span><strong id="sysTotalReduce" style="color:red"></strong></p>
 			
@@ -67,9 +70,9 @@ p {
 </div>
 <div class="layui-row" style="margin-top:20px;">
     	<div class="systemMoney" style="text-align:left; margin-left:100px">
-   			<p><span>系统账单托管金额(右侧具体项计算)：</span><strong id="systemMoney" style="color:red;"></strong><small>（红包总发送-红包总领取-红包总退款+总转账-总接受转账-总退回转账+总付款码付款-总付款码到账+总二维码付款-总二维码到账-总人人商城消费）</small></p>
+   			<p><span>系统账单托管金额(右侧具体项计算)：</span><strong id="systemMoney" style="color:red;"></strong><small>（红包总发送-红包总领取-红包总退款+总转账-总接受转账-总退回转账+总付款码付款-总付款码到账+总二维码付款-总二维码到账）</small></p>
 			<p><span>系统账单总余额(左侧用户总金额-用户总提现)：</span><strong id="leftsystemMoney" style="color:red;"></strong><small></small></p>
-			<p><span>系统账单总金额对比(支付宝充值+微信充值)：</span><strong id="leftrechargeMoney" style="color:red;"></strong><small></small></p>
+			<p><span>系统账单总金额对比(支付宝充值+微信充值+银行卡充值)：</span><strong id="leftrechargeMoney" style="color:red;"></strong><small></small></p>
 			
 			
 		</div>
@@ -81,9 +84,14 @@ p {
     	<div class="userMoney" style="text-align:left; margin-left:100px">
    			<!-- <p><span>用户总充值：</span><strong id="totalRecharge1" style="color:red;"></strong><small></small></p> -->
 			<p><span>用户总余额：</span><strong id="totalBalance1" style="color:red;"></strong><small></small></p>
-			<p><span>损失金额：</span><strong id="outmoney" style="color:red;"></strong><small></small></p>
+			<p><span>损失金额(用户总余额+托管金额+商城消费金额-系统账单总余额)：</span><strong id="outmoney" style="color:red;"></strong><small></small></p>
 			<!-- <p><span>用户总消费：</span><strong id="totalConsume1" style="color:red;"></strong><small></small></p> -->
 		</div>
+		<div class="userCheck" style="text-align:left; margin-left:100px">
+		<p><span>异常用户人数：</span><strong id="checkCount" style="color:red;"></strong><small></small></p>
+		<p><span>异常用户：</span><strong id="userData" style="color:red;"></strong><small></small></p>
+		</div>
+			
     </div>
     
     

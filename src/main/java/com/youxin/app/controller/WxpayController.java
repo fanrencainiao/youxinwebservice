@@ -55,7 +55,6 @@ public class WxpayController extends AbstractController{
 				notityXml += inputLine;
 			}
 			request.getReader().close();
-			
 			Map<String,String> m = WXNotify.parseXmlToList2(notityXml);
 			log.debug("接收到的报文：" + m);
 				String tradeNo=m.get("out_trade_no");

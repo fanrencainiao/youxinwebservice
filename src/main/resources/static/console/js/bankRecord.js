@@ -42,7 +42,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
              ,{field: 'createTime',title:'创建时间',width:195,templet: function(d){
                     return UI.getLocalTime(d.createTime);
                 }}
-            ,{fixed: 'right', width: 120,title:"操作", align:'left', toolbar: '#bankListBar'}
+            ,{fixed: 'right', width: 180,title:"操作", align:'left', toolbar: '#bankListBar'}
         ]]
         ,done:function(res, curr, count){
             if(count==0&&lock==1){
@@ -71,7 +71,20 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         console.log(data);
         if(layEvent === 'overSendBank'){// 完成转账
            overSendBank(data);
-        }
+        }else if(layEvent === 'inTeam'){// 所在群
+    	   	localStorage.setItem("currAccid", data.accid);
+    	   	layer.open({
+    	   	  title : "",
+			  type: 2,
+			  skin: 'layui-layer-rim', //加上边框
+			  area: ['850px', '600px'], //宽高
+			  content: 'userTeam.html'
+			  ,success: function(index, layero){
+
+			  }
+
+			});
+      }
          if(layEvent === 'userBill'){// 完成转账
           	localStorage.setItem("currClickUser", data.userId);
          	layer.open({

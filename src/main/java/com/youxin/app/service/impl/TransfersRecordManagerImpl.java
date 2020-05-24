@@ -107,7 +107,7 @@ public class TransfersRecordManagerImpl{
 			entity.setTime(DateUtil.currentTimeSeconds());
 			entity.setType(KConstants.ConsumeType.PUT_RAISE_CASH);
 			entity.setDesc("实际提现");
-			entity.setStatus(KConstants.OrderStatus.END);
+			entity.setStatus(KConstants.OrderStatus.CREATE);
 			entity.setTradeNo(record.getOutTradeNo());
 			entity.setPayType(KConstants.PayType.BALANCEAY);
 			double realFee=Double.valueOf(record.getRealFee());
@@ -121,6 +121,9 @@ public class TransfersRecordManagerImpl{
 			entity.setId(null);
 			crmi.saveConsumeRecord(entity);
 			us.rechargeUserMoeny(record.getUserId(), Double.valueOf(record.getTotalFee()), 2);
+			entity.setStatus(KConstants.OrderStatus.END);
+			crmi.saveConsumeRecord(entity);
+			crmi.saveConsumeRecord(entity);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

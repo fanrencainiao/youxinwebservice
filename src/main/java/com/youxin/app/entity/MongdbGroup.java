@@ -48,6 +48,10 @@ public class MongdbGroup {
 	 */
 	private Double aliTotalRecharge=0.0;
 	/**
+	 * 易宝银行卡充值
+	 */
+	private Double yeeTotalRecharge=0.0;
+	/**
 	 * 系统总充值
 	 */
 	private Double sysTotalRecharge=0.0;
@@ -278,6 +282,12 @@ public class MongdbGroup {
 	}
 	public void setTotalCash1(Double totalCash1) {
 		this.totalCash1 = totalCash1;
+	}
+	public Double getYeeTotalRecharge() {
+		return yeeTotalRecharge;
+	}
+	public void setYeeTotalRecharge(Double yeeTotalRecharge) {
+		this.yeeTotalRecharge = yeeTotalRecharge;
 	}
 
 	

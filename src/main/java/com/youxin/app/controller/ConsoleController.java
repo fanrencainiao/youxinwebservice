@@ -1067,70 +1067,113 @@ public class ConsoleController extends AbstractController{
 	public Object systemTotalBill(@RequestParam(defaultValue="0") Integer userId,
 			@RequestParam(defaultValue="")String startDate,@RequestParam(defaultValue="")String endDate) {
 		try {
-			long startTime = 0; //开始时间（秒）
-			long endTime = 0; //结束时间（秒）,默认为当前时间
-			startTime = StringUtil.isEmpty(startDate) ? 0 :DateUtil.toDate(startDate).getTime()/1000;
-			endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds() : DateUtil.toDate(endDate).getTime()/1000;
-
-			MongdbGroup g = new MongdbGroup();
-			if(userId!=null&&userId>0) {
-				g.setUserId(userId);
-			}
-			g.setStartDate(startTime);
-			g.setEndDate(endTime);
-			
-			//用户总充值
-			g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4,6}, new Integer[] { 1, 2}, g);
-			//用户总提现
-			g = getTotalMoney("totalCash", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
-			//用户总提现 手续费
-			g = getTotalMoney("totalCash1", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
-			//微信总充值
-			g = getTotalMoney("wxTotalRecharge", "money", 1, new Integer[] {2},new Integer[] { 1, 2}, g);
-			//支付宝总充值
-			g = getTotalMoney("aliTotalRecharge", "money", 1, new Integer[] {1},new Integer[] { 1, 2}, g);
-			//后台总充值
-			g = getTotalMoney("sysTotalRecharge", "money", 3, new Integer[] {4},new Integer[] { 1, 2}, g);
-			//后台总扣除
-			g = getTotalMoney("sysTotalReduce", "money", 16, new Integer[] {4},new Integer[] { 1, 2}, g);
-			//红包总发送
-			g = getTotalMoney("totalSendRedPacket", "money", 4, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//红包总领取
-			g = getTotalMoney("totalGetRedPacket", "money", 5, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//红包总退款
-			g = getTotalMoney("totalBackRedPacket", "money", 6, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总转账
-			g = getTotalMoney("totalTransferMoney", "money", 7, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总接受转账
-			g = getTotalMoney("totalGetTransferMoney", "money", 8, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总退回转账
-			g = getTotalMoney("totalBackTransferMoney", "money", 9, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总付款码付款
-			g = getTotalMoney("totalCodePay", "money", 10, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总付款码到账
-			g = getTotalMoney("totalGetCodePay", "money", 11, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总二维码付款
-			g = getTotalMoney("totalQRCodePay", "money", 12, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总二维码到账
-			g = getTotalMoney("totalGetQRCodePay", "money", 13, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总vip充值
-			g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总vip充值提成
-			g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//总商品消费
-			g = getTotalMoney("totalShopping", "money", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//用户总余额
-			g = getTotalMoney("totalBalance1", "balance", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//用户总充值
-			g = getTotalMoney("totalRecharge1", "totalRecharge", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			//用户总消费
-			g = getTotalMoney("totalConsume1", "totalConsume", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
-			
-			g.setTotalBalance(null);
+			MongdbGroup g = getTotalBill(userId, startDate, endDate);
 			return Result.success(g);
 		} catch (ServiceException e) {
 			return Result.error(e.getErrMessage());
 		}
+	}
+	/**
+	 * 检查用户异常集合
+	 * @return
+	 */
+	@RequestMapping("/checkUserBill")
+	public Object checkUserBill() {
+		try {
+			DecimalFormat df = new DecimalFormat("#.00");
+			Map<String, Object> map=new HashMap<>();
+			//用户充值记录
+			PageResult<ConsumeRecord> result = crm.recharge(0, 1, 0,
+					"", 0, 1000, "", "");
+			map.put("count", 0);
+			result.getData().forEach(c->{
+				MongdbGroup g = getTotalBill(c.getUserId(), "", "");
+				Double totalBalance1 = g.getTotalBalance1();
+				Double systemMoney=(g.getTotalSendRedPacket()-g.getTotalGetRedPacket()-g.getTotalBackRedPacket()+g.getTotalTransferMoney()
+				-g.getTotalGetTransferMoney()-g.getTotalBackTransferMoney()+g.getTotalCodePay()-g.getTotalGetCodePay()+g.getTotalQRCodePay()-g.getTotalGetQRCodePay());
+				Double left=g.getTotalRecharge()-g.getTotalCash();
+				
+				Double money=Double.valueOf(df.format(totalBalance1+systemMoney+g.getTotalShopping()-left));
+				if(money>0) {
+					map.put("userId", c.getUserId());
+					map.put("money", money);
+				}
+				map.put("count", Integer.valueOf(map.get("count").toString())+1);
+					
+			});
+			return Result.success(map);
+		} catch (ServiceException e) {
+			return Result.error(e.getErrMessage());
+		}
+	}
+	
+	private MongdbGroup getTotalBill(Integer userId, String startDate, String endDate) {
+		log.debug("startDate:"+startDate);
+		log.debug("endDate:"+endDate);
+		long startTime = 0; //开始时间（秒）
+		long endTime = 0; //结束时间（秒）,默认为当前时间
+		startTime = StringUtil.isEmpty(startDate) ? 0 :DateUtil.toDate(startDate).getTime()/1000;
+		endTime = StringUtil.isEmpty(endDate) ? DateUtil.currentTimeSeconds() : DateUtil.toDate(endDate).getTime()/1000;
+		log.debug("startTime:"+startTime);
+		log.debug("endTime:"+endTime);
+		MongdbGroup g = new MongdbGroup();
+		if(userId!=null&&userId>0) {
+			g.setUserId(userId);
+		}
+		g.setStartDate(startTime);
+		g.setEndDate(endTime);
+		
+		//用户总充值
+		g = getTotalMoney("totalRecharge", "money", 1,new Integer[] {1,2,3,4,6}, new Integer[] { 1, 2}, g);
+		//用户总提现
+		g = getTotalMoney("totalCash", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
+		//用户总提现 手续费
+		g = getTotalMoney("totalCash1", "money", 2, new Integer[] { 3 },new Integer[] { 1, 2}, g);
+		//微信总充值
+		g = getTotalMoney("wxTotalRecharge", "money", 1, new Integer[] {2},new Integer[] { 1, 2}, g);
+		//支付宝总充值
+		g = getTotalMoney("aliTotalRecharge", "money", 1, new Integer[] {1},new Integer[] { 1, 2}, g);
+		//易宝银行卡总充值
+		g = getTotalMoney("yeeTotalRecharge", "money", 1, new Integer[] {6},new Integer[] { 1, 2}, g);
+		//后台总充值
+		g = getTotalMoney("sysTotalRecharge", "money", 3, new Integer[] {4},new Integer[] { 1, 2}, g);
+		//后台总扣除
+		g = getTotalMoney("sysTotalReduce", "money", 16, new Integer[] {4},new Integer[] { 1, 2}, g);
+		//红包总发送
+		g = getTotalMoney("totalSendRedPacket", "money", 4, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//红包总领取
+		g = getTotalMoney("totalGetRedPacket", "money", 5, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//红包总退款
+		g = getTotalMoney("totalBackRedPacket", "money", 6, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总转账
+		g = getTotalMoney("totalTransferMoney", "money", 7, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总接受转账
+		g = getTotalMoney("totalGetTransferMoney", "money", 8, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总退回转账
+		g = getTotalMoney("totalBackTransferMoney", "money", 9, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总付款码付款
+		g = getTotalMoney("totalCodePay", "money", 10, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总付款码到账
+		g = getTotalMoney("totalGetCodePay", "money", 11, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总二维码付款
+		g = getTotalMoney("totalQRCodePay", "money", 12, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总二维码到账
+		g = getTotalMoney("totalGetQRCodePay", "money", 13, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总vip充值
+		g = getTotalMoney("totalVipRecharge", "money", 14, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总vip充值提成
+		g = getTotalMoney("totalVipRechargeProfit", "money", 15, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//总商品消费
+		g = getTotalMoney("totalShopping", "money", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//用户总余额
+		g = getTotalMoney("totalBalance1", "balance", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//用户总充值
+		g = getTotalMoney("totalRecharge1", "totalRecharge", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		//用户总消费
+		g = getTotalMoney("totalConsume1", "totalConsume", 20, new Integer[] {1,2,3,4,6},new Integer[] { 1, 2}, g);
+		
+		g.setTotalBalance(null);
+		return g;
 	}
 	/**
 	 * 
@@ -1159,14 +1202,12 @@ public class ConsoleController extends AbstractController{
 			if(g.getUserId()>0)
 				query.field("userId").equal(g.getUserId());
 			
-			if(g.getStartDate()>0&&g.getEndDate()>0) {
-				query.and(query.criteria("time").greaterThanOrEq(g.getStartDate()),query.criteria("time").lessThanOrEq(g.getEndDate()));
-			}else {
-				if(g.getStartDate()>0)
-					query.field("time").greaterThanOrEq(g.getStartDate());
-				if(g.getEndDate()>0)
-					query.field("time").lessThanOrEq(g.getEndDate());
-			}
+			
+			if(g.getStartDate()>0)
+				query.field("time").greaterThanOrEq(g.getStartDate());
+			if(g.getEndDate()>0)
+				query.field("time").lessThanOrEq(g.getEndDate());
+			
 			if(total.equals("totalCash1")) {
 				query.field("desc").equal("提现手续费");
 			}
@@ -1194,6 +1235,9 @@ public class ConsoleController extends AbstractController{
 				break;
 			case "aliTotalRecharge":
 				g.setAliTotalRecharge(Double.valueOf(df.format(ug.getAliTotalRecharge())));
+				break;
+			case "yeeTotalRecharge":
+				g.setYeeTotalRecharge(Double.valueOf(df.format(ug.getYeeTotalRecharge())));
 				break;
 			case "sysTotalRecharge":
 				g.setSysTotalRecharge(Double.valueOf(df.format(ug.getSysTotalRecharge())));
