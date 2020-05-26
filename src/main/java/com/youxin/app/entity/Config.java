@@ -50,6 +50,10 @@ public class Config {
 	 */
 	private String regNotice = "欢迎来到友信app";
 	/**
+	 * 注册通知语
+	 */
+	private String configChangeNotice = "账户相关系统维护";
+	/**
 	 * 用户银行卡提现是否短信通知0不通知，1通知
 	 */
 	private int bankMsgState = 0;
@@ -134,6 +138,14 @@ public class Config {
 	private int codeReceiveState = 0;// 零钱二维码收款功能 0正常，1维护，2关闭
 	private int moneyState = 0;// 零钱显示 0正常，2关闭
 	private int aliCodeState = 0;// 支付宝码显示 0正常，2关闭
+	
+	
+	public String getSendConfigChangeNotice() {
+//		String msg=this.configChangeNotice;
+		String msg=this.configChangeNotice;
+		
+		return msg;
+	}
 	
 	public Map<String, Object> getMoneyConfig(Config config) {
 		Map<String, Object> result = new HashMap<String, Object>();

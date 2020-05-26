@@ -173,8 +173,8 @@ public class AlipayController {
 
 	@RequestMapping("/change")
 	public String change(HttpServletRequest request, HttpServletResponse response) {
-		log.debug("支付宝支付状态改变 request    " + request);
-		log.debug("支付宝request.getParameterMap    " + request.getParameterMap());
+//		log.debug("支付宝支付状态改变 request    " + request);
+//		log.debug("支付宝request.getParameterMap    " + request.getParameterMap());
 
 		Map<String, String> params = new HashMap<String, String>();
 		Map requestParams = request.getParameterMap();

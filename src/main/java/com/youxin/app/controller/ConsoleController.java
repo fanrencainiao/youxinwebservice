@@ -515,40 +515,62 @@ public class ConsoleController extends AbstractController{
 	// 设置配置
 	@RequestMapping(value = "/config/set", method = RequestMethod.POST)
 	public Object setConfig(@ModelAttribute Config config) throws Exception {
-		try {
-				cs.setConfig(config);
+		try {	
 				Config config2 = cs.getConfig();
-				Query<User> q = ur.createQuery();
-				q.field("disableUser").notEqual(-1).field("isDelUser").notEqual(1);
-				Double count = (double) q.count();
-				int ceil = (int) Math.ceil(count/500.00);
-				//分页查询用户进行消息发送
-				for (int i = 0; i < ceil; i++) {
-					List<User> asList = q.asList(MongoUtil.pageFindOption(i, 500));
-					List<String> accids=asList.stream().map(User::getAccid).collect(Collectors.toList());
-					Msg msg=new Msg();
-					msg.setBody(JSON.toJSONString(new MsgBody(0,
-							KConstants.MsgType.MONEYCONFIG,
-							config2)));
-					msg.setFrom(Md5Util.md5HexToAccid("10000"));
-					msg.setTo(JSON.toJSONString(accids));
-					msg.setType(100);//文本
-					int j=i;
-					ThreadUtil.executeInThread(new Callback() {
-						@Override
-						public void execute(Object obj) {
-							JSONObject json = SDKService.sendBatchMsg(msg);
-							if(json.getIntValue("code")==200) {
-								log.debug("配置更改消息发送成功，第"+(j+1)+"页");
+				cs.setConfig(config);
+
+				if(checkSendMsg(config, config2)) {
+					Query<User> q = ur.createQuery();
+					q.field("disableUser").notEqual(-1).field("isDelUser").notEqual(1);
+					Double count = (double) q.count();
+					int ceil = (int) Math.ceil(count/500.00);
+					//分页查询用户进行消息发送
+					for (int i = 0; i < ceil; i++) {
+						List<User> asList = q.asList(MongoUtil.pageFindOption(i, 500));
+						List<String> accids=asList.stream().map(User::getAccid).collect(Collectors.toList());
+						Msg msg=new Msg();
+						msg.setBody(JSON.toJSONString(new MsgBody(0,
+								KConstants.MsgType.MONEYCONFIG,
+								config)));
+						msg.setFrom(Md5Util.md5HexToAccid("10000"));
+						msg.setTo(JSON.toJSONString(accids));
+						msg.setType(100);//文本
+						int j=i;
+						ThreadUtil.executeInThread(new Callback() {
+							@Override
+							public void execute(Object obj) {
+								JSONObject json = SDKService.sendBatchMsg(msg);
+								if(json.getIntValue("code")==200) {
+									log.debug("配置更改消息发送成功，第"+(j+1)+"页");
+								}
 							}
-						}
-					});
+						});
+					}
+					log.debug("总计"+count+"人");
 				}
-				log.debug("总计"+count+"人");
+				
 			return Result.success();
 		} catch (Exception e) {
 			return Result.error(e.getMessage());
 		}
+	}
+	private boolean checkSendMsg(Config config, Config config2) {
+		if(config2.getAliState()!=config.getAliState()
+				||config2.getWxState()!=config.getWxState()
+				||config2.getYeeState()!=config.getYeeState()
+				||config2.getRedPacketState()!=config.getRedPacketState()
+				||config2.getAliRedPacketState()!=config.getAliRedPacketState()
+				||config2.getTransferState()!=config.getTransferState()
+				||config2.getBankState()!=config.getBankState()
+				||config2.getRrShopState()!=config.getRrShopState()
+				||config2.getCodeReceiveState()!=config.getCodeReceiveState()
+				||config2.getMoneyState()!=config.getMoneyState()
+				||config2.getAliCodeState()!=config.getAliCodeState()
+				||config2.getAndroidVersion()!=config.getAndroidVersion()
+				||config2.getIosVersionDisable()!=config.getIosVersionDisable())
+			return true;
+		else
+			return false;
 	}
 	
 	/**

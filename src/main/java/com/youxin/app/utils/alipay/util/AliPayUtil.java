@@ -148,9 +148,6 @@ public class AliPayUtil {
 		certAlipayRequest.setRootCertPath(rootPath());
 		certAlipayRequest.setPrivateKey(APP_PRIVATE_KEY());
 		alipayClient = new DefaultAlipayClient(certAlipayRequest);
-		System.out.println("APP_ID:" + APP_ID());
-		System.out.println("apppublickkey:" + pubPath());
-		System.out.println("alipayClient:" + JSON.toJSONString(certAlipayRequest));
 		return alipayClient;
 	}
 
@@ -330,8 +327,6 @@ public class AliPayUtil {
 					+ "\",\"order_title\":\"" + subject + "\","
 					+ "\"business_params\":{\"sub_biz_scene\":\"REDPACKET\",\"payer_binded_alipay_uid\":\"" + pid()
 					+ "\"}}");
-			System.out.println("request:" + JSON.toJSONString(request));
-			System.out.println("request:" + JSON.toJSONString(request));
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransAppPayResponse response = getAliPalyClientByCert().sdkExecute(request);
 			System.out.println("返回response  " + JSON.toJSONString(response));

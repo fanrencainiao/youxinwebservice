@@ -49,6 +49,8 @@ function fillParameter(data){
     $(".moneyState").val(data.moneyState);//
     $(".aliCodeState").val(data.aliCodeState);//
     $(".codeReceiveState").val(data.codeReceiveState);//
+    $(".configChangeNotice").val(nullData(data.configChangeNotice));   
+    
     
     
 //    $(".isHideFinance").val(data.isHideFinance);//是否隐藏app零钱相关功能
@@ -139,7 +141,7 @@ layui.use(['form','jquery',"layer"],function() {
         systemConfig.moneyState = $(".moneyState").val();
         systemConfig.aliCodeState = $(".aliCodeState").val();
         systemConfig.codeReceiveState = $(".codeReceiveState").val();
-        
+        systemConfig.configChangeNotice = $(".configChangeNotice").val();   
         
 //        systemConfig.isHideFinance = $(".isHideFinance").val();
         

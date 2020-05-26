@@ -90,7 +90,7 @@ public class ReceiveMsgController {
 							}
 								
 						}
-		            	logger.debug(mr.toString());
+//		            	logger.debug(mr.toString());
 					}else 
 						logger.debug("消息验证失败");
 					

@@ -82,7 +82,7 @@ public class TransferController extends AbstractController {
 	public Result sendTransfer(@RequestBody Transfer transfer, @RequestParam(defaultValue = "") String moneyStr,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
 		Config config = cs.getConfig();
-		Assert.isTrue(config.getBankState()<1, JSON.toJSONString(Result.error("转账功能暂不可用", config)));
+		Assert.isTrue(config.getTransferState()<1, JSON.toJSONString(Result.error("转账功能暂不可用", config)));
 		Integer userId = ReqUtil.getUserId();
 		String token = getAccess_token();
 
@@ -115,6 +115,9 @@ public class TransferController extends AbstractController {
 	@PostMapping(value = "/receiveTransfer")
 	public Result receiverTransfer(@RequestParam(defaultValue = "") String id,
 			@RequestParam(defaultValue = "0") long time, @RequestParam(defaultValue = "") String secret) {
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getTransferState() < 1, JSON.toJSONString(Result.error("转账功能暂不可用", config)));
+		
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
 		// 接口授权校验
@@ -140,6 +143,10 @@ public class TransferController extends AbstractController {
 	@PostMapping(value = "/transferRecedeMoney")
 	public Result transferRecedeMoney(@RequestParam(defaultValue = "0") Integer toUserId,
 			@RequestParam(defaultValue = "0") double money, @RequestParam(defaultValue = "") String transferId) {
+		
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getTransferState() < 1, JSON.toJSONString(Result.error("转账功能暂不可用", config)));
+		
 		ObjectId tid = null;
 		// 格式化数据
 		DecimalFormat df = new DecimalFormat("#.00");

@@ -32,7 +32,8 @@ public enum ResultCode {
     USER_DEL_EXIST(20012, "用户已经注销"),
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
-
+    CONFIG_OPEN_RED_DISABLE(30002, "零钱红包暂不可用"),
+    CONFIG_OPEN_ALIRED_DISABLE(30003, "支付宝红包暂不可用"),
     /* 系统错误：40001-49999 */
     SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
     SYSTEM_INNER_MIS_ERROR(40002, "系统未知错误，请联系技术人员"),

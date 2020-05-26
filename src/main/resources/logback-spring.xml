@@ -102,27 +102,27 @@
     
 
     <logger name="api.log" level="debug">
-    	<appender-ref ref="CONSOLE"/>
+    	
         <appender-ref ref="paifile"/>
     </logger>
     
      <logger name="sdk" level="debug">
-     	<appender-ref ref="CONSOLE"/>
+    
         <appender-ref ref="sdkfile"/>
     </logger>
     
      <logger name="pay" level="debug">
-     	<appender-ref ref="CONSOLE"/>
+     	
         <appender-ref ref="payfile"/>
     </logger>
     <!-- 定时任务 -->
     <logger name="sche" level="debug">
-    	<appender-ref ref="CONSOLE"/>
+    	
         <appender-ref ref="schefile"/>
     </logger>
       <!-- 消息抄送 -->
     <logger name="getmsg" level="debug">
-  	  	<appender-ref ref="CONSOLE"/>
+  	  	
         <appender-ref ref="getmsgfile"/>
     </logger>
 

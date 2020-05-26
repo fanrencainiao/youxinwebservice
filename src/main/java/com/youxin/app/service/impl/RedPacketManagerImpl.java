@@ -16,10 +16,12 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
+import com.youxin.app.entity.Config;
 import com.youxin.app.entity.ConsumeRecord;
 import com.youxin.app.entity.LastWallet;
 import com.youxin.app.entity.RedPacket;
@@ -34,6 +36,7 @@ import com.youxin.app.repository.RedPacketRepository;
 import com.youxin.app.repository.RedReceiveRepository;
 import com.youxin.app.repository.UserWalletRepository;
 import com.youxin.app.repository.WalletFourRepository;
+import com.youxin.app.service.ConfigService;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.KConstants;
@@ -66,6 +69,8 @@ public class RedPacketManagerImpl {
 	private LastWalletRepository lastWalletRepository;
 	@Autowired
 	private ConsumeRecordManagerImpl crmi;
+	@Autowired
+	private ConfigService cs;
 
 	public RedPacket saveRedPacket(RedPacket entity) {
 		ObjectId id = (ObjectId) redPacketRepository.save(entity).getId();
@@ -129,7 +134,12 @@ public class RedPacketManagerImpl {
 
 	public synchronized Result openRedPacketById(Integer userId, ObjectId id) {
 		RedPacket packet = redPacketRepository.get(id);
-
+		
+		Config config = cs.getConfig();
+		if(packet.getPayType() != 1)
+			Assert.isTrue(config.getRedPacketState() < 1, JSON.toJSONString(Result.failure(30002,"零钱红包功能暂不可用", config)));
+		if(packet.getPayType() == 1)
+			Assert.isTrue(config.getAliRedPacketState() < 1, JSON.toJSONString(Result.failure(30003,"支付宝红包功能暂不可用", config)));
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("packet", packet);
 		if (packet.getType() == 4 && !packet.getToUserIds().contains(userId))

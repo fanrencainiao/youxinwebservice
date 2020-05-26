@@ -142,7 +142,7 @@ public class RedPacketController extends AbstractController {
 	@PostMapping("sendRedPacket")
 	public Result sendRedPacketV1(@RequestBody RedPacket packet, @RequestParam(defaultValue = "0") long time,
 			@RequestParam(defaultValue = "") String moneyStr, @RequestParam(defaultValue = "") String secret) {
-		try {
+	
 			Config config = cs.getConfig();
 			Assert.isTrue(config.getRedPacketState() < 1, JSON.toJSONString(Result.error("零钱红包功能暂不可用", config)));
 			// 支付宝红包
@@ -241,10 +241,7 @@ public class RedPacketController extends AbstractController {
 			});
 
 			return Result.success(data);
-		} catch (Exception e) {
-			log.debug("发红包异常：" + e.getMessage());
-			return Result.error("系统异常");
-		}
+		
 	}
 
 	// 获取红包详情
@@ -299,6 +296,7 @@ public class RedPacketController extends AbstractController {
 //	md5( md5(apikey+time) +userid+token) 
 	public Result openRedPacket(String id, @RequestParam(defaultValue = "0") long time,
 			@RequestParam(defaultValue = "") String secret) {
+		
 		String token = getAccess_token();
 		Integer userId = ReqUtil.getUserId();
 		// 红包接口授权

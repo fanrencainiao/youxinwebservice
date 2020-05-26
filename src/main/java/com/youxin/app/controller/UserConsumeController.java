@@ -127,7 +127,7 @@ public class UserConsumeController extends AbstractController {
 		Map<String, String> map = Maps.newLinkedHashMap();
 		String orderInfo = "";
 		if (0 < payType) {
-			Assert.isTrue(config.getAliState()<1, JSON.toJSONString(Result.error("支付宝充值暂不可用", config)));
+			
 			String orderNo = AliPayUtil.getOutTradeNo();
 			ConsumeRecord entity = new ConsumeRecord();
 			entity.setUserId(ReqUtil.getUserId());
@@ -139,6 +139,7 @@ public class UserConsumeController extends AbstractController {
 			entity.setPayType(payType);
 			entity.setMoney(new Double(price));
 			if (KConstants.PayType.ALIPAY == payType) {
+				Assert.isTrue(config.getAliState()<1, JSON.toJSONString(Result.error("支付宝充值暂不可用", config)));
 //				orderInfo = AliPayUtil.getOrderInfo("余额充值", "余额充值", price, orderNo);
 				if(tradeType.equals("MWEB"))
 					orderInfo = AliPayUtil.getH5From("余额充值", "余额充值", price, orderNo);
@@ -149,7 +150,7 @@ public class UserConsumeController extends AbstractController {
 				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
 			} else if(KConstants.PayType.YEEPAY==payType){
-				Assert.isTrue(config.getYeeState()<1, JSON.toJSONString(Result.error("易宝充值暂不可用", config)));
+				Assert.isTrue(config.getYeeState()<1, JSON.toJSONString(Result.error("银行卡充值暂不可用", config)));
 				String order = YeePayUtil.getOrder(orderNo,price);
 				Assert.notNull(order,"创建订单失败");
 				String otoken = JSON.parseObject(order).getString("token");
@@ -251,7 +252,7 @@ public class UserConsumeController extends AbstractController {
 		}
 		// 充值接口授权
 		if (!AuthServiceUtils.authUser(userId + "", token, time, secret)) {
-			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
+//			log.debug("userId:" + userId + ",token:" + token + ",time:" + time + ",secret:" + secret);
 			return Result.errorMsg("权限验证失败!");
 		}
 		if (null != wallet_Four && wallet_Four.getIsSetUpMoney() == 1) {
@@ -265,7 +266,7 @@ public class UserConsumeController extends AbstractController {
 			BigDecimal count = NumberUtil.getBigDecimalForDouble(packet.getCount());
 			//单个红包金额
 			double divideMoney = money.divide(count,2,BigDecimal.ROUND_HALF_UP).doubleValue();
-			log.debug("money:"+money+"count:"+count+"=divideMoney:"+divideMoney);
+//			log.debug("money:"+money+"count:"+count+"=divideMoney:"+divideMoney);
 			if(divideMoney>200)
 				return Result.error("单个红包不能超过200元");
 			Double sendTotalMoney = redServer.sendBill(userId);
@@ -298,8 +299,8 @@ public class UserConsumeController extends AbstractController {
 				orderInfo = AliPayUtil.getOrderInfoByCoupon("支付宝红包", "支付宝红包", price, orderNo);
 				consumeRecordServer.saveConsumeRecord(entity);
 				map.put("orderInfo", orderInfo);
-				System.out.println("orderInfo>>>>>" + URLDecoder.decode(orderInfo));
-				System.out.println("orderInfo>>>>>" + orderInfo);
+//				System.out.println("orderInfo>>>>>" + URLDecoder.decode(orderInfo));
+//				System.out.println("orderInfo>>>>>" + orderInfo);
 				return Result.success(map);
 			} 
 
@@ -389,6 +390,8 @@ public class UserConsumeController extends AbstractController {
 	public Object codeReceive(@RequestParam(defaultValue = "") Integer toUserId,
 			@RequestParam(defaultValue = "") String money, @RequestParam(defaultValue = "0") long time,
 			@RequestParam(defaultValue = "") String desc, @RequestParam(defaultValue = "") String secret) {
+		Config config = cs.getConfig();
+		Assert.isTrue(config.getCodeReceiveState()<1, JSON.toJSONString(Result.error("二维码收款暂不可用", config)));
 		Integer userId = ReqUtil.getUserId();
 		if (userId == toUserId) {
 			return Result.errorMsg("不支持向自己付款");

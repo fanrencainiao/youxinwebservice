@@ -31,12 +31,14 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.ex.ServiceException;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.ReqUtil;
 import com.youxin.app.utils.Result;
+import com.youxin.app.utils.StringUtil;
 
 
 /**
@@ -230,6 +232,20 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 		} else if (e instanceof ClientAbortException) {
 			resultMsg = "====> ClientAbortException";
 			resultCode = -1;
+		}else if (e instanceof IllegalArgumentException) {
+			IllegalArgumentException ex = ((IllegalArgumentException) e);
+			boolean jsonValid = StringUtil.isJSONValid(ex.getMessage());
+			if(jsonValid) {
+				Result result=JSON.parseObject(ex.getMessage(),Result.class);
+				resultCode = result.getCode();
+				resultMsg = result.getMsg();
+				detailMsg = result.getData().toString();
+			}else {
+				resultCode = 0;
+				resultMsg = ex.getMessage();
+			}
+				
+			
 		} else {
 			e.printStackTrace();
 			detailMsg = e.getMessage();
@@ -242,7 +258,7 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 		map.put("detailMsg", detailMsg);
 
 //		return JSONMessage.failureAndData(null, map);
-		return Result.failure(null, map);
+		return Result.failure(resultCode,resultMsg, map);
 	}
 
 }
