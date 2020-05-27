@@ -67,6 +67,7 @@ import com.youxin.app.entity.Role;
 import com.youxin.app.entity.SysApiLog;
 import com.youxin.app.entity.Transfer;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserKeyWord;
 import com.youxin.app.entity.RedPacket.SendRedPacket;
 import com.youxin.app.entity.User.MyCard;
 import com.youxin.app.entity.User.UserLoginLog;
@@ -419,7 +420,9 @@ public class ConsoleController extends AbstractController{
 	@GetMapping(value = "userTeam")
 	public Object userTeam(@RequestParam String accid, int page, int limit) throws Exception {
 		try {
-
+			if(accid.length()<10) {
+				accid=Md5Util.md5HexToAccid(accid);
+			}
 			// 核验用户是否存在
 			if (null == userService.getUserFromDB(accid)) {
 				return Result.error("用户不存在!");
@@ -931,7 +934,7 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/adList")
-	public Object adList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
+	public Object adList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int limit
 			,@RequestParam(defaultValue = "0") int type,@RequestParam(defaultValue = "0") int state
 			,@RequestParam(defaultValue = "") String nickName ) {
 		PageResult<Advert> result=new PageResult<>();
@@ -944,7 +947,7 @@ public class ConsoleController extends AbstractController{
 				q.field("title").contains(nickName);
 		q.order("-createTime,-updateTime");
 		result.setCount(q.count());
-		result.setData(q.asList(MongoUtil.pageFindOption(page-1, pageSize)));
+		result.setData(q.asList(MongoUtil.pageFindOption(page-1, limit)));
 		return Result.success(result);
 	}
 	/**
@@ -1023,6 +1026,39 @@ public class ConsoleController extends AbstractController{
 		return Result.success();
 	}
 	
+	
+	@RequestMapping(value = "/userKeyWordList")
+	public Object userKeyWordList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int limit
+			,@RequestParam(defaultValue = "") String keyWord
+			,@RequestParam(defaultValue = "") String accid) {
+		PageResult<UserKeyWord> result=new PageResult<>();
+		 Query<UserKeyWord> q = dfds.createQuery(UserKeyWord.class);
+		if(!StringUtil.isEmpty(keyWord))
+				q.field("keyWord").contains(keyWord);
+		if(!StringUtil.isEmpty(accid))
+			q.field("accid").contains(accid);
+		q.order("-time");
+		result.setCount(q.count());
+		result.setData(q.asList(MongoUtil.pageFindOption(page-1, limit)));
+		return Result.success(result);
+	}
+	/**
+	 * 删除记录
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/delUserKeyWord")
+	public Object delUserKeyWord(@RequestParam(defaultValue = "") String id) {
+		if(StringUtil.isEmpty(id)) {
+			return Result.error("id为空");
+		}
+		String[] ids = StringUtil.getStringList(id, ",");
+		for(String idd:ids) {
+			UserKeyWord ad = dfds.createQuery(UserKeyWord.class).field("_id").equal(parse(idd)).get();
+			dfds.delete(ad);
+		}
+		return Result.success();
+	}
 	
 	/**
 	 * @Description:（系统充值记录）
@@ -1510,7 +1546,7 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/pplist")
-	public Object pplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
+	public Object pplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int limit
 			,@RequestParam(defaultValue = "0") int state 
 			,@RequestParam(defaultValue = "") String nickName) {
 		return Result.success(pps.pageList());
@@ -1554,10 +1590,10 @@ public class ConsoleController extends AbstractController{
 	 * @return
 	 */
 	@RequestMapping(value = "/iplist")
-	public Object iplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int pageSize
+	public Object iplist(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int limit
 			,@RequestParam(defaultValue = "0") int disable 
 			,@RequestParam(defaultValue = "") String nickName) {
-		return Result.success(ipds.pageList(disable,nickName,page,pageSize));
+		return Result.success(ipds.pageList(disable,nickName,page,limit));
 	}
 	/**
 	 * 获取授权实体

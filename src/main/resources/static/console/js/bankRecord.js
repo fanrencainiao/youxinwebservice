@@ -72,7 +72,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         if(layEvent === 'overSendBank'){// 完成转账
            overSendBank(data);
         }else if(layEvent === 'inTeam'){// 所在群
-    	   	localStorage.setItem("currAccid", data.accid);
+    	   	localStorage.setItem("currAccid", data.userId);
     	   	layer.open({
     	   	  title : "",
 			  type: 2,

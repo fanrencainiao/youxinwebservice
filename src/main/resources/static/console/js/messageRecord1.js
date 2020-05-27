@@ -17,13 +17,13 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         table = layui.table;
 
     console.log('userTeam  Test  tid'+localStorage.getItem("teamid") );
-  
+    console.log('user  Test  formacount'+localStorage.getItem("fromid") );
     
 	  //列表
     var baseTable = table.render({
       elem: '#body_list'
       ,toolbar: '#toolbarConfigs'
-      ,url:"/console/getMessageReceiveList?convType=TEAM&to="+localStorage.getItem("teamid")
+      ,url:"/console/getMessageReceiveList?convType="+(localStorage.getItem("teamid")?"TEAM":"PERSON")+"&to="+localStorage.getItem("teamid")+"&fromAccount="+localStorage.getItem("fromid")
       ,id: 'body_list'
       ,page: true
       ,curr: 0

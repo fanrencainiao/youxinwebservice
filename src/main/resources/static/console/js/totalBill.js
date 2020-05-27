@@ -43,7 +43,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 			data:{
 				
 			},
-			timeout:200000,
+			timeout:2000000,
 			dataType:'json',
 			async:false,
 			success:function(result){

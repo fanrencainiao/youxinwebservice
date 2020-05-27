@@ -771,7 +771,7 @@ public class UserController extends AbstractController{
 			if(null != nearbyUser && nearbyUser.size()>0)
 				return Result.success(nearbyUser);
 			else
-				return Result.error("附近无用户");
+				return Result.success();
 			
 		} catch (Exception e) {
 			return Result.error(e.getMessage());

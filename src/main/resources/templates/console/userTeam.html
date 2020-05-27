@@ -77,6 +77,7 @@ layui.table.on('tool(user_bill_list)', function(obj){
           data = obj.data;
      if(layEvent === 'backMsg'){// 所在群
   	   	localStorage.setItem("teamid", data.tid);
+  	 	localStorage.setItem("fromid", "");
   	   	layer.open({
   	   	  title : "",
 		  type: 2,

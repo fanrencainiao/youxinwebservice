@@ -3,9 +3,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.youxin.app.entity.MessageReceive;
 import com.youxin.app.entity.User;
+import com.youxin.app.entity.UserKeyWord;
 import com.youxin.app.service.UserService;
 import com.youxin.app.utils.DateUtil;
 import com.youxin.app.utils.ThreadUtil;
+import com.youxin.app.utils.KeyFilter.SensitivewordFilter;
 import com.youxin.app.utils.supper.Callback;
 import com.youxin.app.yx.SDKService;
 import com.youxin.app.yx.utils.CheckSumBuilder;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Set;
 @Controller
 @RequestMapping(value = {"/message"})
 public class ReceiveMsgController {
@@ -81,6 +84,17 @@ public class ReceiveMsgController {
 						}else {
 							if (mr.getEventType().equals("1")&&("PERSON".equals(mr.getConvType())||"TEAM".equals(mr.getConvType()))) {
 								dfds.save(mr);
+								//检测敏感词
+								SensitivewordFilter filter = new SensitivewordFilter();
+								Set<String> sensitiveWord = filter.getSensitiveWord(mr.getBody(), 1);
+								if(sensitiveWord.size()>0) {
+									UserKeyWord uk=new UserKeyWord();
+									uk.setAccid(mr.getFromAccount());
+									uk.setKeyWord(sensitiveWord.toString());
+									uk.setTime(DateUtil.currentTimeSeconds());
+									uk.setMsgid(mr.getMsgidServer());
+									dfds.save(uk);
+								}
 							} else if(mr.getEventType().equals("2")) {
 								JSONObject loginObject = JSON.parseObject(requestBody);
 								userService.updateUserOnlineByAccid(loginObject.getString("accid"), 1);
