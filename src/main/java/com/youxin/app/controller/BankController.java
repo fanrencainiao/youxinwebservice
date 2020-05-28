@@ -402,6 +402,9 @@ public class BankController extends AbstractController{
 //				} else {
 //					return Result.error(rj.getJSONObject("result").getString("description"));
 //				}
+				if("信用卡".equals(rj.getString("bankType"))) {
+					return Result.error("无法绑定信用卡");
+				}
 				myCard.setType(rj.getString("bankType"));
 				myCard.setBankName(rj.getString("bankName"));
 				myCard.setName(rj.getString("name"));
@@ -415,7 +418,7 @@ public class BankController extends AbstractController{
 			}
 		}
 //		saveMyCardByUserId(userId, myCard);
-		return Result.error("ali验证失败");
+		return Result.error("银行卡验证失败");
 	}
 
 	private Result saveOrUpdateMyCard(MyCard myCard, Integer userId, MyCard myCard2, List<MyCard> sysMyCards) {

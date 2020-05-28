@@ -34,7 +34,7 @@ public class ExceptionHandlerAdvice {
 		
 
 		int resultCode = 60001;
-		String resultMsg = "接口内部异常====>";
+		String resultMsg = "系统异常：";
 		Object resultData="";
 		log.info(request.getRequestURI() + "错误：");
 		
@@ -69,7 +69,8 @@ public class ExceptionHandlerAdvice {
 			resultMsg = resultMsg+e.getMessage();
 		}else {
 			e.printStackTrace();
-			resultMsg = resultMsg+e.getMessage();
+//			resultMsg = resultMsg+e.getMessage();
+			log.info("ex:"+e.getMessage());
 		}
 		log.info(resultMsg);
 

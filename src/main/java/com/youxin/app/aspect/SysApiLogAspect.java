@@ -219,7 +219,7 @@ public class SysApiLogAspect extends AbstractQueueRunnable<SysApiLog> {
 
 	private Object handleErrors(Exception e) {
 		int resultCode = 1020101;
-		String resultMsg = "接口内部异常";
+		String resultMsg = "系统异常";
 		String detailMsg = "";
 		if (e instanceof MissingServletRequestParameterException || e instanceof BindException) {
 			resultCode = 1010101;
