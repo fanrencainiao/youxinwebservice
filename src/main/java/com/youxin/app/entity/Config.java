@@ -125,7 +125,10 @@ public class Config {
 	private double afee = 0; // 手续费固定金额
 
 	private double bfee = 0; // 手续费百分比
-
+	
+	private double todayLimitMoney=20000;//当日限额
+	private double nowlimitMoney=10000;//单次限额
+	private int todayLimitNumber=3;//当日提现次数
 	/* ========钱包相关=========== */
 	private int aliState = 0;// 阿里功能 0正常，1维护，2关闭
 	private int wxState = 0;// 微信功能 0正常，1维护，2关闭

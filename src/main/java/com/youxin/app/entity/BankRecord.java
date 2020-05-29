@@ -22,7 +22,7 @@ public class BankRecord {
 	
 	private long createTime;
 	/**
-	 * 订单状态   0 创建   1 支付成功  -1 支付失败
+	 * 订单状态   0 创建   1 支付成功 3.标记异常  未转账  -1 支付失败
 	 */
 	private int status;
 	

@@ -24,15 +24,25 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         ,groups: 7
         ,cols: [[ //表头
             {field: 'userId', title: '用户Id',sort: true,width:120}
+            ,{field: 'realFee', title: '真实金额',sort: true, width:120}
             ,{field: 'bankCard', title: '银行卡',sort: true,width:180}
             ,{field: 'name', title: '户主',sort: true, width:80}
             ,{field: 'totalFee', title: '总金额',sort: true, width:80}
              ,{field: 'fee', title: '手续费',sort: true, width:120}
-              ,{field: 'realFee', title: '真实金额',sort: true, width:120}
             ,{field: 'status', title: '状态',sort: true, width:70, templet : function (d) {
             		console.log(d);
 					var statusMsg;
-            		(d.status == 0 ? statusMsg="创建" : (d.status == 1) ? statusMsg = "完成"  : "")
+            		if(d.status == 0){
+            			statusMsg="创建";
+            		}
+            		if(d.status == 1){
+            			statusMsg="完成";
+            		}
+            	
+	            	if(d.status == 3){
+	            			statusMsg="异常";
+	            	}
+            	
             	
 					return statusMsg;
                 }}
@@ -59,6 +69,9 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
            		 if(item.status==1){
            		 	 $('tr[data-index=' + i + ']')[0].style.color="red";
            		 }
+           		 if(item.status==3){
+           		 	 $('tr[data-index=' + i + ']')[0].style.color="#FF5722";
+           		 }
            }
 
         }
@@ -70,17 +83,19 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             data = obj.data;
         console.log(data);
         if(layEvent === 'overSendBank'){// 完成转账
-           overSendBank(data);
+           overSendBank(data,1);
+        }else if(layEvent === 'exBank'){// exBank
+           overSendBank(data,3);
         }else if(layEvent === 'inTeam'){// 所在群
     	   	localStorage.setItem("currAccid", data.userId);
     	   	layer.open({
     	   	  title : "",
 			  type: 2,
 			  skin: 'layui-layer-rim', //加上边框
-			  area: ['850px', '600px'], //宽高
+			  area: ['70%', '70%'], //宽高
 			  content: 'userTeam.html'
 			  ,success: function(index, layero){
-
+				
 			  }
 
 			});
@@ -91,7 +106,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
          	  title : "",
     			  type: 2,
     			  skin: 'layui-layer-rim', //加上边框
-    			  area: ['750px', '500px'], //宽高
+    			  area: ['70%', '70%'], //宽高
     			  content: 'userBill.html'
     			  ,success: function(index, layero){
 
@@ -133,7 +148,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 });
 
 //重新渲染表单
-function overSendBank(data){
+function overSendBank(data,state){
 	
 		if(data.status==1){
 			return ;
@@ -142,7 +157,7 @@ function overSendBank(data){
 			url:request('/console/updateStatus'),
 			data:{
 				id:data.id,
-				status:1
+				status:state
 			},
 			dataType:'json',
 			async:false,

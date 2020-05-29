@@ -232,11 +232,10 @@ public class ConsoleController extends AbstractController{
 			if(online==3) {
 				query.filter("isDelUser !=", 1);
 			}
-			
-			
+
 		}
 		// 排序、分页
-		List<User> pageData = query.order("-createTime").asList(MongoUtil.pageFindOption(page-1, limit));
+		List<User> pageData = query.order("-disableUser,-createTime").asList(MongoUtil.pageFindOption(page-1, limit));
 		pageData.forEach(userInfo -> {
 			Query<UserLoginLog> loginLog = dfds.createQuery(UserLoginLog.class).field("userId")
 					.equal(userInfo.getId());
@@ -569,8 +568,8 @@ public class ConsoleController extends AbstractController{
 				||config2.getCodeReceiveState()!=config.getCodeReceiveState()
 				||config2.getMoneyState()!=config.getMoneyState()
 				||config2.getAliCodeState()!=config.getAliCodeState()
-				||config2.getAndroidVersion()!=config.getAndroidVersion()
-				||config2.getIosVersionDisable()!=config.getIosVersionDisable())
+				||!config2.getAndroidVersion().equals(config.getAndroidVersion())
+				||!config2.getIosVersionDisable().equals(config.getIosVersionDisable()))
 			return true;
 		else
 			return false;
@@ -612,13 +611,14 @@ public class ConsoleController extends AbstractController{
 			int UserId = 1100;
 			User admin = userService.getUserFromDB(UserId);
 //			PageResult<BankRecord> result = SKBeanUtils.getAdminManager().getBankRecordList(bankCard, page, limit);
+			
+			Query<BankRecord> query = dfds.createQuery(BankRecord.class).field("_id")
+					.equal(new ObjectId(id));
+			BankRecord bankRecord = query.get();
+			if (null == bankRecord)
+				return Result.error("数据系统出错");
+			UpdateOperations<BankRecord> ops = dfds.createUpdateOperations(BankRecord.class);
 			if (status == 1 || status == 0) {
-				Query<BankRecord> query = dfds.createQuery(BankRecord.class).field("_id")
-						.equal(new ObjectId(id));
-				BankRecord bankRecord = query.get();
-				if (null == bankRecord)
-					return Result.error("数据系统出错");
-				UpdateOperations<BankRecord> ops = dfds.createUpdateOperations(BankRecord.class);
 				long currentTimeSeconds = DateUtil.currentTimeSeconds();
 				ops.set("status", status);
 				ops.set("payTime", currentTimeSeconds);
@@ -653,7 +653,11 @@ public class ConsoleController extends AbstractController{
 					e.printStackTrace();
 					log.debug("银行卡提现 sdk消息发送失败"+e.getMessage());
 				}
+			}else if(status == 3) {
+				ops.set("status", status);
+				dfds.update(query, ops);
 			}
+			
 			return Result.success();
 		} catch (ServiceException e) {
 			return Result.error(e.getErrMessage());

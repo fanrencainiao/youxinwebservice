@@ -18,6 +18,7 @@ import org.mongodb.morphia.query.Query;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -160,6 +161,29 @@ public class UserController extends AbstractController{
 		User relUser = userService.getUserFromDB(ReqUtil.getUserId());
 		if(!pwd.equals(relUser.getPassword()))
 			return Result.error("密码错误");
+		User user=new User();
+		//设置为注销状态
+		user.setIsDelUser(1);
+		//手机号：手机号+用户id
+		user.setMobile(relUser.getMobile()+relUser.getId());
+		//密码：yxdel+用户id
+		user.setPassword("yxdel"+relUser.getId());
+		user.setId(ReqUtil.getUserId());
+		userService.updateUserByEle(user);
+		logout();
+		
+		return Result.success();
+		
+	}
+	@ApiOperation(value = "注销v1",response=Result.class)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "pwd", value = "密码验证（md5加密）", required = true, paramType = "query"),
+		@ApiImplicitParam(name = "smsCode", value = "短信验证码", required = true, paramType = "query"),
+		})
+	@DeleteMapping("delUserv1")
+	public Object delUser(@RequestParam String pwd ,@RequestParam String smsCode) {
+		User relUser = userService.getUserFromDB(ReqUtil.getUserId());
+		Assert.isTrue(pwd.equals(relUser.getPassword()), "密码错误");
+		Assert.isTrue(sendSms.isAvailable("86" + relUser.getMobile(), smsCode), "短信验证码不正确!");
 		User user=new User();
 		//设置为注销状态
 		user.setIsDelUser(1);

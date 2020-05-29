@@ -82,7 +82,10 @@ public class ReceiveMsgController {
 		            	if (mr.getMsgidServer()==null||mr.getMsgidServer()==""||mr.getMsgidServer().equals("0")) {
 							
 						}else {
-							if (mr.getEventType().equals("1")&&("PERSON".equals(mr.getConvType())||"TEAM".equals(mr.getConvType()))) {
+							if (mr.getEventType().equals("1")&&("PERSON".equals(mr.getConvType())||"TEAM".equals(mr.getConvType()))
+									&&("TEXT".equals(mr.getMsgType())||"PICTURE".equals(mr.getMsgType())||"AUDIO".equals(mr.getMsgType())
+											||"VIDEO".equals(mr.getMsgType()))) {
+								
 								dfds.save(mr);
 								//检测敏感词
 								SensitivewordFilter filter = new SensitivewordFilter();

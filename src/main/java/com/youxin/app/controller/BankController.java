@@ -76,9 +76,6 @@ public class BankController extends AbstractController{
 //	
 	@Resource
 	private WxConfig wxConfig;
-	
-
-	
 	@Autowired
 	private TransfersRecordManagerImpl transfersManager;
 	@Autowired
@@ -128,18 +125,18 @@ public class BankController extends AbstractController{
 		}
 		System.out.println(hostAddress);
 		System.out.println(hostAddress.equals("172.18.80.77"));
-		if(hostAddress.equals("172.18.80.77")) {
-			Assert.isTrue(new Double(moneyStr)<=10000,"单次提现不能超过10000");
+//		if(hostAddress.equals("172.18.80.77")) {
+			Assert.isTrue(new Double(moneyStr)<=config.getNowlimitMoney(),"单次提现不能超过"+config.getNowlimitMoney());
 			List<BankRecord> toDayBankRecordList = acs.getToDayBankRecordList();
-			Assert.isTrue(toDayBankRecordList.size()<3,"每天只能提现3次");
+			Assert.isTrue(toDayBankRecordList.size()<config.getTodayLimitNumber(),"每天只能提现"+config.getTodayLimitNumber()+"次");
 			Double todayTotal=new Double(moneyStr);
 			for (int i = 0; i < toDayBankRecordList.size(); i++) {
 				todayTotal+=Double.valueOf(toDayBankRecordList.get(i).getTotalFee());
 				System.out.println(todayTotal);
 			}
 			System.out.println(todayTotal);
-			Assert.isTrue(todayTotal<=20000,"当天提现不能超过20000");
-		}
+			Assert.isTrue(todayTotal<=config.getTodayLimitMoney(),"当天提现不能超过"+config.getTodayLimitMoney());
+		
 		
 		int userId = ReqUtil.getUserId();
 		User user =userService.getUserFromDB(userId);

@@ -35,7 +35,7 @@ public class ExceptionHandlerAdvice {
 
 		int resultCode = 60001;
 		String resultMsg = "系统异常：";
-		Object resultData="";
+		Object resultData=".";
 		log.info(request.getRequestURI() + "错误：");
 		
 		if (e instanceof MissingServletRequestParameterException

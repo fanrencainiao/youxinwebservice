@@ -33,6 +33,9 @@ function fillParameter(data){
     $(".regNotice").val(nullData(data.regNotice));   
     $(".afee").val(nullData(data.afee)); 
     $(".bfee").val(nullData(data.bfee));  
+    $(".todayLimitMoney").val(nullData(data.todayLimitMoney));
+    $(".nowlimitMoney").val(nullData(data.nowlimitMoney));
+    $(".todayLimitNumber").val(nullData(data.todayLimitNumber));
     $(".isAutoAddressBook").val(data.isAutoAddressBook);
     $(".isOpenSwagger").val(data.isOpenSwagger);
     $(".authApi").val(data.isAuthApi);
@@ -158,6 +161,9 @@ layui.use(['form','jquery',"layer"],function() {
         	layer.alert("百分比需在0-1之间");
         	return;
         }
+        systemConfig.todayLimitMoney = $(".todayLimitMoney").val();
+        systemConfig.nowlimitMoney = $(".nowlimitMoney").val();
+        systemConfig.todayLimitNumber = $(".todayLimitNumber").val();
 
         if($(".androidVersion").val()=="" || $(".androidVersion").val() == null){
             systemConfig.androidVersion = 0;
@@ -216,6 +222,31 @@ layui.use(['form','jquery',"layer"],function() {
        
         return false;
     });
+    
+    function validationNumber(value, num) {
+        var regu = /^[0-9]+\.?[0-9]*$/;
+        if (value != "") {
+            if (!regu.test(value)) {
+                alert("请输入正确的数字");
+                value = valusubstring(0, valulength - 1);
+                focus();
+            } else {
+                if (num == 0) {
+                    if (valuindexOf('.') > -1) {
+                        value = valusubstring(0, valulength - 1);
+                        focus();
+                    }
+                }
+                if (valuindexOf('.') > -1) {
+                    if (valusplit('.')[1].length > num) {
+                        value = valusubstring(0, valulength - 1);
+                        focus();
+                    }
+                }
+
+            }
+        }
+    }
 
 })
 
