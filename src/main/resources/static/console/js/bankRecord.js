@@ -52,7 +52,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
              ,{field: 'createTime',title:'创建时间',width:195,templet: function(d){
                     return UI.getLocalTime(d.createTime);
                 }}
-            ,{fixed: 'right', width: 180,title:"操作", align:'left', toolbar: '#bankListBar'}
+            ,{fixed: 'right', width: 180,title:"操作", style: "height:111px;",  align:'left', toolbar: '#bankListBar'}
         ]]
         ,done:function(res, curr, count){
             if(count==0&&lock==1){
@@ -86,6 +86,35 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
            overSendBank(data,1);
         }else if(layEvent === 'exBank'){// exBank
            overSendBank(data,3);
+        }else if(layEvent === 'sendMsg'){// sendMsg
+           layer.prompt({title: '请输入消息内容', formType: 2,value: '账户异常'}, function(contents, index){
+  				$.ajax({
+					url:request('/console/sendMsg'),
+					data:{
+						text:contents,
+						userId:data.userId
+					},
+					dataType:'json',
+					async:false,
+					success:function(result){
+						if(result.code==1){
+							layer.alert("发送成功");
+						}else{
+							if(typeof(result.data) == "undefined"){
+								layer.alert(result.msg);
+							}
+							layer.alert(result.data.resultMsg);
+						}
+		
+					},
+					error:function(result){
+						if(result.code==0){
+							layer.alert(result.msg);
+						}
+					}
+				});
+ 
+			  });
         }else if(layEvent === 'inTeam'){// 所在群
     	   	localStorage.setItem("currAccid", data.userId);
     	   	layer.open({

@@ -244,7 +244,7 @@ public class UserServiceImpl implements UserService {
 			if(user.getIsDelUser()==1)
 				throw new ServiceException(20012, "帐号已经注销!");
 			if(user.getDisableUser()==-1)
-				throw new ServiceException(20012, "帐号已被禁用!");
+				throw new ServiceException(20013, "当前账号存在违规行为，已被禁用!");
 			user.setLoginLog(bean.getLoginLog());
 			if (bean.getLoginType() == 0) {
 				// 账号密码登录

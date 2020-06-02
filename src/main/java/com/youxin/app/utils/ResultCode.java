@@ -30,6 +30,7 @@ public enum ResultCode {
     BINGDINGMOBILED(20010, "手机号已存在"),
     USER_DIS_TOKEN(20011, "授权认证失败"),
     USER_DEL_EXIST(20012, "用户已经注销"),
+    USER_DEL_DISABLE(20013, "当前账号存在违规行为，已被禁用!"),
     /* 业务错误：30001-39999 */
     SPECIFIED_QUESTIONED_USER_NOT_EXIST(30001, "某业务出现问题"),
     CONFIG_OPEN_RED_DISABLE(30002, "零钱红包暂不可用"),

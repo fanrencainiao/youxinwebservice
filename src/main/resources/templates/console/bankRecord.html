@@ -6,7 +6,17 @@
 </head>
 <link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
 <!--<script type="text/javascript" src="/pages/js/console_init.js"></script>-->
+<style type="text/css">
+     	.layui-table-cell {
+		    height: auto;
+		}
+		/* .laytable-cell-1-11{
+		white-space: normal;
+		} */
+    </style>
 <body>
+
+
 <div class="layui-row">
 	<div id="back" class="layui-col-md1">&nbsp;</div>
 	<input id="pageCount" type="" name="" style="display: none">
@@ -24,7 +34,7 @@
 
 		<!--操作-->
 		<script type="text/html" id="bankListBar">
-			
+			<div class="" height="" style="white-space: normal;">
 			{{#  if(d.status == 0){ }}
 				<a class="layui-btn layui-btn layui-btn-xs overSendBank" lay-event="overSendBank">完成</a>
 				<a class="layui-btn layui-btn-danger layui-btn-xs exBank" lay-event="exBank">异常</a>
@@ -34,8 +44,10 @@
 				
 			{{#  } }}
 			<a class="layui-btn layui-btn-primary layui-btn-xs userBill" lay-event="userBill">账单</a>
+			<a class="layui-btn layui-btn-primary layui-btn-xs sendMsg" lay-event="sendMsg">发送消息</a>
 			<a class="layui-btn layui-btn-primary layui-btn-xs inTeam" lay-event="inTeam" style="margin-left: 0px;">所在群</a>
-		</script>
+			</div>	
+	</script>
 	</div>
 
 </div>

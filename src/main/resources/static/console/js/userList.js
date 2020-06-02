@@ -139,6 +139,35 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 
 		  });
 
+  }else if(layEvent === 'sendMsg'){// sendMsg
+      layer.prompt({title: '请输入消息内容', formType: 2,value: '账户异常'}, function(contents, index){
+			$.ajax({
+				url:request('/console/sendMsg'),
+				data:{
+					text:contents,
+					userId:data.id
+				},
+				dataType:'json',
+				async:false,
+				success:function(result){
+					if(result.code==1){
+						layer.alert("发送成功");
+					}else{
+						if(typeof(result.data) == "undefined"){
+							layer.alert(result.msg);
+						}
+						layer.alert(result.data.resultMsg);
+					}
+	
+				},
+				error:function(result){
+					if(result.code==0){
+						layer.alert(result.msg);
+					}
+				}
+			});
+
+		  });
   }else if(layEvent==='bill'){ //用户账单
 
    	localStorage.setItem("currClickUser", data.id);

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bson.types.ObjectId;
@@ -36,6 +37,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -648,6 +650,8 @@ public class ConsoleController extends AbstractController{
 				try {
 					JSONObject json=SDKService.sendMsg(messageBean);
 					if(json.getInteger("code")!=200) 
+						log.debug("银行卡提现 sdk消息发送失败");
+					else
 						log.debug("银行卡提现 sdk消息发送失败");
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1660,6 +1664,22 @@ public class ConsoleController extends AbstractController{
 		Query<SysApiLog> q = dfds.createQuery(SysApiLog.class);
 		q.field("time").lessThanOrEq(DateUtil.getOnedayNextDay(DateUtil.currentTimeSeconds(), 7, 1));
 		dfds.delete(q);
+		return Result.success();
+	}
+	
+	
+	@RequestMapping("sendMsg")
+	public Object sendMsg(@RequestParam(defaultValue = "") String text,@RequestParam(defaultValue = "") String userId){
+		MsgRequest messageBean = new MsgRequest();
+		messageBean.setFrom(Md5Util.md5HexToAccid("10000"));
+		messageBean.setType(0);// 文本
+		messageBean.setOpe(0);// 个人消息
+		messageBean.setTo(Md5Util.md5HexToAccid(userId));
+		messageBean.setBody("{\"msg\":\""+text+"\"}");
+		JSONObject msgjson=SDKService.sendMsg(messageBean);
+		if(msgjson.getInteger("code")!=200) 
+			return Result.error("消息发送失败");
+		
 		return Result.success();
 	}
 	
