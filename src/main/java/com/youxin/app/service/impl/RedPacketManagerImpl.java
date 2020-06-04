@@ -79,9 +79,7 @@ public class RedPacketManagerImpl {
 	}
 
 	public Result getRedPacketById(Integer userId, ObjectId id) {
-		long stime = DateUtil.currentTimeMilliSeconds();
 		RedPacket packet = redPacketRepository.get(id);
-		System.out.println("步骤1:"+(DateUtil.currentTimeMilliSeconds()-stime));
 		Map<String, Object> map = Maps.newHashMap();
 		map.put("packet", packet);
 		// 判断红包是否超时
@@ -94,10 +92,8 @@ public class RedPacketManagerImpl {
 		 * getRedReceivesByRedId(packet.getId())); return
 		 * JSONMessage.failureAndData(null, map); //你已经领过了 ! }
 		 */
-		System.out.println("步骤2:"+(DateUtil.currentTimeMilliSeconds()-stime));
 		// 判断红包是否已领完
 		List<RedReceive> redReceivesByRedId = getRedReceivesByRedId(packet.getId());
-		System.out.println("步骤3:"+(DateUtil.currentTimeMilliSeconds()-stime));
 //		Collections.reverse(redReceivesByRedId);
 		if (packet.getCount() > packet.getReceiveCount()) {
 			// 判断当前用户是否领过该红包
@@ -105,16 +101,13 @@ public class RedPacketManagerImpl {
 				if (packet.getStatus() == -1)
 					return Result.error("红包已过期", map);
 				map.put("list", redReceivesByRedId);
-				System.out.println("步骤4:"+(DateUtil.currentTimeMilliSeconds()-stime));
 				return Result.success(map);
 			} else {
 				map.put("list", redReceivesByRedId);
-				System.out.println("步骤5:"+(DateUtil.currentTimeMilliSeconds()-stime));
 				return Result.error("你已经领过了", map); // 你已经领过了 !
 			}
 		} else {// 红包已经领完了
 			map.put("list", redReceivesByRedId);
-			System.out.println("步骤6:"+(DateUtil.currentTimeMilliSeconds()-stime));
 			return Result.error("红包已经领完了", map);
 		}
 		
@@ -161,9 +154,9 @@ public class RedPacketManagerImpl {
 				map.put("packet", packets);
 				map.put("list", getRedReceivesByRedId(packet.getId()));
 				long e = DateUtil.currentTimeMilliSeconds();
-				System.out.println("领取红包耗时：" + (e - s));
+				log.debug("领取红包耗时：" + (e - s));
 				if (packets == null)
-					return Result.error("支付宝红包异常");
+					return Result.error("红包异常");
 				else
 					return Result.success(map);
 			} else {
@@ -354,7 +347,7 @@ public class RedPacketManagerImpl {
 		receive.setId(id);
 		redPacketRepository.update(q, ops);
 		final Double num = money;
-
+		Long stime=DateUtil.currentTimeMilliSeconds();
 		MsgRequest messageBean = new MsgRequest();
 		messageBean.setFrom(Md5Util.md5HexToAccid(userId + ""));
 		messageBean.setType(100);// 文本
@@ -377,7 +370,7 @@ public class RedPacketManagerImpl {
 			e.printStackTrace();
 			log.debug("红包领取 sdk消息发送失败" + e.getMessage());
 		}
-
+		log.debug("红包消息发送时间："+(DateUtil.currentTimeMilliSeconds()-stime));
 		// 开启一个线程 添加一条消费记录
 		new Thread(new Runnable() {
 			@Override

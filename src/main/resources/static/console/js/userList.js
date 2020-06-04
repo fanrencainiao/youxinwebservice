@@ -168,7 +168,23 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 			});
 
 		  });
-  }else if(layEvent==='bill'){ //用户账单
+  }else if(layEvent === 'myfriends'){// sendMsg
+
+	   	localStorage.setItem("friendsaccid", data.accid);
+	   	layer.open({
+	   	  title : "",
+				  type: 2,
+				  skin: 'layui-layer-rim', //加上边框
+				  area: ['750px', '500px'], //宽高
+				  content: 'userFriends.html'
+				  ,success: function(index, layero){
+
+				  }
+
+				});
+			
+	
+}else if(layEvent==='bill'){ //用户账单
 
    	localStorage.setItem("currClickUser", data.id);
    	layer.open({

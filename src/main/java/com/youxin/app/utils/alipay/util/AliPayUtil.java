@@ -27,6 +27,7 @@ import com.alipay.api.domain.AlipayFundTransCommonQueryModel;
 import com.alipay.api.domain.AlipayFundTransRefundModel;
 import com.alipay.api.domain.AlipayFundTransUniTransferModel;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.ExtUserInfo;
 import com.alipay.api.domain.Participant;
 import com.alipay.api.request.AlipayFundCouponOrderAppPayRequest;
 import com.alipay.api.request.AlipayFundTransAppPayRequest;
@@ -249,6 +250,9 @@ public class AliPayUtil {
 		model.setTimeoutExpress("30m");
 		model.setTotalAmount(price);
 		model.setProductCode("QUICK_MSECURITY_PAY");
+		//身份验证
+//		ExtUserInfo ext=new ExtUserInfo();
+		
 //			model.setGoodsType("0");
 		request.setBizModel(model);
 		request.setNotifyUrl(callBackUrl());

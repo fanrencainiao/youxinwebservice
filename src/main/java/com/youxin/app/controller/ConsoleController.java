@@ -1667,7 +1667,12 @@ public class ConsoleController extends AbstractController{
 		return Result.success();
 	}
 	
-	
+	/**
+	 * 10000 号 发送普通消息 
+	 * @param text
+	 * @param userId
+	 * @return
+	 */
 	@RequestMapping("sendMsg")
 	public Object sendMsg(@RequestParam(defaultValue = "") String text,@RequestParam(defaultValue = "") String userId){
 		MsgRequest messageBean = new MsgRequest();
@@ -1679,9 +1684,27 @@ public class ConsoleController extends AbstractController{
 		JSONObject msgjson=SDKService.sendMsg(messageBean);
 		if(msgjson.getInteger("code")!=200) 
 			return Result.error("消息发送失败");
-		
+		SDKService.friendGet(userId, null, null);
 		return Result.success();
 	}
+	
+	@RequestMapping("getFriends")
+	public Object getFriends(@RequestParam(defaultValue = "") String accid){
+		JSONObject friendGet = SDKService.friendGet(accid, 0l, null);
+		if(friendGet.getInteger("code")!=200) 
+			return Result.error("获取好友失败");
+		
+		JSONArray jsonArray = friendGet.getJSONArray("friends");
+		Assert.isTrue(jsonArray!=null,"无好友");
+		for (int i = 0; i < jsonArray.size(); i++) {
+			User userFromDB = userService.getUserFromDB(jsonArray.getJSONObject(i).getString("faccid"));
+			jsonArray.getJSONObject(i).put("nickname", userFromDB.getName());
+		}
+		 PageResult<Object> pageResult = new PageResult<>(jsonArray, friendGet.getIntValue("size"));
+		return Result.success(pageResult);
+	}
+	
+	
 	
 	
 }

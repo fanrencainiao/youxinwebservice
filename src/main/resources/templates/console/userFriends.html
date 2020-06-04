@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
+<style>
+     	.layui-table-cell {
+		    height: auto;
+		}
+</style>
+<body class="childrenBody">
+<form class="layui-form">
+	
+	<!-- <span style="margin-left: 1%">总余额：<cite class="current_total"></cite>  元</span> -->
+	<table id="user_body_list" lay-filter="user_body_list"></table>
+<!--操作-->
+			<script type="text/html" id="baseListBar">
+							
+				<div class="" height="" style="white-space: normal;">
+			
+				
+				</div>
+			</script>
+
+</form>
+
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/core.js"></script>
+<script type="text/javascript" src="/static/console/js/tripledes.js"></script>
+
+
+<!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
+
+<script type="text/javascript">
+console.log('getFriends  Test  friendsaccid'+localStorage.getItem("friendsaccid") );
+//用户账单
+var tableIns = layui.table.render({
+
+  elem: '#user_body_list'
+  ,url:"/console/getFriends?accid="+localStorage.getItem("friendsaccid")
+  ,id: 'user_body_list'
+  ,page: false
+  ,limit:Common.limit
+  ,limits:[]
+  ,cols: [[ //表头
+      {field: 'faccid', title: '好友accid',sort:'true', width:300}
+      ,{field: 'nickname', title: '好友昵称',sort:'true', width:120}
+      ,{field: 'createtime', title: '创建时间', width:180,templet: function(d){
+          return UI.getLocalTime(d.createtime/1000);
+      }}
+     
+      /* ,{fixed: 'right', title:"操作", align:'left',width:280, toolbar: '#baseListBar'} */
+    ]]
+	,done:function(res, curr, count){
+		/*   $(".current_total").empty().text((0==res.total ? 0:res.total)); */
+		  
+	}
+});
+
+//列表操作
+layui.table.on('tool(user_body_list)', function(obj){
+    var layEvent = obj.event,
+          data = obj.data;
+     if(layEvent === 'backMsg'){// 所在群
+  	   	localStorage.setItem("teamid", data.tid);
+  	 	localStorage.setItem("fromid", "");
+  	   	layer.open({
+  	   	  title : "",
+		  type: 2,
+		  skin: 'layui-layer-rim', //加上边框
+		  area: ['750px', '500px'], //宽高
+		  content: 'messageRecord1.html'
+		  ,success: function(index, layero){
+
+		  }
+
+		});
+    }
+});
+</script>
+
+</body>
+</html>
