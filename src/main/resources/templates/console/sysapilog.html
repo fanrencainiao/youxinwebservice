@@ -21,10 +21,11 @@
 		<div id="baseList" class="layui-col-md10">
 			 <div class="search_div" style="margin-top: 2%"> 
 				<input type="text" name="" class="layui-input apiId" style="width: 15%;display: inline" placeholder="访问接口">
+				<input type="text" name="" class="layui-input userId" style="width: 15%;display: inline" placeholder="访问用户">
 				<button class="layui-btn search_base">搜索</button>
 
-				<button  class="layui-btn btn_delsivenDay">删除7天前的接口日志</button>
-				
+				<button  class="layui-btn btn_delsivenDay">删除N天前的接口日志</button>
+			
 			</div>
 
 			<div id="base_table" class="layui-card" style="margin-top: 1%">
@@ -131,15 +132,39 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                 curr: 1 //重新从第 1 页开始
             },
             where: {
-            	apiId:$(".apiId").val()// 
-            	
+            	apiId:$(".apiId").val(),// 
+            	userId:$(".userId").val()?$(".userId").val():-1
             }
         })
         lock=1;
     });
     //删除一月之前的消息记录
     $(".btn_delsivenDay").on("click",function(){
-		$.ajax({
+    	
+
+		  layer.prompt({title: '请输入天数', formType: 0,value: '3'}, function(days, index){
+          // 充值金额（正整数）的正则校验
+			
+				Common.invoke({
+				      path : request('/console/delsysapi'),
+				      data : {
+				    	  days:days
+				      },
+				      successMsg : "成功",
+				      errorMsg :  "失败，请稍后重试",
+				      successCb : function(result) {
+				        var data = result.data; //DataSort(result.data);
+				      	layer.close(index); //关闭弹框
+				      	renderTable();
+				      },
+				      errorCb : function(result) {
+
+				      }
+			    });
+
+		  });
+    	
+	/* 	$.ajax({
 			type:'POST',
 			url:'/console/delsysapi',
 			data:{},
@@ -152,7 +177,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 
 			}
 		})
-    	renderTable();
+    	renderTable(); */
     });
     
 })

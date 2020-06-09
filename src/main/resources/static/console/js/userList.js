@@ -55,6 +55,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
           ,{field: 'balance', title: '余额',sort:'true', width:80}
           ,{field: 'totalRecharge', title: '充值总金额',sort:'true', width:80}
           ,{field: 'totalConsume', title: '消费总金额',sort:'true', width:80}
+          ,{field: 'disableUserSign', title: '禁用标签',sort:'true', width:80}
           ,{field: 'createTime', title: '注册时间',sort: true, width:200,templet : function (d) {
               return d.createTime?UI.getLocalTime(d.createTime):"";
           }}
@@ -453,6 +454,39 @@ var Base={
             }});
     },
     disableUser:function(id,accid,disableUser){
+	    	var title="确定禁用指定用户";
+	    	if(disableUser==1){
+	    		title="确定解禁指定用户";
+	    	}
+
+		  layer.prompt({title: title, formType: 0,value: '异常,违规'}, function(disableUserSign, index){
+          // 充值金额（正整数）的正则校验
+			
+				Common.invoke({
+				      path : request('/console/blockUser'),
+				      data : {
+				    	disableUserSign:disableUserSign,
+				    	id:id,
+	                    accid:accid,
+	                    disableUser:disableUser
+				      },
+				      successMsg : "成功",
+				      errorMsg :  "失败，请稍后重试",
+				      successCb : function(result) {
+
+				        var data = result.data; //DataSort(result.data);
+				      	layer.close(index); //关闭弹框
+				      	renderTable();
+
+				      },
+				      errorCb : function(result) {
+
+				      }
+			    });
+
+		  });
+    	
+    /*	
         layer.confirm('确定禁用指定用户',{icon:3, title:'提示消息',yes:function () {
                 myFn.invoke({
                     url:request('/console/blockUser'),
@@ -475,7 +509,7 @@ var Base={
             	ids = [];
             },cancel:function () {
             	ids = [];
-            }});
+            }});*/
     },
 
     button_back:function(){

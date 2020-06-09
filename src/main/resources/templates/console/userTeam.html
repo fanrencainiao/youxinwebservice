@@ -27,7 +27,11 @@
 					<a class="layui-btn layui-btn-danger layui-btn-xs undisall" style="margin-left: 0px;" lay-event="undisall">解锁该群组</a>
 
 					<a class="layui-btn layui-btn-danger layui-btn-xs delete" style="margin-left: 0px;" lay-event="delete">解散该群组</a>
-				
+					
+					<a class="layui-btn layui-btn-danger layui-btn-xs teamUsers" style="margin-left: 0px;" lay-event="teamUsers">群成员</a>
+					
+					<a class="layui-btn layui-btn-danger layui-btn-xs blokall" style="margin-left: 0px;" lay-event="blokall">禁用群所有成员</a>
+					
 				</div>
 			</script>
 
@@ -166,7 +170,49 @@ layui.table.on('tool(user_bill_list)', function(obj){
                  }
              });
          })
-        }
+        }else if(layEvent === 'teamUsers'){//群成员列表
+         	localStorage.setItem("tu_tid", data.tid);
+      	   	layer.open({
+      	   	  title : "",
+    		  type: 2,
+    		  skin: 'layui-layer-rim', //加上边框
+    		  area: ['750px', '500px'], //宽高
+    		  content: 'teamUsers.html',
+    		  success: function(index, layero){
+					
+    		  }
+
+    		});
+          
+           }else if(layEvent === 'blokall'){// 禁用群所有成员
+               
+               var confMsg,successMsg="";
+           	 confMsg = "确定禁用该群所有用户？";
+               successMsg = "禁用完成";
+               layer.confirm(confMsg,{icon:3, title:'提示信息'},function(index){
+
+                   Common.invoke({
+                       path : request('/console/teamUserList'),
+                       data : {
+                       	tid:data.tid,
+                       	action:1
+                       },
+                       successMsg : successMsg,
+                       errorMsg :  "加载数据失败，请稍后重试",
+                       successCb : function(result) {
+                           
+                           Com.complaint(0);
+                           Com.limit();
+                           
+                       },
+                       errorCb : function(result) {
+                       }
+                   });
+               })
+              }
+     
+     
+     
 });
 </script>
 

@@ -26,7 +26,8 @@ textarea#content {
     		<td><textarea id="content" ></textarea></td>
 		</div>
 		<div style="width:80%;margin:0 auto;">
-		<button type="button" id="send" class="layui-btn">发送</button>
+		<button type="button"  class="layui-btn send">批量发送</button>
+		<button type="button"  class="layui-btn broadcastMsg">广播发送</button>
 		</div>
     </div>
    
@@ -40,8 +41,8 @@ textarea#content {
 <script type="text/javascript" src="/static/console/js/console_ui.js"></script>
 <script type="text/javascript">
 
-$('body').on('click','.layui-btn', function() {
-	$.ajax({
+$('body').on('click','.send', function() {
+	 $.ajax({
 		type:'POST',
 		url:request('/console/sendBatchMsg'),
 		data:{
@@ -50,14 +51,43 @@ $('body').on('click','.layui-btn', function() {
 		dataType:'json',
 		async:false,
 		success:function(result){
-			layer.alert(result.data);
+			if(result.code==1){
+				layer.alert("发送成功");
+			}else{
+				layer.alert(result.msg);
+			}
 		},
 		error:function(result){
 			if(result.code==0){
 				layer.alert(result.msg);
 			}
 		}
-	})
+	}) 
+})
+
+$('body').on('click','.broadcastMsg', function() {
+	 $.ajax({
+		type:'POST',
+		url:request('/console/broadcastMsg'),
+		data:{
+			text: $("#content").val()
+		},
+		dataType:'json',
+		async:false,
+		success:function(result){
+			if(result.code==1){
+				layer.alert("发送成功");
+			}else{
+				layer.alert(result.msg);
+			}
+			
+		},
+		error:function(result){
+			if(result.code==0){
+				layer.alert(result.msg);
+			}
+		}
+	}) 
 })
 </script>
 </body>

@@ -143,6 +143,8 @@ public class User extends BaseExample{
 	private String account;
 	@ApiModelProperty(value = "禁用用户（-1禁用 1解禁）")
 	private int disableUser = 1;
+	@ApiModelProperty(value = "禁用用户 标签（原因）")
+	private String disableUserSign;
 	@ApiModelProperty(value = "用户类型 0普通用户(默认)，2公众号,6管理员")
 	private int userType = 0;
 	@ApiModelProperty(value = "身份二维码标识，用于刷新二维码")

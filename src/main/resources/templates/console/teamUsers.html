@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<link href="../../static/common/layui/css/layui.css" rel="stylesheet" media="all">
+<style>
+     	.layui-table-cell {
+		    height: auto;
+		}
+</style>
+<body class="childrenBody">
+<form class="layui-form">
+	
+	<!-- <span style="margin-left: 1%">总余额：<cite class="current_total"></cite>  元</span> -->
+	<table id="user_body_list" lay-filter="user_body_list"></table>
+<!--操作-->
+			<script type="text/html" id="baseListBar">
+							
+				<div class="" height="" style="white-space: normal;">
+			
+				
+				</div>
+			</script>
+
+</form>
+
+<script type="text/javascript" src="/static/common/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/static/common/layui/layui.all.js"></script>
+<script type="text/javascript" src="/static/assets/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/static/console/js/common.js"></script>
+<script type="text/javascript" src="/static/console/js/console_ui.js"></script>
+<script type="text/javascript" src="/static/js/_coolchat-commons.js"></script>
+<script type="text/javascript" src="/static/console/js/core.js"></script>
+<script type="text/javascript" src="/static/console/js/tripledes.js"></script>
+
+
+<!-- <script type="text/javascript" src="/pages/js/console_init.js"></script> -->
+
+<script type="text/javascript">
+console.log('tu_tid  Test  tu_tid'+localStorage.getItem("tu_tid") );
+//用户账单
+var tableIns = layui.table.render({
+
+  elem: '#user_body_list'
+  ,url:"/console/teamUserList?tid="+localStorage.getItem("tu_tid")+"&action=0"
+  ,id: 'user_body_list'
+  ,page: false
+  ,limit:Common.limit
+  ,limits:[]
+  ,cols: [[ //表头
+      {field: 'accid', title: 'accid',sort:'true', width:300}
+      ,{field: 'nick', title: '昵称',sort:'true', width:120}
+      ,{field: 'isAdmin', title: '成员类型', width:180,templet: function(d){
+    	  if(d.isAdmin==2){
+    		  return "群主";
+    	  }else if(d.isAdmin==1){
+    		  return "管理员";
+    	  }else{
+    		  return "普通成员";
+    	  }
+      }}
+      ,{field: 'mute', title: '是否禁言', width:180,templet: function(d){
+    	  if(d.mute==true){
+    		  return "已禁言";
+    	  }else{
+    		  return "未禁言";
+    	  }
+      }}
+      ,{field: 'createtime', title: '进群时间', width:180,templet: function(d){
+          return UI.getLocalTime(d.createtime/1000);
+      }}
+      ,{field: 'updatetime', title: '更新时间', width:180,templet: function(d){
+          return UI.getLocalTime(d.updatetime/1000);
+      }}
+     
+      /* ,{fixed: 'right', title:"操作", align:'left',width:280, toolbar: '#baseListBar'} */
+    ]]
+	,done:function(res, curr, count){
+		/*   $(".current_total").empty().text((0==res.total ? 0:res.total)); */
+		  
+	}
+});
+
+//列表操作
+layui.table.on('tool(user_body_list)', function(obj){
+    var layEvent = obj.event,
+          data = obj.data;
+     if(layEvent === 'backMsg'){// 所在群
+  	   	localStorage.setItem("teamid", data.tid);
+  	 	localStorage.setItem("fromid", "");
+  	   	layer.open({
+  	   	  title : "",
+		  type: 2,
+		  skin: 'layui-layer-rim', //加上边框
+		  area: ['750px', '500px'], //宽高
+		  content: 'messageRecord1.html'
+		  ,success: function(index, layero){
+
+		  }
+
+		});
+    }
+});
+</script>
+
+</body>
+</html>

@@ -508,10 +508,12 @@ public class UserServiceImpl implements UserService {
 		User user = q.get();
 		if(bean.getDisableUser()==-1 || bean.getDisableUser()==1) {
 			user.setDisableUser(bean.getDisableUser());
+			user.setDisableUserSign(bean.getDisableUserSign());
 		}
 		user.setExs();
 		com.youxin.app.yx.request.User.User yuser=new com.youxin.app.yx.request.User.User();
 		BeanUtils.copyProperties(user, yuser);
+		yuser.setMobile(null);
 		JSONObject json = SDKService.updateUinfo(yuser);
 		if(json.getIntValue("code")==200) {
 			Key<User> save = repository.save(user);

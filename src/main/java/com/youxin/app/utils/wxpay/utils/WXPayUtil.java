@@ -15,6 +15,8 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,7 +27,7 @@ import com.youxin.app.utils.applicationBean.WxConfig;
 
 @Component
 public class WXPayUtil{
-	
+	protected static Log log = LogFactory.getLog("pay");
 	private static Object Server;
 	
 	private static String QRfromGoogle;
@@ -223,15 +225,15 @@ public class WXPayUtil{
 		String sign = reqHandler.createSign(contentMap);
 		contentMap.put("sign", sign);
 		String xml = WXPayUtil.paramsToxmlStr(contentMap);
-		System.out.println("xml:"+xml);
+		log.info("xml:"+xml);
 		if(wxPayDto.getTradeType().equals("MWEB")) {
-			System.out.println("h5支付");
+			log.info("h5支付");
 			SortedMap<String, String> payMap = new TreeMap<String, String>();
 			String mweb = new GetWxOrderno().getMweb(WXPayConfig.PREPAY_ID_URL, xml);
 			payMap.put("mwebUrl", mweb);
 			return payMap;
 		}
-		System.out.println("app支付");
+		log.info("app支付");
 		String prepay_id = new GetWxOrderno().getPayNo(WXPayConfig.PREPAY_ID_URL, xml);
 		//获取prepay_id后，拼接最后请求支付所需要的package
 		
@@ -308,7 +310,7 @@ public class WXPayUtil{
 	public static String createSign(TreeMap<String, String> treeMap,String partnerKey) {
 		String string1 = WXPayUtil.originalStr(treeMap, true);
 		String stringSignTemp = string1 + "key=" + partnerKey;
-		System.out.println("签名调试输出：" + stringSignTemp);
+		log.info("签名调试输出：" + stringSignTemp);
 		String sign = MD5Util
 				.MD5Encode(stringSignTemp, WXPayConfig.INPUT_CHARSET)
 				.toUpperCase();

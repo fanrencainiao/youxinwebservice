@@ -54,6 +54,24 @@ public final class Md5Util {
 		}
 		return null;
 	}
+	/**
+	 * 不适用 客服号等
+	 * @param accid
+	 * @return
+	 */
+	 public static Integer accidToUserId(String accid){
+		 String userId="";
+		 for (int i = 0; i < 8; i++) {
+			 String nm = accid.substring(2*i+1, 2*i+2);
+			 System.out.println(nm);
+			 userId+=nm;
+		}
+		 try {
+			 return Integer.valueOf(userId); 
+		} catch (Exception e) {
+			 return 0; 
+		}
+	 }
 	 /**
      * 加密解密算法 执行一次加密，两次解密
      */
@@ -75,6 +93,7 @@ public final class Md5Util {
     	System.out.println(convertMD5(md5Hex("123456")));
     	System.out.println(md5HexToAccid("100").length());
 //    	System.out.println(md5HexToAccid("100000025").substring(0,md5HexToAccid("100000025").length()-"100000025".length()));
-	}
+    	System.out.println(accidToUserId("61602071275618b0fcd73c077a7fc12e"));
+    }
 
 }

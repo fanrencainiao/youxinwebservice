@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.ClientPNames;
@@ -33,7 +35,7 @@ public class GetWxOrderno
     httpclient = (DefaultHttpClient)HttpClientConnectionManager.getSSLInstance(httpclient);
   }
 
-
+  protected static Log log = LogFactory.getLog("pay");
   /**
    *description:获取预支付id
    *@param url
@@ -51,12 +53,12 @@ public class GetWxOrderno
 		 httpost.setEntity(new StringEntity(xmlParam, "UTF-8"));
 		 HttpResponse response = httpclient.execute(httpost);
 	     String jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
-	    if(jsonStr.indexOf("FAIL")!=-1){
-	    	System.out.println("签名错误!---------");
+	     if(jsonStr.indexOf("FAIL")!=-1){
+	    	log.info("签名错误!---------"+jsonStr);
 	    	return prepay_id;
 	    }
 	    Map map = doXMLParse(jsonStr);
-	   // System.out.println(map);
+	   // log.info(map);
 	    prepay_id  = (String) map.get("prepay_id");
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
@@ -74,12 +76,13 @@ public class GetWxOrderno
 		 httpost.setEntity(new StringEntity(xmlParam, "UTF-8"));
 		 HttpResponse response = httpclient.execute(httpost);
 	     String jsonStr = EntityUtils.toString(response.getEntity(), "UTF-8");
+	     log.info("jsonStr---------"+jsonStr);
 	    if(jsonStr.indexOf("FAIL")!=-1){
-	    	System.out.println("签名错误!---------"+jsonStr);
+	    	log.info("签名错误!---------"+jsonStr);
 	    	return mweb;
 	    }
 	    Map map = doXMLParse(jsonStr);
-	   // System.out.println(map);
+	   // log.info(map);
 	    mweb  = (String) map.get("mweb_url");
 	} catch (Exception e) {
 		// TODO Auto-generated catch block

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeansException;
@@ -63,6 +65,7 @@ import com.youxin.app.utils.applicationBean.AliPayConfig;
 
 @Component
 public class AliPayUtil {
+	protected static Log log = LogFactory.getLog("pay");
 	private static AliPayConfig aliPayConfig;
 
 	@Autowired
@@ -204,7 +207,7 @@ public class AliPayUtil {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipaySystemOauthTokenResponse response = getAliPalyClientByCert().certificateExecute(request);
 
-			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
+			log.info("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
 
 			return response.getAccessToken();
 		} catch (AlipayApiException e) {
@@ -224,7 +227,7 @@ public class AliPayUtil {
 		AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest();
 		try {
 			AlipayUserInfoShareResponse response = getAliPalyClientByCert().certificateExecute(request, token);
-			System.out.println(response.getBody());
+			log.info(response.getBody());
 			return response.getUserId();
 		} catch (AlipayApiException e) {
 			// TODO Auto-generated catch block
@@ -256,16 +259,17 @@ public class AliPayUtil {
 //			model.setGoodsType("0");
 		request.setBizModel(model);
 		request.setNotifyUrl(callBackUrl());
-		System.out.println("request:" + JSON.toJSONString(request));
+		log.info("request:" + JSON.toJSONString(request));
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayTradeAppPayResponse response = getAliPalyClientByCert().sdkExecute(request);
-			System.out.println("request:" + JSON.toJSONString(response));
-//			System.out.println("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
+			log.info("response:" + JSON.toJSONString(response));
+//			log.info("返回order  " + response.getBody());// 就是orderString 可以直接给客户端请求，无需再做处理。
 
 			return response.getBody();
 		} catch (AlipayApiException e) {
 			e.printStackTrace();
+			log.info("支付宝异常:" + JSON.toJSONString(e));
 			return null;
 		}
 	}
@@ -296,7 +300,7 @@ public class AliPayUtil {
 		try {
 			// 这里和普通的接口调用不同，使用的是pageExecute
 			AlipayTradeWapPayResponse response = getAliPayClient().pageExecute(request);
-			System.out.println("返回form  " + response.getBody());//// 调用SDK生成表单
+			log.info("返回form  " + response.getBody());//// 调用SDK生成表单
 
 			return response.getBody();
 		} catch (AlipayApiException e) {
@@ -333,7 +337,7 @@ public class AliPayUtil {
 					+ "\"}}");
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransAppPayResponse response = getAliPalyClientByCert().sdkExecute(request);
-			System.out.println("返回response  " + JSON.toJSONString(response));
+			log.info("返回response  " + JSON.toJSONString(response));
 
 			return response.getBody();
 		} catch (AlipayApiException e) {
@@ -375,11 +379,11 @@ public class AliPayUtil {
 		request.setBizModel(model);
 //		request.setNotifyUrl(callBackUrl());
 		try {
-			System.out.println("orderNo==>" + orderNo + "aliNo==>" + aliNo + "uid==>" + uid);
+			log.info("orderNo==>" + orderNo + "aliNo==>" + aliNo + "uid==>" + uid);
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransUniTransferResponse response = getAliPalyClientByCert().certificateExecute(request);
 
-			System.out.println("红包打款: " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+			log.info("红包打款: " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
 																								// 可以直接给客户端请求，无需再做处理。
 
 			return response.getStatus();
@@ -409,7 +413,7 @@ public class AliPayUtil {
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransRefundResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("红包退回:" + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+			log.info("红包退回:" + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
 																								// 可以直接给客户端请求，无需再做处理。
 
 			return response.getOrderId();
@@ -446,7 +450,7 @@ public class AliPayUtil {
 		try {
 			// 这里和普通的接口调用不同，使用的是sdkExecute
 			AlipayFundTransCommonQueryResponse response = getAliPalyClientByCert().certificateExecute(request);
-			System.out.println("红包查询  " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
+			log.info("红包查询  " + response.getOrderId() + "状态:" + response.getStatus());// 就是orderString
 																								// 可以直接给客户端请求，无需再做处理。
 			if (response.isSuccess()) {
 				return response.getOrderId();
@@ -461,7 +465,7 @@ public class AliPayUtil {
 
 	public static void main(String[] args) {
 //		JSONObject parseObject = JSON.parseObject("{\"body\":\"alipay_root_cert_sn=687b59193f3f462dd5336e5abf83c5d8_02941eef3187dddf3d3b83462e1dfcf6&alipay_sdk=alipay-sdk-java-4.9.5.ALL&app_cert_sn=a5573f6729d940a9ee439c66032e3146&app_id=2019103168821258&biz_content={\"biz_scene\":\"PERSONAL_PAY\",\"order_id\":\"20200116110075000006820073489855\",\"out_biz_no\":\"251579161719124\",\"product_code\":\"STD_RED_PACKET\"}&charset=utf-8&format=json&method=alipay.fund.trans.common.query&sign=G7tBxQYoorXO/J7CWJRTr7Dkrmdgm7rctX3j8h/eNmyZ36FKLXpvWpKQIaxIl793cs7MpWhjVEswoxOxI1jC2VpSqrbXZEGeWHxXOoI1E4xlrn/EybJmMbdPmY7iS2bpdR1ReqpREMc9ShpprSV5NyW7Y7e3A6zem+RQlawV6FeV5Hpa+dFcvy+6Q6GLOek+zt7CNG4aAIEgAH2NZd/liV2DTNFbi0rgaCQmwxljXd5rCJ4Qj+wl+HpbkoBCPwRJsDNmp8/YO4VnW7afRJMM4ZVqedBrip6z9Ft9/3Y8d6dpGnQdTiK5vsNG/cbfxIOkJoOK3SAbHosSJqaSFf7u2g==&sign_type=RSA2&timestamp=2020-01-16 16:02:40&version=1.0\",\"success\":true}");
-//		System.out.println(parseObject);
+//		log.info(parseObject);
 	}
 
 	/**
@@ -537,9 +541,9 @@ public class AliPayUtil {
 		try {
 
 			HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
-			System.out.println(response.toString());
+			log.info(response.toString());
 			// 获取response的body
-//		    	System.out.println(EntityUtils.toString(response.getEntity()));
+//		    	log.info(EntityUtils.toString(response.getEntity()));
 			returnStr = EntityUtils.toString(response.getEntity());
 		} catch (Exception e) {
 			e.printStackTrace();
