@@ -54,7 +54,7 @@ import com.youxin.app.yx.request.MsgRequest;
 
 @Service
 public class RedPacketManagerImpl {
-	protected Log log = LogFactory.getLog("pay");
+	protected static Log log = LogFactory.getLog("pay");
 	@Autowired
 	private UserService userManager;
 	@Autowired
@@ -404,7 +404,7 @@ public class RedPacketManagerImpl {
 //		getRandomMoney(6, 0.1d);
 ////		 DecimalFormat df = new DecimalFormat("#.00");
 ////		for (int i = 0; i < 100; i++) {
-////			System.out.println(Double.valueOf(df.format(0.04 / 4)) == 0.01d);
+////			log.info(Double.valueOf(df.format(0.04 / 4)) == 0.01d);
 ////		}
 //	}
 
@@ -418,16 +418,16 @@ public class RedPacketManagerImpl {
 			Random r = new Random();
 			long currentTimeMilliSeconds = DateUtil.currentTimeMilliSeconds();
 			if (num == 1) {
-				System.out.println(moeny);
+				log.info(moeny);
 				resultMoney = moeny;
 			} else {
 				if (Double.valueOf(moeny / num) > max || Double.valueOf(moeny / num) < min) {
-					System.out.println("无法分配");
+					log.info("无法分配");
 				} else if (Double.valueOf(moeny / num) == max) {
-					System.out.println(max);
+					log.info(max);
 					resultMoney = max;
 				} else if (Double.valueOf(moeny / num) == min) {
-					System.out.println(min);
+					log.info(min);
 					resultMoney = min;
 				} else {
 				regMaxMoney=moeny;
@@ -436,10 +436,10 @@ public class RedPacketManagerImpl {
 					Double rmoney = 0.0d;
 					Double lesMoney = Double.valueOf(df.format(regMaxMoney - (num - 1) * max));
 					if (lesMoney > 0) {
-						System.out.println("1:" + (max - lesMoney) * nd );
+						log.info("1:" + (max - lesMoney) * nd );
 						rmoney = (max - lesMoney) * nd + lesMoney;
 						rmoney=Double.valueOf(df.format(rmoney))>=max?(rmoney-0.01):rmoney;
-						System.out.println("1:" + rmoney);
+						log.info("1:" + rmoney);
 					}else {
 //						rmoney=moeny* nd;
 						// 计算此次最大分配金额，保证此次之后剩余金额与数量足够最小分配
@@ -455,20 +455,20 @@ public class RedPacketManagerImpl {
 							if(rmoney<0.02)
 								rmoney=0.01;
 								
-							System.out.println("2:" + rmoney);
+							log.info("2:" + rmoney);
 						} else {
 							rmoney = (max - (num - 1) * min) * nd;
-							System.out.println("3:" + rmoney);
+							log.info("3:" + rmoney);
 						}
 					}
 					rmoney = Double.valueOf(df.format(rmoney));
 					if (rmoney == 0.0)
 						rmoney = 0.01;
-					System.out.println("结果：" + rmoney);
+					log.info("结果：" + rmoney);
 					resultMoney = rmoney;
 				}
 			}
-			System.out.println("抢红包耗时：" + (DateUtil.currentTimeMilliSeconds() - currentTimeMilliSeconds));
+			log.info("抢红包耗时：" + (DateUtil.currentTimeMilliSeconds() - currentTimeMilliSeconds));
 			return resultMoney;
 	}
 
@@ -476,11 +476,11 @@ public class RedPacketManagerImpl {
 	 * private static synchronized Double getRandomMoney(int remainSize, Double
 	 * remainMoney) { // remainSize 剩余的红包数量 // remainMoney 剩余的钱 Double money = 0.0;
 	 * if (remainSize == 1) { remainSize--; money = (double) Math.round(remainMoney
-	 * * 100) / 100; System.out.println("=====> " + money); return money; } Random r
+	 * * 100) / 100; log.info("=====> " + money); return money; } Random r
 	 * = new Random(); double min = 0.01; // // double max = remainMoney /
 	 * remainSize * 2; //支付宝红包，单个发送不能超过200，单个领取不超过400, double max = remainMoney /
 	 * remainSize*2; money = r.nextDouble() * max; money = money <= min ? 0.01 :
-	 * money; money = Math.floor(money * 100) / 100; System.out.println("=====> " +
+	 * money; money = Math.floor(money * 100) / 100; log.info("=====> " +
 	 * money); remainSize--; remainMoney -= money; DecimalFormat df = new
 	 * DecimalFormat("#.00"); return Double.valueOf(df.format(money)); }
 	 */
@@ -507,7 +507,7 @@ public class RedPacketManagerImpl {
 			Map<String, String> param) {
 
 		Query<RedPacket> q = redPacketRepository.createQuery();
-		System.out.println(param);
+		log.info(param);
 		if (param != null) {
 			if (!StringUtil.isEmpty(param.get("startTime"))) {
 				q.field("sendTime").greaterThanOrEq(Long.valueOf(param.get("startTime")));
@@ -515,8 +515,8 @@ public class RedPacketManagerImpl {
 			if (!StringUtil.isEmpty(param.get("endTime"))) {
 				q.field("sendTime").lessThanOrEq(Long.valueOf(param.get("endTime")));
 			}
-			System.out.println(param.get("jid"));
-			System.out.println(!StringUtil.isEmpty(param.get("jid")));
+			log.info(param.get("jid"));
+			log.info(!StringUtil.isEmpty(param.get("jid")));
 			if (!StringUtil.isEmpty(param.get("jid"))) {
 				q.field("roomJid").equal(param.get("jid"));
 			}
@@ -531,14 +531,14 @@ public class RedPacketManagerImpl {
 
 		if (userId != null && userId > 0)
 			q.field("userId").equal(userId);
-		System.out.println("查询参数:" + q);
+		log.info("查询参数:" + q);
 		return q.order("-sendTime").offset(pageIndex * pageSize).limit(pageSize).asList();
 	}
 
 	// 收到的红包
 	public List<RedReceive> getRedReceiveList(Integer userId, int pageIndex, int pageSize, Map<String, String> param) {
 		Query<RedReceive> q = redReceiveRepository.createQuery().field("userId").equal(userId);
-		System.out.println(param);
+		log.info(param);
 		if (param != null) {
 			if (!StringUtil.isEmpty(param.get("startTime"))) {
 				q.field("time").greaterThanOrEq(Long.valueOf(param.get("startTime")));

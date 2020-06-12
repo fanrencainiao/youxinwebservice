@@ -77,6 +77,7 @@ import com.youxin.app.yx.request.team.QueryDetail;
 @Service
 public class UserServiceImpl implements UserService {
 	protected Log log=LogFactory.getLog(this.getClass());
+	protected Log paylog=LogFactory.getLog("pay");
 	@Autowired
 	private UserRepository repository;
 	@Autowired
@@ -373,7 +374,7 @@ public class UserServiceImpl implements UserService {
 			Query<User> q = repository.createQuery();
 			q.field("_id").equal(userId);
 			
-			boolean tryLock = lock.tryLock(2, 10, TimeUnit.SECONDS);
+			boolean tryLock = lock.tryLock(30, 10, TimeUnit.SECONDS);
 			if(tryLock) {
 			UpdateOperations<User> ops = repository.createUpdateOperations();
 			User user = getUser(userId);
@@ -401,11 +402,12 @@ public class UserServiceImpl implements UserService {
 			KSessionUtil.saveUserByUserId(userId, user);
 			
 			}else {
-				log.debug("金额操作失败 用户id：" +userId+"金额："+money);
+				paylog.debug("金额操作失败 用户id：" +userId+"金额："+money);
 			}
 			return q.get().getBalance();
 		} catch (Exception e) {
 			e.printStackTrace();
+			paylog.debug("用户金额操作异常：" +userId+"金额："+money+"=e:"+e.getMessage());
 			return 0.0;
 		}finally {
 			lock.unlock();
