@@ -140,7 +140,7 @@ public class RedPacketController extends AbstractController {
 			@ApiImplicitParam(name = "time", value = "时间", required = true, paramType = "query"),
 			@ApiImplicitParam(name = "secret", value = "密钥 md5(md5(apikey+time+money) +userid+token+payPassword", required = true, paramType = "query") })
 	@PostMapping("sendRedPacket")
-	public Result sendRedPacketV1(@RequestBody RedPacket packet, @RequestParam(defaultValue = "0") long time,
+	public synchronized Result sendRedPacketV1(@RequestBody RedPacket packet, @RequestParam(defaultValue = "0") long time,
 			@RequestParam(defaultValue = "") String moneyStr, @RequestParam(defaultValue = "") String secret) {
 	
 			Config config = cs.getConfig();

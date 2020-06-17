@@ -23,7 +23,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     var baseTable = table.render({
       elem: '#body_list'
       ,toolbar: '#toolbarConfigs'
-      ,url:"/console/getMessageReceiveList?convType="+(localStorage.getItem("teamid")?"TEAM":"PERSON")+"&to="+localStorage.getItem("teamid")+"&fromAccount="+localStorage.getItem("fromid")
+      ,url:"/console/getMessageReceiveList?convType="+(localStorage.getItem("teamid")?"TEAM":"")+"&to="+localStorage.getItem("teamid")+"&fromAccount="+localStorage.getItem("fromid")
       ,id: 'body_list'
       ,page: true
       ,curr: 0
