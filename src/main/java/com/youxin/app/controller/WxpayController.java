@@ -2,6 +2,7 @@ package com.youxin.app.controller;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +65,10 @@ public class WxpayController extends AbstractController{
 				else if(0!=entity.getStatus())
 					log.debug(tradeNo+"===status==="+entity.getStatus()+"=======交易已处理或已取消!");
 				else if("SUCCESS".equals(m.get("result_code"))){
-					boolean flag=Double.valueOf(m.get("cash_fee"))==entity.getMoney()*100;
+					long sysMoney = new BigDecimal(entity.getMoney()+"").multiply(new BigDecimal(100)).longValue();
+					long wxMoney = new BigDecimal(m.get("cash_fee")).longValue();
+//					boolean flag=Double.valueOf(m.get("cash_fee"))==entity.getMoney()*100;
+					boolean flag=sysMoney==wxMoney;
 					if(flag){
 						 //log.info("支付金额比较"+m.get("cash_fee")+"=="+entity.getMoney()*100+"=======>"+flag);
 						WxPayResult wpr = WXPayUtil.mapToWxPayResult(m);
@@ -97,5 +101,12 @@ public class WxpayController extends AbstractController{
 		}
 		
 	}
+	/*public static void main(String[] args) {
+		ConsumeRecord cr = new ConsumeRecord();
+		cr.setMoney(285.21);
+		System.out.println(cr.getMoney()*100);
+		boolean flag=2l==2l;
+		System.out.println(flag);
+	}*/
 	
 }

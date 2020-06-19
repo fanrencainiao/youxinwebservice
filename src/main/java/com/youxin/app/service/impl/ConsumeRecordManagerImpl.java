@@ -2,8 +2,11 @@ package com.youxin.app.service.impl;
 
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mongodb.morphia.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +22,9 @@ import com.youxin.app.utils.PageVO;
 import com.youxin.app.utils.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
-@Slf4j
 @Service
 public class ConsumeRecordManagerImpl {
-	
+	protected static Log log = LogFactory.getLog(ConsumeRecordManagerImpl.class);
 	@Autowired
 	private ConsumeRecordRepository repository;
 	@Autowired
@@ -126,19 +128,26 @@ public class ConsumeRecordManagerImpl {
 			long formateEndtime = DateUtil.getOnedayNextDay(endTime,1,0);
 			query.field("time").greaterThan(startTime).field("time").lessThanOrEq(formateEndtime);
 		}
+		Long s=DateUtil.currentTimeMilliSeconds();
 		List<ConsumeRecord> recordList = query.asList(MongoUtil.pageFindOption(page, limit));
+		log.info("1:"+(DateUtil.currentTimeMilliSeconds()-s));
 		for(ConsumeRecord record : recordList){
 			record.setUserName(userService.getUserName(record.getUserId()));
 		}
+		log.info("2:"+(DateUtil.currentTimeMilliSeconds()-s));
 		List<ConsumeRecord> allList = query.asList();
-		for (ConsumeRecord consumeRecord : allList) {
-			//交易完成或者支付完成
-			if(consumeRecord.getStatus()==1||consumeRecord.getStatus()==2) {
-				BigDecimal bd1 = new BigDecimal(Double.toString(totalMoney)); 
-		        BigDecimal bd2 = new BigDecimal(Double.toString(consumeRecord.getMoney())); 
-				totalMoney =  bd1.add(bd2).doubleValue();
-			}
-		}
+		totalMoney = allList.stream().filter(f -> f.getStatus()==1||f.getStatus()==2).mapToDouble(ConsumeRecord::getMoney).sum();
+//		for (ConsumeRecord consumeRecord : allList) {
+//			//交易完成或者支付完成
+//			if(consumeRecord.getStatus()==1||consumeRecord.getStatus()==2) {
+//				BigDecimal bd1 = new BigDecimal(Double.toString(totalMoney)); 
+//		        BigDecimal bd2 = new BigDecimal(Double.toString(consumeRecord.getMoney())); 
+//				totalMoney =  bd1.add(bd2).doubleValue();
+//			}
+//		}
+		DecimalFormat df= new DecimalFormat("#.00");
+		totalMoney=Double.valueOf(df.format(totalMoney));
+		log.info("3:"+(DateUtil.currentTimeMilliSeconds()-s));
 		result.setCount(query.count());
 		log.info("当前总金额："+totalMoney);
 		result.setTotal(totalMoney);

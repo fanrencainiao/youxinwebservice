@@ -1377,7 +1377,7 @@ public class ConsoleController extends AbstractController {
 				query.field("desc").equal("提现手续费");
 			}
 			pipeline = dfds.createAggregation(ConsumeRecord.class);
-			pipeline.match(query.filter("type", type).filter("status in", status).filter("payType in", payType))
+			pipeline.match(query.filter("type", type).filter("payType in", payType).filter("status in", status))
 					.group(grouping(total, sum(sum)));
 		}
 
