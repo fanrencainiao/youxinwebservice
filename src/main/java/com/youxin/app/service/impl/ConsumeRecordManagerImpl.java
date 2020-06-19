@@ -135,18 +135,11 @@ public class ConsumeRecordManagerImpl {
 			record.setUserName(userService.getUserName(record.getUserId()));
 		}
 		log.info("2:"+(DateUtil.currentTimeMilliSeconds()-s));
-		List<ConsumeRecord> allList = query.asList();
-		totalMoney = allList.stream().filter(f -> f.getStatus()==1||f.getStatus()==2).mapToDouble(ConsumeRecord::getMoney).sum();
-//		for (ConsumeRecord consumeRecord : allList) {
-//			//交易完成或者支付完成
-//			if(consumeRecord.getStatus()==1||consumeRecord.getStatus()==2) {
-//				BigDecimal bd1 = new BigDecimal(Double.toString(totalMoney)); 
-//		        BigDecimal bd2 = new BigDecimal(Double.toString(consumeRecord.getMoney())); 
-//				totalMoney =  bd1.add(bd2).doubleValue();
-//			}
-//		}
-		DecimalFormat df= new DecimalFormat("#.00");
-		totalMoney=Double.valueOf(df.format(totalMoney));
+//		List<ConsumeRecord> allList = query.asList();
+		//交易完成或者支付完成
+//		totalMoney = allList.stream().filter(f -> f.getStatus()==1||f.getStatus()==2).mapToDouble(ConsumeRecord::getMoney).sum();
+//		DecimalFormat df= new DecimalFormat("#.00");
+//		totalMoney=Double.valueOf(df.format(totalMoney));
 		log.info("3:"+(DateUtil.currentTimeMilliSeconds()-s));
 		result.setCount(query.count());
 		log.info("当前总金额："+totalMoney);
