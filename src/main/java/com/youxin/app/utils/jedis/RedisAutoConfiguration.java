@@ -14,12 +14,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisAutoConfiguration {
 
-		@Value("${youxin.redisAddr}")
+		@Value("${spring.redis.host}")
 	    private String address;
 
 	    @Value("${spring.redis.port}")
 	    private int port;
-
+	    @Value("${spring.redis.password}")
+	    private String password;
+	    @Value("${spring.redis.database}")
+	    private int database;
 	    @Value("${spring.redis.timeout.seconds}")
 	    private int timeout;
 
@@ -61,8 +64,9 @@ public class RedisAutoConfiguration {
 //                }
            }else {
             	  SingleServerConfig serverConfig = config.useSingleServer()
-                  		.setAddress(address)
-                  		.setDatabase(0);
+                  		.setAddress("redis://"+address+":"+port)
+                  		.setPassword(password)
+                  		.setDatabase(database);
             	  serverConfig.setKeepAlive(true);
                   serverConfig.setPingConnectionInterval(500);
                   serverConfig.setPingTimeout(timeout);
