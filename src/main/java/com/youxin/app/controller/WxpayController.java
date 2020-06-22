@@ -101,12 +101,13 @@ public class WxpayController extends AbstractController{
 		}
 		
 	}
-	/*public static void main(String[] args) {
-		ConsumeRecord cr = new ConsumeRecord();
-		cr.setMoney(285.21);
-		System.out.println(cr.getMoney()*100);
-		boolean flag=2l==2l;
-		System.out.println(flag);
-	}*/
+//	public static void main(String[] args) {
+//		ConsumeRecord cr = new ConsumeRecord();
+////		cr.setMoney(285.21);
+//		cr.setMoney(68.32);
+//		System.out.println(cr.getMoney()*100);
+//		boolean flag=2l==2l;
+//		System.out.println(flag);
+//	}
 	
 }

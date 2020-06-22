@@ -13,7 +13,9 @@ import java.util.Random;
 import org.mongodb.morphia.Key;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +33,8 @@ import com.youxin.app.yx.SDKService;
 @RestController
 @RequestMapping("")
 public class TestController  {
-	
+/*	 @Value("${hello.text}")
+	 private String text;*/
 	private static WxConfig wxConfig;
 	@Autowired
 	public TestController(WxConfig wxConfig) {
@@ -105,6 +108,13 @@ public class TestController  {
 		return Result.success("处理完毕");
 		
 	}
+	
+
+//	    @GetMapping("/info/say")
+//	    public String sayHello(){
+//	        return text;
+//	    }
+
 	public static void main(String[] args) {
 //		for (int i = 0; i < 200; i++) {
 //			Double rm = getRandomMoney(5, 100d);
