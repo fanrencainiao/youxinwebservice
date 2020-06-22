@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.youxin.app.utils.StringUtil;
+
 
 @Configuration
 public class RedisAutoConfiguration {
@@ -65,8 +67,9 @@ public class RedisAutoConfiguration {
            }else {
             	  SingleServerConfig serverConfig = config.useSingleServer()
                   		.setAddress("redis://"+address+":"+port)
-                  		.setPassword(password)
                   		.setDatabase(database);
+            	  if(!StringUtil.isEmpty(password))
+            		  serverConfig.setPassword(password);
             	  serverConfig.setKeepAlive(true);
                   serverConfig.setPingConnectionInterval(500);
                   serverConfig.setPingTimeout(timeout);
