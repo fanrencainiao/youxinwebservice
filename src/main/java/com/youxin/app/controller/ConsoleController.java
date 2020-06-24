@@ -724,7 +724,7 @@ public class ConsoleController extends AbstractController {
 					if (json.getInteger("code") != 200)
 						log.debug("银行卡提现 sdk消息发送失败");
 					else
-						log.debug("银行卡提现 sdk消息发送失败");
+						log.debug("银行卡提现 sdk消息发送成功");
 				} catch (Exception e) {
 					e.printStackTrace();
 					log.debug("银行卡提现 sdk消息发送失败" + e.getMessage());
